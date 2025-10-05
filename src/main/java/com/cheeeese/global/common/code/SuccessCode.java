@@ -10,6 +10,9 @@ public enum SuccessCode implements BaseCode{
 
     // health_check
     HEALTH_CHECK_SUCCESS(HttpStatus.OK, "Health Check Success"),
+
+    // auth
+    EXCHANGE_TOKEN_SUCCESS(HttpStatus.OK, "Exchange Token Success"),
     ;
 
     private final HttpStatus httpStatus;
