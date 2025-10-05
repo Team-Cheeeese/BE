@@ -1,5 +1,7 @@
 package com.cheeeese.global.security.jwt;
 
+import com.cheeeese.auth.exception.AuthException;
+import com.cheeeese.auth.exception.code.AuthErrorCode;
 import com.cheeeese.global.common.code.ErrorCode;
 import com.cheeeese.global.exception.BusinessException;
 import io.jsonwebtoken.Claims;
