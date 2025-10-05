@@ -4,11 +4,11 @@ import com.cheeeese.auth.dto.response.TempCodeExchangeResponse;
 import com.cheeeese.auth.exception.AuthException;
 import com.cheeeese.auth.exception.code.AuthErrorCode;
 import com.cheeeese.auth.infrastructure.mapper.AuthMapper;
-import com.cheeeese.global.common.code.ErrorCode;
-import com.cheeeese.global.exception.BusinessException;
 import com.cheeeese.global.security.jwt.JwtProvider;
 import com.cheeeese.global.util.RedisUtil;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.exception.UserException;
+import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,7 +48,7 @@ public class AuthService {
             String userId = claims.getSubject();
 
             User user = userRepository.findById(Long.valueOf(userId))
-                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                    .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
             redisUtil.deleteValue(key);
 

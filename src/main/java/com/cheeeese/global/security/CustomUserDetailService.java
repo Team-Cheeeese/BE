@@ -1,8 +1,8 @@
 package com.cheeeese.global.security;
 
-import com.cheeeese.global.common.code.ErrorCode;
-import com.cheeeese.global.exception.BusinessException;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.exception.UserException;
+import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +19,7 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
         User user = userRepository.findById(Long.valueOf(userId))
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND)); // TODO: 에러 코드 수정
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         return new CustomUserDetails(user);
     }
