@@ -1,5 +1,6 @@
 package com.cheeeese.oauth2.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -19,7 +20,8 @@ public class RefreshToken {
     @TimeToLive
     private Long expiration = 604800L;
 
-    public RefreshToken(Long userId, String refreshToken) {
+    @Builder
+    private RefreshToken(Long userId, String refreshToken) {
         this.userId = userId;
         this.refreshToken = refreshToken;
     }
