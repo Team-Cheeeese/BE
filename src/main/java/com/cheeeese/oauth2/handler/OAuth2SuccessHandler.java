@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Map;
@@ -55,7 +56,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 1000 * 60L
         );
 
-        String callbackUri = redirectUri + tempCode;
+        String callbackUri = UriComponentsBuilder
+                .fromUriString(redirectUri)
+                .queryParam("code", tempCode)
+                .build()
+                .toUriString();
+
         response.sendRedirect(callbackUri);
     }
 }

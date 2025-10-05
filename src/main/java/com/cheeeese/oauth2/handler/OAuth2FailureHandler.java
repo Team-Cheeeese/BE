@@ -17,8 +17,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
-    @Value("${frontend.oauth2.failure-redirect-uri}")
-    private String failureRedirectUri;
+    @Value("${frontend.oauth2.redirect-uri}")
+    private String redirectUri;
 
     @Override
     public void onAuthenticationFailure(
@@ -28,10 +28,10 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
     ) throws IOException {
         log.warn("⚠️ 로그인 실패: {}", exception.getMessage());
 
-        String redirectUri = UriComponentsBuilder.fromUriString(failureRedirectUri)
+        String targetUri = UriComponentsBuilder.fromUriString(redirectUri)
                 .queryParam("error",exception.getLocalizedMessage())
                 .build().toUriString();
 
-        getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        getRedirectStrategy().sendRedirect(request, response, targetUri);
     }
 }
