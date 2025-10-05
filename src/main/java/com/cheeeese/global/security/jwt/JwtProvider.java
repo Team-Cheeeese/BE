@@ -69,7 +69,7 @@ public class JwtProvider {
 
             return true;
         } catch (ExpiredJwtException e) {
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
     }
 
