@@ -31,6 +31,15 @@ public class AuthService {
     private final RedisUtil redisUtil;
 
     public TempCodeExchangeResponse exchangeTempCode(String code) {
+        Map<String, String> tokens = getTokenFromTempCode(code);
+        User user = getUserFromToken(tokens.get("accessToken"));
+
+        redisUtil.deleteValue("auth:" + code);
+
+        return AuthMapper.toResponse(tokens.get("accessToken"), tokens.get("refreshToken"), user);
+    }
+
+    private Map<String, String> getTokenFromTempCode(String code) {
         String key = "auth:" + code;
         String json = redisUtil.getValue(key);
 
@@ -39,23 +48,17 @@ public class AuthService {
         }
 
         try {
-            Map<String, String> data = objectMapper.readValue(json, new TypeReference<>() {});
-
-            String accessToken = data.get("accessToken");
-            String refreshToken = data.get("refreshToken");
-
-            Claims claims = jwtProvider.getClaims(accessToken);
-            String userId = claims.getSubject();
-
-            User user = userRepository.findById(Long.valueOf(userId))
-                    .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
-            redisUtil.deleteValue(key);
-
-            return AuthMapper.toResponse(accessToken, refreshToken, user);
+            return objectMapper.readValue(json, new TypeReference<>() {});
         } catch (JsonProcessingException e) {
-            redisUtil.deleteValue(key);
             throw new AuthException(AuthErrorCode.TOKEN_PARSE_FAILED);
         }
+    }
+
+    private User getUserFromToken(String accessToken) {
+        Claims claims = jwtProvider.getClaims(accessToken);
+        String userId = claims.getSubject();
+
+        return userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
 }
