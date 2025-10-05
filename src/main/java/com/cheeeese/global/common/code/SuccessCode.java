@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum SuccessCode implements BaseCode{
+public enum SuccessCode implements BaseCode {
 
     // health_check
     HEALTH_CHECK_SUCCESS(HttpStatus.OK, "Health Check Success"),
