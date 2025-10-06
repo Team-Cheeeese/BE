@@ -1,5 +1,6 @@
 package com.cheeeese.auth.infrastructure.mapper;
 
+import com.cheeeese.auth.dto.response.AuthReissueResponse;
 import com.cheeeese.auth.dto.response.TempCodeExchangeResponse;
 import com.cheeeese.user.domain.User;
 
@@ -12,6 +13,13 @@ public class AuthMapper {
                 .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
+                .build();
+    }
+
+    public static AuthReissueResponse toResponse(String accessToken, String refreshToken) {
+        return AuthReissueResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }
