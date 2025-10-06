@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v1/global/health-check",
                                 "/login/oauth2/**",
-                                "/v1/auth/exchange"
+                                "/v1/auth/exchange",
+                                "/v1/auth/reissue"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
