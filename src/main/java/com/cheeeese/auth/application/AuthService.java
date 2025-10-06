@@ -73,6 +73,7 @@ public class AuthService {
         try {
             return objectMapper.readValue(json, new TypeReference<>() {});
         } catch (JsonProcessingException e) {
+            redisUtil.deleteValue(key);
             throw new AuthException(AuthErrorCode.TOKEN_PARSE_FAILED);
         }
     }
