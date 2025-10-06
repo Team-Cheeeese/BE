@@ -2,7 +2,7 @@ package com.cheeeese.auth.application;
 
 import com.cheeeese.auth.dto.request.AuthReissueRequest;
 import com.cheeeese.auth.dto.response.AuthReissueResponse;
-import com.cheeeese.auth.dto.response.TempCodeExchangeResponse;
+import com.cheeeese.auth.dto.response.AuthExchangeResponse;
 import com.cheeeese.auth.exception.AuthException;
 import com.cheeeese.auth.exception.code.AuthErrorCode;
 import com.cheeeese.auth.infrastructure.mapper.AuthMapper;
@@ -35,7 +35,7 @@ public class AuthService {
     private final ObjectMapper objectMapper;
     private final RedisUtil redisUtil;
 
-    public TempCodeExchangeResponse exchangeTempCode(String code) {
+    public AuthExchangeResponse exchangeTempCode(String code) {
         Map<String, String> tokens = getTokenFromTempCode(code);
         User user = getUserFromToken(tokens.get("accessToken"));
 

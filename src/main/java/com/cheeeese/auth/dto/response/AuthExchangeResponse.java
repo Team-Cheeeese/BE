@@ -3,7 +3,7 @@ package com.cheeeese.auth.dto.response;
 import lombok.Builder;
 
 @Builder
-public record TempCodeExchangeResponse(
+public record AuthExchangeResponse(
         String accessToken,
         String refreshToken,
         Long userId,
