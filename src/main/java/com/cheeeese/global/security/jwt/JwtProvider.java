@@ -2,15 +2,13 @@ package com.cheeeese.global.security.jwt;
 
 import com.cheeeese.auth.exception.AuthException;
 import com.cheeeese.auth.exception.code.AuthErrorCode;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -28,7 +26,7 @@ public class JwtProvider {
                 .setSubject(userId.toString())
                 .setIssuedAt(now)
                 .setExpiration(expiration)
-                .signWith(Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8)),  SignatureAlgorithm.HS256)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -40,14 +38,14 @@ public class JwtProvider {
                 .setSubject(userId.toString())
                 .setIssuedAt(now)
                 .setExpiration(expiration)
-                .signWith(Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8)),  SignatureAlgorithm.HS256)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Claims getClaims(String token) {
         try {
             return Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(jwtProperties.secret().getBytes()))
+                    .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -59,12 +57,14 @@ public class JwtProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8)))
+                    .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
 
             return true;
         } catch (ExpiredJwtException e) {
+            throw new AuthException(AuthErrorCode.EXPIRED_TOKEN);
+        } catch (MalformedJwtException | UnsupportedJwtException e) {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
         }
     }
@@ -76,5 +76,9 @@ public class JwtProvider {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -20,7 +20,12 @@ public class SecurityUtils {
         ) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
-        return ((CustomUserDetails) authentication.getPrincipal()).getUser();
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof CustomUserDetails customUserDetails)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return customUserDetails.getUser();
     }
 
     public static Long getCurrentUserId() {

@@ -29,7 +29,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         KakaoUserInfo userInfo = extractKakaoUserInfo(attributes);
 
-        User user = userRepository.findByEmail(userInfo.getEmail())
+        User user = userRepository.findByProviderId(userInfo.getProviderId())
                 .orElseGet(() -> {
                     User newUser = UserMapper.toEntity(userInfo);
                     return userRepository.save(newUser);

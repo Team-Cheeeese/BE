@@ -1,4 +1,4 @@
-package com.cheeeese.oauth2.infrastructure;
+package com.cheeeese.oauth2.infrastructure.mapper;
 
 import com.cheeeese.oauth2.domain.RefreshToken;
 import com.cheeeese.user.domain.User;

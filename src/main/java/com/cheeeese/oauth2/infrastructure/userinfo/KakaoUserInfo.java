@@ -3,6 +3,7 @@ package com.cheeeese.oauth2.infrastructure.userinfo;
 import com.cheeeese.oauth2.domain.OAuth2UserInfo;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collections;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -17,36 +18,34 @@ public class KakaoUserInfo implements OAuth2UserInfo {
 
     @Override
     public String getEmail() {
-        Map<String, Object> accountMap = (Map<String, Object>) attributes.get("kakao_account");
-        if (accountMap == null) {
-            return null;
-        }
-        return (String) accountMap.get("email");
+        return (String) getKakaoAccount().get("email");
     }
 
     @Override
     public String getName() {
-        Map<String, Object> accountMap = (Map<String, Object>) attributes.get("kakao_account");
-        if (accountMap == null) {
-            return null;
-        }
-        Map<String, Object> profileMap = (Map<String, Object>) accountMap.get("profile");
-        if (profileMap == null) {
-            return null;
-        }
-        return (String) profileMap.get("nickname");
+        return (String) getKakaoProfile().get("nickname");
     }
 
     @Override
     public String getProfileImage() {
-        Map<String, Object> accountMap = (Map<String, Object>) attributes.get("kakao_account");
-        if (accountMap == null) {
-            return null;
+        return (String) getKakaoProfile().get("profile_image_url");
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getKakaoAccount() {
+        Object account = attributes.get("kakao_account");
+        if (account instanceof Map) {
+            return (Map<String, Object>) account;
         }
-        Map<String, Object> profileMap = (Map<String, Object>) accountMap.get("profile");
-        if (profileMap == null) {
-            return null;
+        return Collections.emptyMap();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getKakaoProfile() {
+        Object profile = attributes.get("profile");
+        if (profile instanceof Map) {
+            return (Map<String, Object>) profile;
         }
-        return (String) profileMap.get("profile_image_url");
+        return Collections.emptyMap();
     }
 }

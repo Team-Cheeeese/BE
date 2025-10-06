@@ -3,7 +3,7 @@ package com.cheeeese.oauth2.handler;
 import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.global.security.jwt.JwtProvider;
 import com.cheeeese.global.util.RedisUtil;
-import com.cheeeese.oauth2.infrastructure.RefreshTokenMapper;
+import com.cheeeese.oauth2.infrastructure.mapper.RefreshTokenMapper;
 import com.cheeeese.oauth2.infrastructure.persistence.RefreshTokenRepository;
 import com.cheeeese.user.domain.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
