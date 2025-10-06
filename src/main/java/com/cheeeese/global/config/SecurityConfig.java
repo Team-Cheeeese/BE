@@ -29,6 +29,15 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
+    private final String[] WHITE_LIST = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/v1/global/health-check",
+            "/login/oauth2/**",
+            "/v1/auth/exchange",
+            "/v1/auth/reissue"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -39,14 +48,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/v1/global/health-check",
-                                "/login/oauth2/**",
-                                "/v1/auth/exchange",
-                                "/v1/auth/reissue"
-                        ).permitAll()
+                        .requestMatchers(WHITE_LIST).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
