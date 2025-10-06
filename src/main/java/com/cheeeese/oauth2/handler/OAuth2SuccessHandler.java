@@ -1,6 +1,7 @@
 package com.cheeeese.oauth2.handler;
 
 import com.cheeeese.global.security.CustomUserDetails;
+import com.cheeeese.global.security.jwt.JwtProperties;
 import com.cheeeese.global.security.jwt.JwtProvider;
 import com.cheeeese.global.util.RedisUtil;
 import com.cheeeese.oauth2.infrastructure.mapper.RefreshTokenMapper;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
+    private final JwtProperties jwtProperties;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ObjectMapper objectMapper;
     private final RedisUtil redisUtil;
@@ -44,7 +46,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtProvider.createAccessToken(user.getId());
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
 
-        refreshTokenRepository.save(RefreshTokenMapper.toRefreshToken(user, refreshToken));
+        refreshTokenRepository.save(RefreshTokenMapper.toRefreshToken(user, refreshToken, jwtProperties.refreshExp()));
 
         String tempCode = UUID.randomUUID().toString();
 

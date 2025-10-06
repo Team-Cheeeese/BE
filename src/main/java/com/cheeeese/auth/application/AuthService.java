@@ -6,6 +6,7 @@ import com.cheeeese.auth.dto.response.AuthExchangeResponse;
 import com.cheeeese.auth.exception.AuthException;
 import com.cheeeese.auth.exception.code.AuthErrorCode;
 import com.cheeeese.auth.infrastructure.mapper.AuthMapper;
+import com.cheeeese.global.security.jwt.JwtProperties;
 import com.cheeeese.global.security.jwt.JwtProvider;
 import com.cheeeese.global.util.RedisUtil;
 import com.cheeeese.oauth2.domain.RefreshToken;
@@ -30,6 +31,7 @@ import java.util.Map;
 public class AuthService {
 
     private final JwtProvider jwtProvider;
+    private final JwtProperties jwtProperties;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ObjectMapper objectMapper;
@@ -56,7 +58,7 @@ public class AuthService {
         String newAccessToken = jwtProvider.createAccessToken(user.getId());
         String newRefreshToken = jwtProvider.createRefreshToken(user.getId());
 
-        savedToken.updateRefreshToken(newRefreshToken);
+        savedToken.updateRefreshToken(newRefreshToken, jwtProperties.refreshExp());
         refreshTokenRepository.save(savedToken);
 
         return AuthMapper.toResponse(newAccessToken, newRefreshToken);
