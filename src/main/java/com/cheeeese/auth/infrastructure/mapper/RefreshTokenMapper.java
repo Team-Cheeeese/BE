@@ -1,6 +1,6 @@
-package com.cheeeese.oauth2.infrastructure.mapper;
+package com.cheeeese.auth.infrastructure.mapper;
 
-import com.cheeeese.oauth2.domain.RefreshToken;
+import com.cheeeese.auth.domain.RefreshToken;
 import com.cheeeese.user.domain.User;
 
 public class RefreshTokenMapper {

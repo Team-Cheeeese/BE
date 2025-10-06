@@ -1,6 +1,6 @@
-package com.cheeeese.oauth2.infrastructure.persistence;
+package com.cheeeese.auth.infrastructure.persistence;
 
-import com.cheeeese.oauth2.domain.RefreshToken;
+import com.cheeeese.auth.domain.RefreshToken;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
