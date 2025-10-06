@@ -77,8 +77,8 @@ public class AuthService {
         }
     }
 
-    private User getUserFromToken(String accessToken) {
-        Claims claims = jwtProvider.getClaims(accessToken);
+    private User getUserFromToken(String token) {
+        Claims claims = jwtProvider.getClaims(token);
         String userId = claims.getSubject();
 
         return userRepository.findById(Long.valueOf(userId))
