@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.TOKEN_EXCHANGE_SUCCESS;
-import static com.cheeeese.global.common.code.SuccessCode.REISSUE_TOKEN_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.TOKEN_REISSUE_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +29,6 @@ public class AuthController implements AuthSwagger {
     @Override
     @PostMapping("/reissue")
     public CommonResponse<AuthReissueResponse> reissueToken(@RequestBody @Valid AuthReissueRequest request) {
-        return CommonResponse.success(REISSUE_TOKEN_SUCCESS, authService.reissueToken(request));
+        return CommonResponse.success(TOKEN_REISSUE_SUCCESS, authService.reissueToken(request));
     }
 }
