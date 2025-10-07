@@ -1,5 +1,6 @@
 package com.cheeeese.auth.application;
 
+import com.cheeeese.auth.application.validator.AuthValidator;
 import com.cheeeese.auth.dto.request.AuthReissueRequest;
 import com.cheeeese.auth.dto.response.AuthReissueResponse;
 import com.cheeeese.auth.dto.response.AuthExchangeResponse;
@@ -34,6 +35,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ObjectMapper objectMapper;
     private final RedisUtil redisUtil;
+    private final AuthValidator authValidator;
 
     public AuthExchangeResponse exchangeTempCode(String code) {
         Map<String, String> tokens = getTokenFromTempCode(code);
@@ -50,8 +52,7 @@ public class AuthService {
 
         User user = getUserFromToken(request.refreshToken());
 
-        RefreshToken savedToken = refreshTokenRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new AuthException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND));
+        RefreshToken savedToken = authValidator.validateRefreshToken(user.getId(), request.refreshToken());
 
         String newAccessToken = jwtProvider.createAccessToken(user.getId());
         String newRefreshToken = jwtProvider.createRefreshToken(user.getId());

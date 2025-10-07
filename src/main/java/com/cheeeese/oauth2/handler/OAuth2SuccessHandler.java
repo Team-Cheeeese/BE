@@ -1,7 +1,6 @@
 package com.cheeeese.oauth2.handler;
 
 import com.cheeeese.global.security.CustomUserDetails;
-import com.cheeeese.global.security.jwt.JwtProperties;
 import com.cheeeese.global.security.jwt.JwtProvider;
 import com.cheeeese.global.util.RedisUtil;
 import com.cheeeese.auth.infrastructure.mapper.RefreshTokenMapper;
