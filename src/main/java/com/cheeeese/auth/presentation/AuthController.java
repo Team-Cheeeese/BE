@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.cheeeese.global.common.code.SuccessCode.EXCHANGE_TOKEN_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.TOKEN_EXCHANGE_SUCCESS;
 import static com.cheeeese.global.common.code.SuccessCode.REISSUE_TOKEN_SUCCESS;
 
 @RestController
@@ -23,7 +23,7 @@ public class AuthController implements AuthSwagger {
     @Override
     @GetMapping("/exchange")
     public CommonResponse<AuthExchangeResponse> exchangeTempCode(@RequestParam String code) {
-        return CommonResponse.success(EXCHANGE_TOKEN_SUCCESS, authService.exchangeTempCode(code));
+        return CommonResponse.success(TOKEN_EXCHANGE_SUCCESS, authService.exchangeTempCode(code));
     }
 
     @Override
