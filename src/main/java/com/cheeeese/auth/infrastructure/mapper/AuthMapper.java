@@ -6,7 +6,7 @@ import com.cheeeese.user.domain.User;
 
 public class AuthMapper {
 
-    public static AuthExchangeResponse toResponse(String accessToken, String refreshToken, User user) {
+    public static AuthExchangeResponse toExchangeResponse(String accessToken, String refreshToken, User user) {
         return AuthExchangeResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -16,7 +16,7 @@ public class AuthMapper {
                 .build();
     }
 
-    public static AuthReissueResponse toResponse(String accessToken, String refreshToken) {
+    public static AuthReissueResponse toReissueResponse(String accessToken, String refreshToken) {
         return AuthReissueResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

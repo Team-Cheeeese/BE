@@ -43,7 +43,7 @@ public class AuthService {
 
         redisUtil.deleteValue("auth:" + code);
 
-        return AuthMapper.toResponse(tokens.get("accessToken"), tokens.get("refreshToken"), user);
+        return AuthMapper.toExchangeResponse(tokens.get("accessToken"), tokens.get("refreshToken"), user);
     }
 
     @Transactional
@@ -61,7 +61,7 @@ public class AuthService {
         savedToken.updateRefreshToken(newRefreshToken, jwtProperties.refreshExp());
         refreshTokenRepository.save(savedToken);
 
-        return AuthMapper.toResponse(newAccessToken, newRefreshToken);
+        return AuthMapper.toReissueResponse(newAccessToken, newRefreshToken);
     }
 
     private Map<String, String> getTokenFromTempCode(String code) {
