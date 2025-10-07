@@ -1,11 +1,16 @@
 package com.cheeeese.auth.application;
 
-import com.cheeeese.auth.dto.response.TempCodeExchangeResponse;
+import com.cheeeese.auth.application.validator.AuthValidator;
+import com.cheeeese.auth.dto.request.AuthReissueRequest;
+import com.cheeeese.auth.dto.response.AuthReissueResponse;
+import com.cheeeese.auth.dto.response.AuthExchangeResponse;
 import com.cheeeese.auth.exception.AuthException;
 import com.cheeeese.auth.exception.code.AuthErrorCode;
 import com.cheeeese.auth.infrastructure.mapper.AuthMapper;
 import com.cheeeese.global.security.jwt.JwtProvider;
 import com.cheeeese.global.util.RedisUtil;
+import com.cheeeese.auth.domain.RefreshToken;
+import com.cheeeese.auth.infrastructure.persistence.RefreshTokenRepository;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
@@ -27,16 +32,35 @@ public class AuthService {
 
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final ObjectMapper objectMapper;
     private final RedisUtil redisUtil;
+    private final AuthValidator authValidator;
 
-    public TempCodeExchangeResponse exchangeTempCode(String code) {
+    public AuthExchangeResponse exchangeTempCode(String code) {
         Map<String, String> tokens = getTokenFromTempCode(code);
         User user = getUserFromToken(tokens.get("accessToken"));
 
         redisUtil.deleteValue("auth:" + code);
 
-        return AuthMapper.toResponse(tokens.get("accessToken"), tokens.get("refreshToken"), user);
+        return AuthMapper.toExchangeResponse(tokens.get("accessToken"), tokens.get("refreshToken"), user);
+    }
+
+    @Transactional
+    public AuthReissueResponse reissueToken(AuthReissueRequest request) {
+        jwtProvider.validateToken(request.refreshToken());
+
+        User user = getUserFromToken(request.refreshToken());
+
+        RefreshToken savedToken = authValidator.validateRefreshToken(user.getId(), request.refreshToken());
+
+        String newAccessToken = jwtProvider.createAccessToken(user.getId());
+        String newRefreshToken = jwtProvider.createRefreshToken(user.getId());
+
+        savedToken.updateRefreshToken(newRefreshToken);
+        refreshTokenRepository.save(savedToken);
+
+        return AuthMapper.toReissueResponse(newAccessToken, newRefreshToken);
     }
 
     private Map<String, String> getTokenFromTempCode(String code) {
@@ -50,12 +74,13 @@ public class AuthService {
         try {
             return objectMapper.readValue(json, new TypeReference<>() {});
         } catch (JsonProcessingException e) {
+            redisUtil.deleteValue(key);
             throw new AuthException(AuthErrorCode.TOKEN_PARSE_FAILED);
         }
     }
 
-    private User getUserFromToken(String accessToken) {
-        Claims claims = jwtProvider.getClaims(accessToken);
+    private User getUserFromToken(String token) {
+        Claims claims = jwtProvider.getClaims(token);
         String userId = claims.getSubject();
 
         return userRepository.findById(Long.valueOf(userId))

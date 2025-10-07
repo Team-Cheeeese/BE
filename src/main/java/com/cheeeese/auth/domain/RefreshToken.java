@@ -1,4 +1,4 @@
-package com.cheeeese.oauth2.domain;
+package com.cheeeese.auth.domain;
 
 import lombok.Builder;
 import lombok.Getter;
