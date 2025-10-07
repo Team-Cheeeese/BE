@@ -6,6 +6,10 @@ import lombok.Builder;
 @Builder
 @Schema(description = "token 재발급")
 public record AuthReissueRequest(
+        @Schema(
+                description = "유효한 refreshToken",
+                example = "eyJh.eqi57hK"
+        )
         String refreshToken
 ) {
 }

@@ -26,6 +26,7 @@ public class AuthController implements AuthSwagger {
         return CommonResponse.success(EXCHANGE_TOKEN_SUCCESS, authService.exchangeTempCode(code));
     }
 
+    @Override
     @PostMapping("/reissue")
     public CommonResponse<AuthReissueResponse> reissueToken(@RequestBody @Valid AuthReissueRequest request) {
         return CommonResponse.success(REISSUE_TOKEN_SUCCESS, authService.reissueToken(request));
