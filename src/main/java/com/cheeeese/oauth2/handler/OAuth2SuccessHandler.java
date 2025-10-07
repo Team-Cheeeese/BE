@@ -26,7 +26,6 @@ import java.util.UUID;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
-    private final JwtProperties jwtProperties;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ObjectMapper objectMapper;
     private final RedisUtil redisUtil;
@@ -46,7 +45,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtProvider.createAccessToken(user.getId());
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
 
-        refreshTokenRepository.save(RefreshTokenMapper.toRefreshToken(user, refreshToken, jwtProperties.refreshExp()));
+        refreshTokenRepository.save(RefreshTokenMapper.toRefreshToken(user, refreshToken));
 
         String tempCode = UUID.randomUUID().toString();
 

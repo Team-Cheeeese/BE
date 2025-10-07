@@ -5,11 +5,10 @@ import com.cheeeese.user.domain.User;
 
 public class RefreshTokenMapper {
 
-    public static RefreshToken toRefreshToken(User user, String refreshToken, Long expiration) {
+    public static RefreshToken toRefreshToken(User user, String refreshToken) {
         return RefreshToken.builder()
                 .userId(user.getId())
                 .refreshToken(refreshToken)
-                .expiration(expiration)
                 .build();
     }
 }
