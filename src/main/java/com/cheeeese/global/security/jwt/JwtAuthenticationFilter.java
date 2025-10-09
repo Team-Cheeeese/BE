@@ -1,6 +1,8 @@
 package com.cheeeese.global.security.jwt;
 
+import com.cheeeese.auth.application.TokenBlacklistService;
 import com.cheeeese.global.security.CustomUserDetailService;
+import com.cheeeese.global.security.handler.TokenBlacklistHandler;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,6 +23,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailService customUserDetailService;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final TokenBlacklistHandler tokenBlacklistHandler;
 
     @Override
     protected void doFilterInternal(
@@ -30,9 +34,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String token = jwtProvider.resolveToken(request);
 
-        // TODO: 로그아웃 구현 후 관련 로직 추가
-
         if (token != null && jwtProvider.validateToken(token)) {
+            if (tokenBlacklistService.isBlackListed(token)) {
+                tokenBlacklistHandler.handleBlacklistedToken(response);
+                return;
+            }
             Claims claims = jwtProvider.getClaims(token);
             String userId = claims.getSubject();
 

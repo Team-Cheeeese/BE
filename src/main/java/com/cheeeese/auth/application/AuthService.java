@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Service
@@ -36,6 +37,7 @@ public class AuthService {
     private final ObjectMapper objectMapper;
     private final RedisUtil redisUtil;
     private final AuthValidator authValidator;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AuthExchangeResponse exchangeTempCode(String code) {
         Map<String, String> tokens = getTokenFromTempCode(code);
@@ -61,6 +63,22 @@ public class AuthService {
         refreshTokenRepository.save(savedToken);
 
         return AuthMapper.toReissueResponse(newAccessToken, newRefreshToken);
+    }
+
+    @Transactional
+    public void logout(String accessToken) {
+        User user = getUserFromToken(accessToken);
+        Claims claims = jwtProvider.getClaims(accessToken);
+
+        RefreshToken refreshToken = authValidator.getRefreshTokenByUserId(user.getId());
+        refreshTokenRepository.delete(refreshToken);
+
+        long expiration = claims.getExpiration().getTime() - System.currentTimeMillis();
+
+        if (expiration <= 0) {
+            expiration = 1000;
+        }
+        tokenBlacklistService.addBlackList(accessToken, "logout", Duration.ofMillis(expiration));
     }
 
     private Map<String, String> getTokenFromTempCode(String code) {

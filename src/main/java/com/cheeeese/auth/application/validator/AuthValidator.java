@@ -13,9 +13,13 @@ public class AuthValidator {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public RefreshToken validateRefreshToken(Long userId, String refreshToken) {
-        RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
+    public RefreshToken getRefreshTokenByUserId(Long userId) {
+        return refreshTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND));
+    }
+
+    public RefreshToken validateRefreshToken(Long userId, String refreshToken) {
+        RefreshToken savedToken = getRefreshTokenByUserId(userId);
 
         if (!savedToken.getRefreshToken().equals(refreshToken)) {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
