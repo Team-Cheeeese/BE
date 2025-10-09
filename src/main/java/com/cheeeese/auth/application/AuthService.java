@@ -70,9 +70,7 @@ public class AuthService {
         User user = getUserFromToken(accessToken);
         Claims claims = jwtProvider.getClaims(accessToken);
 
-        RefreshToken refreshToken = refreshTokenRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new AuthException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND));
-
+        RefreshToken refreshToken = authValidator.getRefreshTokenByUserId(user.getId());
         refreshTokenRepository.delete(refreshToken);
 
         long expiration = claims.getExpiration().getTime() - System.currentTimeMillis();
