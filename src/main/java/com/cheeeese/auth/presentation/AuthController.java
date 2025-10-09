@@ -34,6 +34,7 @@ public class AuthController implements AuthSwagger {
         return CommonResponse.success(TOKEN_REISSUE_SUCCESS, authService.reissueToken(request));
     }
 
+    @Override
     @PostMapping("/logout")
     public CommonResponse<Void> logout(HttpServletRequest request) {
         authService.logout(jwtProvider.resolveToken(request));

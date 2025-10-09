@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,4 +50,16 @@ public interface AuthSwagger {
     CommonResponse<AuthReissueResponse> reissueToken(
             @RequestBody @Valid AuthReissueRequest request
     );
+
+    @Operation(
+            summary = "사용자 로그아웃 API",
+            description = "사용자 로그아웃을 진행합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사용자 로그아웃이 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<Void> logout(HttpServletRequest request);
 }
