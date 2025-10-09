@@ -8,7 +8,7 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
-public class TokenBlackListService {
+public class TokenBlacklistService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String BLACKLIST_PREFIX = "accessTokenBlackList:";

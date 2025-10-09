@@ -37,7 +37,7 @@ public class AuthService {
     private final ObjectMapper objectMapper;
     private final RedisUtil redisUtil;
     private final AuthValidator authValidator;
-    private final TokenBlackListService tokenBlackListService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AuthExchangeResponse exchangeTempCode(String code) {
         Map<String, String> tokens = getTokenFromTempCode(code);
@@ -80,7 +80,7 @@ public class AuthService {
         if (expiration <= 0) {
             expiration = 1000;
         }
-        tokenBlackListService.addBlackList(accessToken, "logout", Duration.ofMillis(expiration));
+        tokenBlacklistService.addBlackList(accessToken, "logout", Duration.ofMillis(expiration));
     }
 
     private Map<String, String> getTokenFromTempCode(String code) {
