@@ -14,6 +14,7 @@ public enum SuccessCode implements BaseCode {
     // auth
     TOKEN_EXCHANGE_SUCCESS(HttpStatus.OK, "Token Exchange Success"),
     TOKEN_REISSUE_SUCCESS(HttpStatus.OK, "Token Reissue Success"),
+    LOGOUT_SUCCESS(HttpStatus.OK, "Logout Success"),
     ;
 
     private final HttpStatus httpStatus;

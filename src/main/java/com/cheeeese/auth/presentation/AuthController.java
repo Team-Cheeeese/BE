@@ -6,18 +6,20 @@ import com.cheeeese.auth.dto.response.AuthReissueResponse;
 import com.cheeeese.auth.dto.response.AuthExchangeResponse;
 import com.cheeeese.auth.presentation.swagger.AuthSwagger;
 import com.cheeeese.global.common.CommonResponse;
+import com.cheeeese.global.security.jwt.JwtProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.cheeeese.global.common.code.SuccessCode.TOKEN_EXCHANGE_SUCCESS;
-import static com.cheeeese.global.common.code.SuccessCode.TOKEN_REISSUE_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/auth")
 public class AuthController implements AuthSwagger {
 
+    private final JwtProvider jwtProvider;
     private final AuthService authService;
 
     @Override
@@ -30,5 +32,11 @@ public class AuthController implements AuthSwagger {
     @PostMapping("/reissue")
     public CommonResponse<AuthReissueResponse> reissueToken(@RequestBody @Valid AuthReissueRequest request) {
         return CommonResponse.success(TOKEN_REISSUE_SUCCESS, authService.reissueToken(request));
+    }
+
+    @PostMapping("/logout")
+    public CommonResponse<Void> logout(HttpServletRequest request) {
+        authService.logout(jwtProvider.resolveToken(request));
+        return CommonResponse.success(LOGOUT_SUCCESS);
     }
 }

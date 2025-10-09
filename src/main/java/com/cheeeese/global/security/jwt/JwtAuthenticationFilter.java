@@ -1,5 +1,6 @@
 package com.cheeeese.global.security.jwt;
 
+import com.cheeeese.auth.application.TokenBlackListService;
 import com.cheeeese.global.security.CustomUserDetailService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -21,6 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailService customUserDetailService;
+    private final TokenBlackListService tokenBlackListService;
 
     @Override
     protected void doFilterInternal(
@@ -30,9 +32,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String token = jwtProvider.resolveToken(request);
 
-        // TODO: 로그아웃 구현 후 관련 로직 추가
-
         if (token != null && jwtProvider.validateToken(token)) {
+            if (tokenBlackListService.isBlackListed(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\": \"로그아웃된 토큰입니다.\"}");
+                return;
+            }
             Claims claims = jwtProvider.getClaims(token);
             String userId = claims.getSubject();
 
