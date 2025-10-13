@@ -7,7 +7,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 
 @SpringBootApplication
 @EnableJpaAuditing
-@EnableRedisRepositories(basePackages = "com.cheeeese.oauth2.infrastructure.persistence")
+@EnableRedisRepositories(basePackages = "com.cheeeese.auth.infrastructure.persistence")
 public class CheeeeseApplication {
 
 	public static void main(String[] args) {

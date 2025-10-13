@@ -23,31 +23,31 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "profile_image")
+    @Column(name = "profile_image", nullable = false)
     private String profileImage;
 
     @Column(name = "provider_id", nullable = false)
     private String providerId;
 
-    @Column(name = "is_service_agreement")
-    private Boolean isServiceAgreement;
+    @Column(name = "is_service_agreement", nullable = false)
+    private boolean isServiceAgreement;
 
-    @Column(name = "is_user_info_agreement")
-    private Boolean isUserInfoAgreement;
+    @Column(name = "is_user_info_agreement", nullable = false)
+    private boolean isUserInfoAgreement;
 
-    @Column(name = "is_marketing_agreement")
-    private Boolean isMarketingAgreement;
+    @Column(name = "is_marketing_agreement", nullable = false)
+    private boolean isMarketingAgreement;
 
-    @Column(name = "is_third_party_agreement")
-    private Boolean isThirdPartyAgreement;
+    @Column(name = "is_third_party_agreement", nullable = false)
+    private boolean isThirdPartyAgreement;
 
-    @Column(name = "album_cnt")
+    @Column(name = "album_cnt", nullable = false)
     private int albumCnt;
 
-    @Column(name = "photo_cnt")
+    @Column(name = "photo_cnt", nullable = false)
     private int photoCnt;
 
-    @Column(name = "likes_cnt")
+    @Column(name = "likes_cnt", nullable = false)
     private int likesCnt;
 
     @Builder
@@ -56,10 +56,10 @@ public class User extends BaseEntity {
             String email,
             String profileImage,
             String providerId,
-            Boolean isServiceAgreement,
-            Boolean isUserInfoAgreement,
-            Boolean isMarketingAgreement,
-            Boolean isThirdPartyAgreement,
+            boolean isServiceAgreement,
+            boolean isUserInfoAgreement,
+            boolean isMarketingAgreement,
+            boolean isThirdPartyAgreement,
             int albumCnt,
             int photoCnt,
             int likesCnt
@@ -75,5 +75,21 @@ public class User extends BaseEntity {
         this.albumCnt = albumCnt;
         this.photoCnt = photoCnt;
         this.likesCnt = likesCnt;
+    }
+
+    public void updateUserProfile(String name) {
+        this.name = name;
+    }
+
+    public void saveUserAgreement(
+            boolean isServiceAgreement,
+            boolean isUserInfoAgreement,
+            boolean isMarketingAgreement,
+            boolean isThirdPartyAgreement
+    ) {
+        this.isServiceAgreement = isServiceAgreement;
+        this.isUserInfoAgreement = isUserInfoAgreement;
+        this.isMarketingAgreement = isMarketingAgreement;
+        this.isThirdPartyAgreement = isThirdPartyAgreement;
     }
 }
