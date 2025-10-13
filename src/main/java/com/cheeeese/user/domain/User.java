@@ -80,4 +80,16 @@ public class User extends BaseEntity {
     public void saveUserOnboarding(String name) {
         this.name = name;
     }
+
+    public void saveUserAgreement(
+            boolean isServiceAgreement,
+            boolean isUserInfoAgreement,
+            boolean isMarketingAgreement,
+            boolean isThirdPartyAgreement
+    ) {
+        this.isServiceAgreement = isServiceAgreement;
+        this.isUserInfoAgreement = isUserInfoAgreement;
+        this.isMarketingAgreement = isMarketingAgreement;
+        this.isThirdPartyAgreement = isThirdPartyAgreement;
+    }
 }
