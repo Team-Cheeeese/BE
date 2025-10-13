@@ -6,6 +6,7 @@ import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
+import com.cheeeese.user.presentation.swagger.UserSwagger;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,11 @@ import static com.cheeeese.global.common.code.SuccessCode.USER_PROFILE_UPDATE_SU
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/user")
-public class UserController {
+public class UserController implements UserSwagger {
 
     private final UserService userService;
 
+    @Override
     @PostMapping("/me/profile")
     public CommonResponse<Void> updateUserProfile(
             @CurrentUser User user,
@@ -32,6 +34,7 @@ public class UserController {
         return CommonResponse.success(USER_PROFILE_UPDATE_SUCCESS);
     }
 
+    @Override
     @PostMapping("/agreement")
     public CommonResponse<Void> saveUserAgreement(
             @CurrentUser User user,
