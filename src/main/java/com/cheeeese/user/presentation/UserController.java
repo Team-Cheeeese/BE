@@ -10,6 +10,7 @@ import com.cheeeese.user.presentation.swagger.UserSwagger;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +26,7 @@ public class UserController implements UserSwagger {
     private final UserService userService;
 
     @Override
-    @PostMapping("/me/profile")
+    @PatchMapping("/me/profile")
     public CommonResponse<Void> updateUserProfile(
             @CurrentUser User user,
             @RequestBody @Valid UserProfileRequest request
