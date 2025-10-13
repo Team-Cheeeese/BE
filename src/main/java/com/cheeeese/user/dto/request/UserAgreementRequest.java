@@ -12,25 +12,25 @@ public record UserAgreementRequest(
                 description = "서비스 이용 약관 동의",
                 example = "true"
         )
-        Boolean isServiceAgreement,
+        boolean isServiceAgreement,
 
         @NotNull
         @Schema(
                 description = "사용자 정보 수집 동의",
                 example = "true"
         )
-        Boolean isUserInfoAgreement,
+        boolean isUserInfoAgreement,
 
         @Schema(
                 description = "마케팅 수신 동의",
                 example = "false"
         )
-        Boolean isMarketingAgreement,
+        boolean isMarketingAgreement,
 
         @Schema(
                 description = "제3자 제공 동의",
                 example = "false"
         )
-        Boolean isThirdPartyAgreement
+        boolean isThirdPartyAgreement
 ) {
 }
