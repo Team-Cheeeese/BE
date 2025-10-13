@@ -13,10 +13,12 @@ public interface AlbumSwagger {
     @Operation(
             summary = "앨범 초대장 기본 정보 확인 API (로그인 불필요)",
             description = """
-                          ### RequestParam
+                          ### PathVariable
                           ---
-                          `code`: 앨범 입장 code
-                          ---
+                          `code`: 앨범 접근 코드 (URL의 일부)
+                          
+                          <br>
+                          
                           ### API 설명
                           ---
                           URL/QR을 통해 앨범 코드를 전달 받아 제목, 만료일, 호스트 등 기본 정보를 제공합니다. 로그인 여부와 관계없이 호출 가능
