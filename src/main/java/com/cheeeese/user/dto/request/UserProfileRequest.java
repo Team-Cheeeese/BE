@@ -8,5 +8,6 @@ import lombok.Builder;
 public record UserProfileRequest(
         @Schema(description = "사용자 이름", example = "주")
         String name
+        // TODO: 이미지 수정 추후 추가
 ) {
 }

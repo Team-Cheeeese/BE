@@ -17,6 +17,7 @@ public class UserService {
 
     @Transactional
     public void updateUserProfile(User user, UserProfileRequest request) {
+        // TODO: 이미지 수정 추후 추가
         user.updateUserProfile(request.name());
     }
 
