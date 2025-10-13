@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.cheeeese.global.common.code.SuccessCode.USER_AGREEMENT_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.USER_AGREEMENT_ACCEPT_SUCCESS;
 import static com.cheeeese.global.common.code.SuccessCode.USER_ONBOARDING_SUCCESS;
 
 @RestController
@@ -38,6 +38,6 @@ public class UserController {
             @RequestBody @Valid UserAgreementRequest request
     ) {
         userService.saveUserAgreement(user, request);
-        return CommonResponse.success(USER_AGREEMENT_SUCCESS);
+        return CommonResponse.success(USER_AGREEMENT_ACCEPT_SUCCESS);
     }
 }

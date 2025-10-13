@@ -18,7 +18,7 @@ public enum SuccessCode implements BaseCode {
 
     // user
     USER_ONBOARDING_SUCCESS(HttpStatus.OK, "User Onboarding Success"),
-    USER_AGREEMENT_SUCCESS(HttpStatus.OK, "User Agreement Success"),
+    USER_AGREEMENT_ACCEPT_SUCCESS(HttpStatus.OK, "User Agreement Accept Success"),
     ;
 
     private final HttpStatus httpStatus;
