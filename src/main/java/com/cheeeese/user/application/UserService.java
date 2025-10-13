@@ -26,8 +26,8 @@ public class UserService {
         userValidator.validateUserAgreement(request);
 
         user.saveUserAgreement(
-                true,
-                true,
+                request.isServiceAgreement(),
+                request.isUserInfoAgreement(),
                 request.isMarketingAgreement(),
                 request.isThirdPartyAgreement()
         );

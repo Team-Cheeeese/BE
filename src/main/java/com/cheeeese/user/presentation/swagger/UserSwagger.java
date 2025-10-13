@@ -19,7 +19,7 @@ public interface UserSwagger {
             description = """
                           ### RequestBody
                           ---
-                          `name`: 사용자 이름
+                          `name`: 사용자 이름 (String)
                           """
     )
     @ApiResponses(value = {
@@ -41,7 +41,7 @@ public interface UserSwagger {
                           `isServiceAgreement`: 서비스 이용 약관 동의 (boolean) \n
                           `isUserInfoAgreement`: 사용자 정보 수집 동의 (boolean) \n
                           `isMarketingAgreement`: 마케팅 수신 동의 (boolean) \n
-                          `isThirdPartyAgreement`: 제3자 제공 동의
+                          `isThirdPartyAgreement`: 제3자 제공 동의 (boolean)
                           """
     )
     @ApiResponses(value = {
