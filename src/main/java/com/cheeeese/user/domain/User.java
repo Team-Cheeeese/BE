@@ -82,10 +82,10 @@ public class User extends BaseEntity {
     }
 
     public void saveUserAgreement(
-            boolean isServiceAgreement,
-            boolean isUserInfoAgreement,
-            boolean isMarketingAgreement,
-            boolean isThirdPartyAgreement
+            Boolean isServiceAgreement,
+            Boolean isUserInfoAgreement,
+            Boolean isMarketingAgreement,
+            Boolean isThirdPartyAgreement
     ) {
         this.isServiceAgreement = isServiceAgreement;
         this.isUserInfoAgreement = isUserInfoAgreement;
