@@ -5,7 +5,7 @@ import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
-import com.cheeeese.user.dto.request.UserOnboardingRequest;
+import com.cheeeese.user.dto.request.UserProfileRequest;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.cheeeese.global.common.code.SuccessCode.USER_AGREEMENT_ACCEPT_SUCCESS;
-import static com.cheeeese.global.common.code.SuccessCode.USER_ONBOARDING_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.USER_PROFILE_UPDATE_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,13 +23,13 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/onboarding")
-    public CommonResponse<Void> saveUserOnboarding(
+    @PostMapping("/me/profile")
+    public CommonResponse<Void> updateUserProfile(
             @CurrentUser User user,
-            @RequestBody @Valid UserOnboardingRequest request
+            @RequestBody @Valid UserProfileRequest request
     ) {
-        userService.saveUserOnboarding(user, request);
-        return CommonResponse.success(USER_ONBOARDING_SUCCESS);
+        userService.updateUserProfile(user, request);
+        return CommonResponse.success(USER_PROFILE_UPDATE_SUCCESS);
     }
 
     @PostMapping("/agreement")

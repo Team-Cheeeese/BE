@@ -77,7 +77,7 @@ public class User extends BaseEntity {
         this.likesCnt = likesCnt;
     }
 
-    public void saveUserOnboarding(String name) {
+    public void updateUserProfile(String name) {
         this.name = name;
     }
 
