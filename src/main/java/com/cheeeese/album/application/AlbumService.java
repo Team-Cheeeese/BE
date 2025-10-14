@@ -4,12 +4,11 @@ import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
-import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
-import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.exception.UserException;
@@ -30,7 +29,7 @@ public class AlbumService {
     private final AlbumValidator albumValidator;
     private final UserAlbumRepository userAlbumRepository;
     private final UserRepository userRepository;
-    private final PhotoRepository photoRepository;
+    private final PhotoService photoService;
 
     public AlbumInvitationResponse getInvitationInfo(String code) {
         Album album = albumValidator.validateAlbumCode(code);
@@ -80,7 +79,7 @@ public class AlbumService {
 
         // 2. 총 사진 수
         // TODO: softdelete 논의 필요
-        long totalPhotoCount = photoRepository.countByAlbumIdAndIsDeletedFalse(albumId);
+        long totalPhotoCount = photoService.countTotalPhotos(albumId);
 
         // 3. 참가자 정보 목록 조회
         List<Long> participantUserIds = userAlbumRepository.findAllByAlbumId(albumId).stream()
@@ -93,11 +92,8 @@ public class AlbumService {
                 .collect(Collectors.toList());
 
         // 4. 최신 사진 9장
-        // TODO: 썸네일 생성 후 썸네일 이미지 제공
-        List<Photo> recentPhotos = photoRepository.findTop9ByAlbumIdAndIsDeletedFalseOrderByCreatedAtDesc(albumId);
-        List<String> recentPhotoUrls = recentPhotos.stream()
-                .map(Photo::getImageUrl)
-                .collect(Collectors.toList());
+        // TODO: 썸네일 생성 후 썸네일 이미지 제공, 아래 코드는 임시
+        List<String> recentPhotoUrls = photoService.getRecentPhotoUrls(albumId);
 
         return AlbumMapper.toEnterResponse(
                 album,
