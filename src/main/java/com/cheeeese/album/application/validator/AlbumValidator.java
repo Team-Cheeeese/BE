@@ -34,9 +34,6 @@ public class AlbumValidator {
 
         // 2. 블랙리스트 확인 (권한 체크)
         validateUserBlacklisted(album, user);
-
-        // 3. 정원 초과 확인 (신규 참여자에게만 적용)
-        validateAlbumCapacity(album, user);
     }
 
     /**
@@ -47,17 +44,5 @@ public class AlbumValidator {
                 .ifPresent(userAlbum -> {
                     throw new AlbumException(AlbumErrorCode.USER_IS_BLACKLISTED);
                 });
-    }
-
-    /**
-     * 신규 참여자일 경우, 앨범의 최대 정원 초과 여부를 확인합니다.
-     */
-    private void validateAlbumCapacity(Album album, User user) {
-        // 이미 참여 중인 사용자는 정원 체크를 건너뜁니다.
-        boolean isAlreadyParticipant = userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId()).isPresent();
-
-        if (!isAlreadyParticipant && album.isFull()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
-        }
     }
 }

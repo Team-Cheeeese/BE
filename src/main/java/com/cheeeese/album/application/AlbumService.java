@@ -3,8 +3,10 @@ package com.cheeeese.album.application;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
+import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
+import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
@@ -17,7 +19,6 @@ import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class AlbumService {
 
     private final AlbumValidator albumValidator;
+    private final AlbumRepository albumRepository;
     private final UserAlbumRepository userAlbumRepository;
     private final UserRepository userRepository;
     private final PhotoService photoService;
@@ -69,18 +71,18 @@ public class AlbumService {
             return; // 이미 참가했으므로 바로 종료
         }
 
-        try {
-            // 첫 입장: UserAlbum에 GUEST로 저장하고, Album 참가자 수 증가
-            UserAlbum newUserAlbum = AlbumMapper.toGuestUserAlbum(currentUser, album);
-            userAlbumRepository.save(newUserAlbum);
-            album.incrementParticipantCount();
+        // 첫 입장: UserAlbum에 GUEST로 저장하고, Album 참가자 수 증가
+        UserAlbum newUserAlbum = AlbumMapper.toGuestUserAlbum(currentUser, album);
+        userAlbumRepository.save(newUserAlbum);
 
-        } catch (DataIntegrityViolationException e) {
-            // 경합 상황 발생: 다른 트랜잭션이 먼저 저장했으므로 예외를 무시하고 정상 처리
-            AlbumErrorCode errorCode = AlbumErrorCode.USER_ALREADY_JOINED_CONCURRENTLY;
-            log.warn("{}: User {} already registered for album {} by another transaction. Proceeding.",
-                    errorCode.getMessage(), currentUser.getId(), album.getId());
+        int updatedRows = albumRepository.incrementParticipantCountAtomically(album.getId());
+        if (updatedRows == 0) {
+            // 정원 초과 조건(currentParticipant < participant) 불만족 시 예외 처리
+            throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
         }
+
+        // JPQL UPDATE는 영속성 컨텍스트를 무시하므로 수동 동기화
+        album.setCurrentParticipant(album.getCurrentParticipant() + 1);
     }
 
     private AlbumEnterResponse createAlbumEnterResponse(Album album) {

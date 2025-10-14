@@ -1,7 +1,5 @@
 package com.cheeeese.album.domain;
 
-import com.cheeeese.album.exception.AlbumException;
-import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.global.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -72,11 +70,8 @@ public class Album extends BaseEntity {
         return this.currentParticipant >= this.participant;
     }
 
-    public void incrementParticipantCount() {
-        if (isFull()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
-        }
-        this.currentParticipant++;
+    public void setCurrentParticipant(int currentParticipant) {
+        this.currentParticipant = currentParticipant;
     }
 
     @Builder
