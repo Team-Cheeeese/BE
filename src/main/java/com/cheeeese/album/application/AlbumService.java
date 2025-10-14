@@ -19,6 +19,7 @@ import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,33 +57,40 @@ public class AlbumService {
         albumValidator.validateAlbumEntry(album, currentUser);
 
         // 3. 사용자 앨범 참가 로직: 첫 입장 시 GUEST로 등록 및 참가자 수 증가
-        handleAlbumParticipation(album, currentUser);
+        Album freshAlbum = handleAlbumParticipation(album, currentUser);
 
         // 4. 응답 DTO 생성
-        return createAlbumEnterResponse(album);
+        return createAlbumEnterResponse(freshAlbum);
     }
 
-    private void handleAlbumParticipation(Album album, User currentUser) {
+    private Album handleAlbumParticipation(Album album, User currentUser) {
         boolean isAlreadyParticipant = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId()).isPresent();
 
         if (isAlreadyParticipant) {
             log.info("User {} is already a participant of album {}. Skipping registration.",
                     currentUser.getId(), album.getId());
-            return; // 이미 참가했으므로 바로 종료
+            return album;
         }
 
         // 첫 입장: UserAlbum에 GUEST로 저장하고, Album 참가자 수 증가
         UserAlbum newUserAlbum = AlbumMapper.toGuestUserAlbum(currentUser, album);
-        userAlbumRepository.save(newUserAlbum);
+        try {
+            userAlbumRepository.save(newUserAlbum);
 
-        int updatedRows = albumRepository.incrementParticipantCountAtomically(album.getId());
-        if (updatedRows == 0) {
-            // 정원 초과 조건(currentParticipant < participant) 불만족 시 예외 처리
-            throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
+            int updatedRows = albumRepository.incrementParticipantCountAtomically(album.getId());
+            if (updatedRows == 0) {
+                // 정원 초과 조건(currentParticipant < participant) 불만족 시 예외 처리
+                throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new AlbumException(AlbumErrorCode.USER_ALREADY_JOINED_CONCURRENTLY);
         }
 
-        // JPQL UPDATE는 영속성 컨텍스트를 무시하므로 수동 동기화
-        album.setCurrentParticipant(album.getCurrentParticipant() + 1);
+        return albumRepository.findById(album.getId())
+                .orElseThrow(() -> {
+                    log.error("Failed to re-fetch album {} after atomic update.", album.getId());
+                    return new AlbumException(AlbumErrorCode.ALBUM_NOT_FOUND);
+                });
     }
 
     private AlbumEnterResponse createAlbumEnterResponse(Album album) {
