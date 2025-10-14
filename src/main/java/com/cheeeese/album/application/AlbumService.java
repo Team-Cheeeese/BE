@@ -36,8 +36,7 @@ public class AlbumService {
 
         albumValidator.validateAlbumExpiration(album);
 
-        User host = userRepository.findById(album.getHostId())
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User host = getHostUser(album.getHostId());
 
         return AlbumMapper.toInvitationResponse(album, host);
     }
@@ -51,6 +50,13 @@ public class AlbumService {
         albumValidator.validateAlbumEntry(album, currentUser);
 
         // 3. 사용자 앨범 참가 로직: 첫 입장 시 GUEST로 등록 및 참가자 수 증가
+        handleAlbumParticipation(album, currentUser);
+
+        // 4. 응답 DTO 생성
+        return createAlbumEnterResponse(album);
+    }
+
+    private void handleAlbumParticipation(Album album, User currentUser) {
         userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId())
                 .ifPresentOrElse(
                         userAlbum -> {
@@ -63,18 +69,13 @@ public class AlbumService {
                             album.incrementParticipantCount();
                         }
                 );
-
-        // 4. 응답 DTO 생성
-        return createAlbumEnterResponse(album);
     }
 
     private AlbumEnterResponse createAlbumEnterResponse(Album album) {
         Long albumId = album.getId();
 
         // 1. 호스트 정보 조회
-        User host = userRepository.findById(album.getHostId())
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
+        User host = getHostUser(album.getHostId());
         AlbumHostInfo hostInfo = AlbumMapper.toHostInfo(host);
 
         // 2. 총 사진 수
@@ -82,14 +83,7 @@ public class AlbumService {
         long totalPhotoCount = photoService.countTotalPhotos(albumId);
 
         // 3. 참가자 정보 목록 조회
-        List<Long> participantUserIds = userAlbumRepository.findAllByAlbumId(albumId).stream()
-                .map(UserAlbum::getUserId)
-                .collect(Collectors.toList());
-        List<User> participants = userRepository.findAllById(participantUserIds);
-
-        List<AlbumParticipantResponse> participantResponses = participants.stream()
-                .map(AlbumMapper::toParticipantResponse)
-                .collect(Collectors.toList());
+        List<AlbumParticipantResponse> participantResponses = getParticipantResponses(albumId);
 
         // 4. 최신 사진 9장
         // TODO: 썸네일 생성 후 썸네일 이미지 제공, 아래 코드는 임시
@@ -102,5 +96,22 @@ public class AlbumService {
                 participantResponses,
                 recentPhotoUrls
         );
+    }
+
+    private User getHostUser(Long hostId) {
+        return userRepository.findById(hostId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    }
+
+    private List<AlbumParticipantResponse> getParticipantResponses(Long albumId) {
+        List<Long> participantUserIds = userAlbumRepository.findAllByAlbumId(albumId).stream()
+                .map(UserAlbum::getUserId)
+                .collect(Collectors.toList());
+
+        List<User> participants = userRepository.findAllById(participantUserIds);
+
+        return participants.stream()
+                .map(AlbumMapper::toParticipantResponse)
+                .collect(Collectors.toList());
     }
 }
