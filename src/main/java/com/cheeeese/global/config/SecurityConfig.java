@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/v1/global/health-check",
             "/login/oauth2/**",
             "/v1/auth/exchange",
-            "/v1/auth/reissue"
+            "/v1/auth/reissue",
+            "/v1/album/*/invitation"
     };
 
     @Bean
