@@ -66,16 +66,8 @@ public class Album extends BaseEntity {
         return this.expiredAt.isBefore(LocalDateTime.now()) || this.status == AlbumStatus.EXPIRED;
     }
 
-    public boolean isFull() {
-        return this.currentParticipant >= this.participant;
-    }
-
-    public void setCurrentParticipant(int currentParticipant) {
-        this.currentParticipant = currentParticipant;
-    }
-
     @Builder
-    public Album(
+    private Album(
             Long hostId,
             String title,
             String code,

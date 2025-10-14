@@ -31,7 +31,7 @@ public class UserAlbum extends BaseEntity {
     private UserAlbumRole role;
 
     @Builder
-    public UserAlbum(Long userId, Long albumId, UserAlbumRole role) {
+    private UserAlbum(Long userId, Long albumId, UserAlbumRole role) {
         this.userId = userId;
         this.albumId = albumId;
         this.role = role;

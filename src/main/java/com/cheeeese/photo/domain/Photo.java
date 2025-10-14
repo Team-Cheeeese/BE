@@ -41,7 +41,7 @@ public class Photo extends BaseEntity {
     private boolean isDeleted;
 
     @Builder
-    public Photo(
+    private Photo(
             Long userId,
             Long albumId,
             String imageUrl,

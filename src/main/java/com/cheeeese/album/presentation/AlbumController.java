@@ -8,10 +8,7 @@ import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.ALBUM_ENTER_SUCCESS;
 import static com.cheeeese.global.common.code.SuccessCode.ALBUM_INVITATION_FETCH_SUCCESS;
@@ -31,7 +28,7 @@ public class AlbumController implements AlbumSwagger {
     }
 
     @Override
-    @GetMapping("/{code}/enter")
+    @PostMapping("/{code}/enter")
     public CommonResponse<AlbumEnterResponse> enterAlbum(
             @CurrentUser User user,
             @PathVariable String code
