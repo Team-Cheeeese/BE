@@ -3,6 +3,7 @@ package com.cheeeese.album.application;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
+import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
@@ -15,12 +16,15 @@ import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,18 +61,26 @@ public class AlbumService {
     }
 
     private void handleAlbumParticipation(Album album, User currentUser) {
-        userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId())
-                .ifPresentOrElse(
-                        userAlbum -> {
-                            // 이미 참가한 경우: 아무것도 하지 않음
-                        },
-                        () -> {
-                            // 첫 입장: UserAlbum에 GUEST로 저장하고, Album 참가자 수 증가
-                            UserAlbum newUserAlbum = AlbumMapper.toGuestUserAlbum(currentUser, album);
-                            userAlbumRepository.save(newUserAlbum);
-                            album.incrementParticipantCount();
-                        }
-                );
+        boolean isAlreadyParticipant = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId()).isPresent();
+
+        if (isAlreadyParticipant) {
+            log.info("User {} is already a participant of album {}. Skipping registration.",
+                    currentUser.getId(), album.getId());
+            return; // 이미 참가했으므로 바로 종료
+        }
+
+        try {
+            // 첫 입장: UserAlbum에 GUEST로 저장하고, Album 참가자 수 증가
+            UserAlbum newUserAlbum = AlbumMapper.toGuestUserAlbum(currentUser, album);
+            userAlbumRepository.save(newUserAlbum);
+            album.incrementParticipantCount();
+
+        } catch (DataIntegrityViolationException e) {
+            // 경합 상황 발생: 다른 트랜잭션이 먼저 저장했으므로 예외를 무시하고 정상 처리
+            AlbumErrorCode errorCode = AlbumErrorCode.USER_ALREADY_JOINED_CONCURRENTLY;
+            log.warn("{}: User {} already registered for album {} by another transaction. Proceeding.",
+                    errorCode.getMessage(), currentUser.getId(), album.getId());
+        }
     }
 
     private AlbumEnterResponse createAlbumEnterResponse(Album album) {

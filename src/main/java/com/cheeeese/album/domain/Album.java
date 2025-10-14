@@ -48,9 +48,9 @@ public class Album extends BaseEntity {
     private int maxPhotoCount;
 
     @Column(name = "current_photo_count", nullable = false)
-    private int currentPhotoCount = 0;
+    private int currentPhotoCount;
 
-    @Column(name = "Field", nullable = false)
+    @Column(name = "is_info_available", nullable = false)
     private boolean isInfoAvailable;
 
     @Column(name = "expired_at", nullable = false)

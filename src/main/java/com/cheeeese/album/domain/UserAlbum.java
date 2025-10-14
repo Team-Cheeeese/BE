@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "user_album")
+@Table(name = "user_album", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "album_id"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserAlbum extends BaseEntity {
 
