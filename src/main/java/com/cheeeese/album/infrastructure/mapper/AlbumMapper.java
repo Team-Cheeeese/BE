@@ -12,6 +12,7 @@ public class AlbumMapper {
     public static AlbumInvitationResponse toInvitationResponse(Album album, User host) {
         return AlbumInvitationResponse.builder()
                 .title(album.getTitle())
+                .themeImageUrl(album.getThemeImageUrl())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
                 .hostName(host.getName())

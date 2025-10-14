@@ -11,6 +11,9 @@ public record AlbumInvitationResponse(
         @Schema(description = "앨범 제목", example = "경영학부 졸업식")
         String title,
 
+        @Schema(description = "앨범 테마 이미지 URL", example = "http://example.com/theme.jpg")
+        String themeImageUrl,
+
         @Schema(description = "이벤트 날짜", example = "2025-02-26")
         String eventDate,
 
