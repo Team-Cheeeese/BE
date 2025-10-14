@@ -39,6 +39,7 @@ public class AlbumMapper {
     ) {
         return AlbumEnterResponse.builder()
                 .title(album.getTitle())
+                .themeImageUrl(album.getThemeImageUrl())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
                 .maxParticipantCount(album.getParticipant())
