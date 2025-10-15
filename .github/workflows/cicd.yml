@@ -61,7 +61,7 @@ jobs:
             key: ${{ secrets.SERVER_SSH_KEY }}
             source: ./src/main/resources/secret/prod.env
             target: /root
-            strip_components: 4
+            strip_components: 5
 
         - name: Copy dev.env to NCP server
           uses: appleboy/scp-action@master
@@ -71,7 +71,7 @@ jobs:
             key: ${{ secrets.SERVER_SSH_KEY }}
             source: ./src/main/resources/secret/dev.env
             target: /root
-            strip_components: 4
+            strip_components: 5
 
         - name: Copy deploy.sh to NCP server
           uses: appleboy/scp-action@master
@@ -81,7 +81,7 @@ jobs:
             key: ${{ secrets.SERVER_SSH_KEY }}
             source: ./src/main/resources/secret/deploy.sh
             target: /root
-            strip_components: 4
+            strip_components: 5
 
         - name: Copy docker-compose.yml to NCP server
           uses: appleboy/scp-action@master
