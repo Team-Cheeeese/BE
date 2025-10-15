@@ -46,6 +46,8 @@ public class AlbumService {
     public AlbumCreateResponse createAlbum(User user, AlbumCreateRequest request) {
         String code = UUID.randomUUID().toString();
 
+        albumValidator.validateAlbumCreation(user, request);
+
         Album album = AlbumMapper.toEntity(
                 user.getId(),
                 request.title(),
