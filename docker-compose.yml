@@ -11,8 +11,8 @@ services:
     command: [ "redis-server", "--requirepass", "${SPRING_DATA_REDIS_PASSWORD}" ]
     ports:
       - "6379:6379"
-    environment:
-      - REDIS_PASSWORD=${SPRING_DATA_REDIS_PASSWORD}
+    env_file:
+      - /root/.env
     volumes:
       - redis-data:/data
     networks:
@@ -33,11 +33,6 @@ services:
     restart: always
     networks:
       - cheeeeese-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
   backend-blue-prod:
     image: mozzarella32/backend:prod
@@ -51,11 +46,6 @@ services:
     restart: always
     networks:
       - cheeeeese-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
   # ------------------------------------------------------------
   # ✅ 개발 환경용
@@ -72,11 +62,6 @@ services:
     restart: always
     networks:
       - cheeeeese-network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
   backend-blue-dev:
     image: mozzarella32/backend:dev
@@ -90,11 +75,6 @@ services:
     restart: always
     networks:
       - cheeeeese-network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
 # ------------------------------------------------------------
 # ✅ 네트워크 및 볼륨 정의
