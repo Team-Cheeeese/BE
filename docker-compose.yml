@@ -1,0 +1,104 @@
+version: "3.9"
+
+services:
+  # ------------------------------------------------------------
+  # ✅ Redis 서비스 (항상 실행)
+  # ------------------------------------------------------------
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - cheeeeese-network
+
+  # ------------------------------------------------------------
+  # ✅ Backend 서비스 (Blue-Green 전환 대상)
+  # ------------------------------------------------------------
+  backend-green-prod:
+    image: mozzarella32/backend:prod     # deploy.sh에서 docker pull로 최신 이미지 갱신
+    container_name: cheeeeese-green-prod
+    env_file:
+      - /root/prod.env
+    depends_on:
+      - redis
+    ports:
+      - "8080:8080"     # Green 인스턴스 포트
+    restart: always
+    networks:
+      - cheeeeese-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend-blue-prod:
+    image: mozzarella32/backend:prod
+    container_name: cheeeeese-blue-prod
+    env_file:
+      - /root/prod.env
+    depends_on:
+      - redis
+    ports:
+      - "8081:8080"     # Blue 인스턴스 포트
+    restart: always
+    networks:
+      - cheeeeese-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ------------------------------------------------------------
+  # ✅ 개발 환경용
+  # ------------------------------------------------------------
+  backend-green-dev:
+    image: mozzarella32/backend:dev
+    container_name: cheeeeese-green-dev
+    env_file:
+      - /root/dev.env
+    depends_on:
+      - redis
+    ports:
+      - "8082:8080"
+    restart: always
+    networks:
+      - cheeeeese-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend-blue-dev:
+    image: mozzarella32/backend:dev
+    container_name: cheeeeese-blue-dev
+    env_file:
+      - /root/dev.env
+    depends_on:
+      - redis
+    ports:
+      - "8083:8080"
+    restart: always
+    networks:
+      - cheeeeese-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+# ------------------------------------------------------------
+# ✅ 네트워크 및 볼륨 정의
+# ------------------------------------------------------------
+networks:
+  cheeeeese-network:
+    driver: bridge
+
+volumes:
+  redis-data:
