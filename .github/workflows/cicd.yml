@@ -2,7 +2,7 @@ name: CI/CD Workflow
 
 on:
   push:
-    branches: [ "main", "develop"]
+    branches: [ "main", "develop", "chore/#4-cicd"]
 
 jobs:
   CI-CD:
@@ -126,7 +126,7 @@ jobs:
 
         # ---------------------- DEV Deployment ----------------------
         - name: Docker build & push (develop)
-          if: github.ref == 'refs/heads/develop'
+          if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/chore/#4-cicd'
           run: |
             IMAGE_NAME=${{ secrets.DOCKER_REPO }}/${{ secrets.DOCKER_IMAGE_NAME }}
             
@@ -138,7 +138,7 @@ jobs:
             echo "✅ Pushed $IMAGE_NAME:dev"
 
         - name: Deploy to develop
-          if: github.ref == 'refs/heads/develop'
+          if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/chore/#4-cicd'
           uses: appleboy/ssh-action@master
           with:
             host: ${{ secrets.SERVER_HOST }}

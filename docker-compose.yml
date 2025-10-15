@@ -8,8 +8,11 @@ services:
     image: redis:7.2-alpine
     container_name: redis
     restart: always
+    command: [ "redis-server", "--requirepass", "${SPRING_DATA_REDIS_PASSWORD}" ]
     ports:
       - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${SPRING_DATA_REDIS_PASSWORD}
     volumes:
       - redis-data:/data
     networks:
