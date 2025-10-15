@@ -52,7 +52,7 @@ public class AlbumService {
                 code,
                 request.themeImageUrl(),
                 request.participant(),
-                request.eventData(),
+                request.eventDate(),
                 true,
                 LocalDateTime.now().plusDays(7),
                 request.isTermsAgreement()
