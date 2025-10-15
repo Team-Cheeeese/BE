@@ -27,7 +27,8 @@ public class AlbumMapper {
             int participant,
             LocalDate eventDate,
             boolean isInfoAvailable,
-            LocalDateTime expiredAt
+            LocalDateTime expiredAt,
+            boolean isTermsAgreement
     ) {
         return Album.builder()
                 .hostId(hostId)
@@ -42,6 +43,7 @@ public class AlbumMapper {
                 .isInfoAvailable(isInfoAvailable)
                 .expiredAt(expiredAt)
                 .status(Album.AlbumStatus.ACTIVE)
+                .isTermsAgreement(isTermsAgreement)
                 .build();
     }
 

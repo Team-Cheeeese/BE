@@ -9,6 +9,7 @@ public record AlbumCreateRequest(
         String themeImageUrl,
         String title,
         int participant,
-        LocalDate eventData
+        LocalDate eventData,
+        boolean isTermsAgreement
 ) {
 }
