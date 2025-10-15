@@ -46,23 +46,11 @@ jobs:
             chmod 600 ./src/main/resources/secret/deploy.sh
             echo "✅ .env & .sh 파일 생성 완료"
         
-
         - name: Docker Login
           uses: docker/login-action@v3
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-        - name: 🧾 Check generated secret files
-          run: |
-            echo "=== Checking secret directory ==="
-            ls -al ./src/main/resources/secret || echo "❌ secret folder not found"
-            echo "=== Check file content ==="
-            cat ./src/main/resources/secret/prod.env || echo "❌ prod.env missing"
-            cat ./src/main/resources/secret/dev.env || echo "❌ dev.env missing"
-            cat ./src/main/resources/secret/deploy.sh || echo "❌ deploy.sh missing"
-            echo "=== Check docker-compose existence ==="
-            ls -al ./docker-compose.yml || echo "❌ docker-compose.yml missing"
 
         - name: Copy deployment files to NCP server (Integrated SCP)
           uses: appleboy/scp-action@master
@@ -70,12 +58,12 @@ jobs:
             host: ${{ secrets.SERVER_HOST }}
             username: ${{ secrets.SERVER_USER }}
             key: ${{ secrets.SERVER_SSH_KEY }}
-            source: |
-              ./src/main/resources/secret/prod.env
-              ./src/main/resources/secret/dev.env
-              ./src/main/resources/secret/deploy.sh
-              ./docker-compose.yml
             target: /root
+            source: >
+              src/main/resources/secret/prod.env
+              src/main/resources/secret/dev.env
+              src/main/resources/secret/deploy.sh
+              docker-compose.yml
 
         # ---------------------- PROD Deployment ----------------------
         - name: Docker build & push (prod)
