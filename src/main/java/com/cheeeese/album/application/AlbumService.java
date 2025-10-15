@@ -2,6 +2,8 @@ package com.cheeeese.album.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.dto.request.AlbumCreateRequest;
+import com.cheeeese.album.dto.response.AlbumCreateResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
@@ -23,7 +25,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +41,25 @@ public class AlbumService {
     private final UserAlbumRepository userAlbumRepository;
     private final UserRepository userRepository;
     private final PhotoService photoService;
+
+    @Transactional
+    public AlbumCreateResponse createAlbum(User user, AlbumCreateRequest request) {
+        String code = UUID.randomUUID().toString();
+
+        Album album = AlbumMapper.toEntity(
+                user.getId(),
+                request.title(),
+                code,
+                request.themeImageUrl(),
+                request.participant(),
+                request.eventData(),
+                true,
+                LocalDateTime.now().plusDays(7)
+        );
+        albumRepository.save(album);
+
+        return AlbumMapper.toCreateResponse(album);
+    }
 
     public AlbumInvitationResponse getInvitationInfo(String code) {
         Album album = albumValidator.validateAlbumCode(code);

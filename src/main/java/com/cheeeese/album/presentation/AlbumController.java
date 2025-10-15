@@ -1,12 +1,15 @@
 package com.cheeeese.album.presentation;
 
 import com.cheeeese.album.application.AlbumService;
+import com.cheeeese.album.dto.request.AlbumCreateRequest;
+import com.cheeeese.album.dto.response.AlbumCreateResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.presentation.swagger.AlbumSwagger;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,14 @@ import static com.cheeeese.global.common.code.SuccessCode.ALBUM_INVITATION_FETCH
 public class AlbumController implements AlbumSwagger {
 
     private final AlbumService albumService;
+
+    @PostMapping
+    public CommonResponse<AlbumCreateResponse> createAlbum(
+            @CurrentUser User user,
+            @RequestBody @Valid AlbumCreateRequest request
+    ) {
+         return CommonResponse.success(ALBUM_ENTER_SUCCESS, albumService.createAlbum(user, request));
+    }
 
     @Override
     @GetMapping("/{code}/invitation")
