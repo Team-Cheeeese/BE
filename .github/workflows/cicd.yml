@@ -39,20 +39,20 @@ jobs:
             mkdir -p ./src/main/resources/secret
             echo "${{ secrets.PROD_ENV_CONTENT }}" > ./src/main/resources/secret/prod.env
             echo "${{ secrets.DEV_ENV_CONTENT }}" > ./src/main/resources/secret/dev.env
-            echo "${{ secrets.DEPLOY_FILE }}" > ./src/main/resources/secret/deploy.sh
+            cat <<'EOF' > ./src/main/resources/secret/deploy.sh
+            ${{ secrets.DEPLOY_FILE }}
+            EOF
             chmod 600 ./src/main/resources/secret/*.env
             chmod 600 ./src/main/resources/secret/deploy.sh
             echo "✅ .env & .sh 파일 생성 완료"
         
 
-        # 📌 개선: Docker Login을 별도 Step으로 분리하고 공식 액션 사용
         - name: Docker Login
           uses: docker/login-action@v3
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-        # 📌 개선: prod.env, dev.env, deploy.sh 파일을 하나의 scp-action으로 통합 전송
         - name: Copy deployment files to NCP server (Integrated SCP)
           uses: appleboy/scp-action@master
           with:
