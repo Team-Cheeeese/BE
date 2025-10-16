@@ -13,8 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.cheeeese.global.common.code.SuccessCode.ALBUM_ENTER_SUCCESS;
-import static com.cheeeese.global.common.code.SuccessCode.ALBUM_INVITATION_FETCH_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.*;
 
 
 @RestController
@@ -29,7 +28,7 @@ public class AlbumController implements AlbumSwagger {
             @CurrentUser User user,
             @RequestBody @Valid AlbumCreateRequest request
     ) {
-         return CommonResponse.success(ALBUM_ENTER_SUCCESS, albumService.createAlbum(user, request));
+         return CommonResponse.success(ALBUM_CREATE_SUCCESS, albumService.createAlbum(user, request));
     }
 
     @Override

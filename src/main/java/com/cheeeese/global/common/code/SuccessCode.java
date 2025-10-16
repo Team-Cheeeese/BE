@@ -23,6 +23,7 @@ public enum SuccessCode implements BaseCode {
     // album
     ALBUM_INVITATION_FETCH_SUCCESS(HttpStatus.OK, "앨범 초대장 정보 조회가 성공적으로 완료되었습니다."),
     ALBUM_ENTER_SUCCESS(HttpStatus.OK, "앨범 입장이 성공적으로 완료되었습니다."),
+    ALBUM_CREATE_SUCCESS(HttpStatus.OK, "Album Create Success"),
     ;
 
     private final HttpStatus httpStatus;
