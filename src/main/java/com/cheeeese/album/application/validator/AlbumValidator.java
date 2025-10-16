@@ -1,8 +1,7 @@
 package com.cheeeese.album.application.validator;
 
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.domain.AlbumParticipant;
-import com.cheeeese.album.dto.request.AlbumCreateRequest;
+import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
@@ -18,7 +17,7 @@ public class AlbumValidator {
     private final AlbumRepository albumRepository;
     private final AlbumParticipantRepository albumParticipantRepository;
 
-    public void validateAlbumCreation(User user, AlbumCreateRequest request) {
+    public void validateAlbumCreation(User user, AlbumCreationRequest request) {
         if (!request.isTermsAgreement()) {
             throw new AlbumException(AlbumErrorCode.ALBUM_REQUIRED_TERMS_NOT_AGREED);
         }

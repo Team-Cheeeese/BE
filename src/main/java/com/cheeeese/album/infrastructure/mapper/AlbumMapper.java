@@ -2,7 +2,7 @@ package com.cheeeese.album.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.AlbumParticipant;
-import com.cheeeese.album.dto.response.AlbumCreateResponse;
+import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
@@ -49,8 +49,8 @@ public class AlbumMapper {
     /**
      * Album 생성 후, UUID Code 발급
      */
-    public static AlbumCreateResponse toCreateResponse(Album album) {
-        return AlbumCreateResponse.builder()
+    public static AlbumCreationResponse toCreateResponse(Album album) {
+        return AlbumCreationResponse.builder()
                 .themeImageUrl(album.getThemeImageUrl())
                 .eventDate(album.getEventDate())
                 .currentParticipant(album.getCurrentParticipant())

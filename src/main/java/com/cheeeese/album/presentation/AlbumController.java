@@ -1,8 +1,8 @@
 package com.cheeeese.album.presentation;
 
 import com.cheeeese.album.application.AlbumService;
-import com.cheeeese.album.dto.request.AlbumCreateRequest;
-import com.cheeeese.album.dto.response.AlbumCreateResponse;
+import com.cheeeese.album.dto.request.AlbumCreationRequest;
+import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.presentation.swagger.AlbumSwagger;
@@ -23,10 +23,11 @@ public class AlbumController implements AlbumSwagger {
 
     private final AlbumService albumService;
 
+    @Override
     @PostMapping
-    public CommonResponse<AlbumCreateResponse> createAlbum(
+    public CommonResponse<AlbumCreationResponse> createAlbum(
             @CurrentUser User user,
-            @RequestBody @Valid AlbumCreateRequest request
+            @RequestBody @Valid AlbumCreationRequest request
     ) {
          return CommonResponse.success(ALBUM_CREATE_SUCCESS, albumService.createAlbum(user, request));
     }

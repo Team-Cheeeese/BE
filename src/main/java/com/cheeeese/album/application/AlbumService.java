@@ -2,8 +2,8 @@ package com.cheeeese.album.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.dto.request.AlbumCreateRequest;
-import com.cheeeese.album.dto.response.AlbumCreateResponse;
+import com.cheeeese.album.dto.request.AlbumCreationRequest;
+import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
@@ -43,7 +43,7 @@ public class AlbumService {
     private final PhotoService photoService;
 
     @Transactional
-    public AlbumCreateResponse createAlbum(User user, AlbumCreateRequest request) {
+    public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
         String code = UUID.randomUUID().toString();
 
         albumValidator.validateAlbumCreation(user, request);
