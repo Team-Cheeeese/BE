@@ -2,7 +2,6 @@ package com.cheeeese.album.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.AlbumParticipant;
-import com.cheeeese.album.domain.UserAlbumRole;
 import com.cheeeese.album.dto.response.AlbumCreateResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;

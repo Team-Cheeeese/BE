@@ -1,7 +1,6 @@
 package com.cheeeese.album.infrastructure.persistence;
 
 import com.cheeeese.album.domain.AlbumParticipant;
-import com.cheeeese.album.domain.UserAlbumRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
