@@ -1,7 +1,7 @@
 package com.cheeeese.album.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.domain.UserAlbum;
+import com.cheeeese.album.domain.AlbumParticipant;
 import com.cheeeese.album.domain.UserAlbumRole;
 import com.cheeeese.album.dto.response.AlbumCreateResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
@@ -109,13 +109,13 @@ public class AlbumMapper {
     }
 
     /**
-     * User와 Album 엔티티를 기반으로 GUEST 역할의 UserAlbum 엔티티를 생성합니다.
+     * User와 Album 엔티티를 기반으로 isBlacklisted = false 역할의 AlbumParticipant 엔티티를 생성합니다.
      */
-    public static UserAlbum toGuestUserAlbum(User user, Album album) {
-        return UserAlbum.builder()
+    public static AlbumParticipant toGuestUserAlbum(User user, Album album) {
+        return AlbumParticipant.builder()
                 .userId(user.getId())
                 .albumId(album.getId())
-                .role(UserAlbumRole.GUEST)
+                .isBlacklisted(false)
                 .build();
     }
 

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "user_album", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "album_id"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserAlbum extends BaseEntity {
+public class AlbumParticipant extends BaseEntity {
 
     @Id
     @Column(name = "user_album_id", nullable = false)
@@ -26,14 +26,13 @@ public class UserAlbum extends BaseEntity {
     @Column(name = "album_id", nullable = false)
     private Long albumId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private UserAlbumRole role;
+    @Column(name = "is_blacklisted", nullable = false)
+    private boolean isBlacklisted;
 
     @Builder
-    private UserAlbum(Long userId, Long albumId, UserAlbumRole role) {
+    private AlbumParticipant(Long userId, Long albumId, boolean isBlacklisted) {
         this.userId = userId;
         this.albumId = albumId;
-        this.role = role;
+        this.isBlacklisted = isBlacklisted;
     }
 }
