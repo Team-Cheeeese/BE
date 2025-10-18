@@ -54,7 +54,7 @@ public class AlbumValidator {
      * 사용자가 앨범의 블랙리스트에 등록되어 있는지 확인합니다.
      */
     private void validateUserBlacklisted(Album album, User user) {
-        albumParticipantRepository.findByAlbumIdAndUserIdAndBlacklistedTrue(album.getId(), user.getId())
+        albumParticipantRepository.findByAlbumIdAndUserIdAndIsBlacklistedTrue(album.getId(), user.getId())
                 .ifPresent(blacklisted -> {
                     throw new AlbumException(AlbumErrorCode.USER_IS_BLACKLISTED);
                 });

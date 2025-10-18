@@ -50,8 +50,13 @@ dependencies {
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // uuid v7
+	implementation 'com.github.f4b6a3:uuid-creator:5.2.0'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'benchmark'
+    }
 }

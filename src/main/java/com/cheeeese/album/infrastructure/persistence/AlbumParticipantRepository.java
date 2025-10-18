@@ -11,5 +11,5 @@ public interface AlbumParticipantRepository extends JpaRepository<AlbumParticipa
 
     List<AlbumParticipant> findAllByAlbumId(Long albumId);
 
-    Optional<AlbumParticipant> findByAlbumIdAndUserIdAndBlacklistedTrue(Long albumId, Long userId);
+    Optional<AlbumParticipant> findByAlbumIdAndUserIdAndIsBlacklistedTrue(Long albumId, Long userId);
 }
