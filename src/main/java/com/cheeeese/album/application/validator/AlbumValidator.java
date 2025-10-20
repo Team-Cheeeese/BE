@@ -24,7 +24,7 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_REQUIRED_TERMS_NOT_AGREED);
         }
 
-        if (request.emoji() == null || request.emoji().isBlank()) {
+        if (request.themeEmoji() == null || request.themeEmoji().isBlank()) {
             throw new AlbumException(AlbumErrorCode.ALBUM_THEME_EMOJI_NOT_SELECTED);
         }
 

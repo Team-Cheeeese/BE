@@ -22,7 +22,7 @@ public class AlbumMapper {
             Long hostId,
             String title,
             String code,
-            String emoji,
+            String themeEmoji,
             int participant,
             LocalDate eventDate,
             boolean isInfoAvailable,
@@ -33,7 +33,7 @@ public class AlbumMapper {
                 .hostId(hostId)
                 .title(title)
                 .code(code)
-                .emoji(emoji)
+                .themeEmoji(themeEmoji)
                 .participant(participant)
                 .currentParticipant(1)
                 .eventDate(eventDate)
@@ -51,7 +51,7 @@ public class AlbumMapper {
      */
     public static AlbumCreationResponse toCreationResponse(Album album) {
         return AlbumCreationResponse.builder()
-                .emoji(album.getEmoji())
+                .themeEmoji(album.getThemeEmoji())
                 .title(album.getTitle())
                 .eventDate(album.getEventDate())
                 .currentPhotoCnt(album.getCurrentPhotoCount())
@@ -65,7 +65,7 @@ public class AlbumMapper {
     public static AlbumInvitationResponse toInvitationResponse(Album album, User host) {
         return AlbumInvitationResponse.builder()
                 .title(album.getTitle())
-                .themeImageUrl(album.getEmoji())
+                .themeEmoji(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
                 .hostName(host.getName())
@@ -85,7 +85,7 @@ public class AlbumMapper {
     ) {
         return AlbumEnterResponse.builder()
                 .title(album.getTitle())
-                .themeImageUrl(album.getEmoji())
+                .themeImageUrl(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
                 .maxParticipantCount(album.getParticipant())
