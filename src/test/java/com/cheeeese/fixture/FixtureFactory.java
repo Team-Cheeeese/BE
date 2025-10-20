@@ -45,7 +45,7 @@ public class FixtureFactory {
         return AlbumMapper.toEntity(
                 1L,
                 "v7-" + i,
-                UuidCreator.getTimeOrdered().toString(),
+                UuidCreator.getTimeOrderedEpoch().toString(),
                 "테스트 이미지",
                 4,
                 LocalDate.of(2025, 1, 1),

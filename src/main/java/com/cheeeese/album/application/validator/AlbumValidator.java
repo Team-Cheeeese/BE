@@ -28,6 +28,10 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_THEME_IMAGE_NOT_SELECTED);
         }
 
+        if (request.title() == null || request.title().isBlank()) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_TITLE_REQUIRED);
+        }
+
         if (request.eventDate() == null) {
             throw new AlbumException(AlbumErrorCode.ALBUM_EVENT_DATE_REQUIRED);
         }

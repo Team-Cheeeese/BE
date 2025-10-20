@@ -16,7 +16,13 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Query("UPDATE Album a SET a.currentParticipant = a.currentParticipant + 1 WHERE a.id = :albumId AND a.currentParticipant < a.participant")
     int incrementParticipantCountAtomically(@Param("albumId") Long albumId);
 
-    @Query("SELECT COUNT(a) FROM Album a WHERE a.hostId = :userId AND a.createdAt BETWEEN :start AND :end")
+    @Query("""
+        SELECT COUNT(a)
+        FROM Album a
+        WHERE a.hostId = :userId
+        AND a.createdAt >= :start
+        AND a.createdAt < :end
+    """)
     long countByUserAndCreatedAtBetween(
             @Param("userId") Long userId,
             @Param("start") LocalDateTime start,

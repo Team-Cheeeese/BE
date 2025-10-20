@@ -3,13 +3,14 @@ package com.cheeeese.album.benchmark;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.fixture.FixtureFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ public class AlbumServiceBenchmarkTest {
 
     @Autowired
     private AlbumRepository albumRepository;
+
+    @PersistenceContext
+    private EntityManager em;
 
     private static final int DATA_SIZE = 20000;
     private final Random random = new Random();
@@ -67,7 +71,7 @@ public class AlbumServiceBenchmarkTest {
                 .map(Album::getCode)
                 .toList();
 
-        // 평균 조회 속도 테스트
+        // 전체 조회 속도 테스트
         measureSelectingTest("v4", v4Codes);
         measureSelectingTest("v7", v7Codes);
 
@@ -84,12 +88,19 @@ public class AlbumServiceBenchmarkTest {
             albumRepository.findByCode(code);
             total += System.nanoTime() - start;
         }
-        System.out.printf("[%s] 평균 조회 시간: %.2f ms%n", label, total / 1000000.0);
+        System.out.printf("[%s] 전체 조회 시간: %.2f ms%n", label, total / 1000000.0);
     }
 
     private void measureSortingTest(String label) {
         long start = System.currentTimeMillis();
-        albumRepository.findAll(Sort.by(Sort.Direction.DESC, "code"));
+        em.createQuery("""
+                SELECT a
+                FROM Album a
+                WHERE a.title LIKE :prefix
+                ORDER BY a.code DESC
+            """, Album.class)
+                .setParameter("prefix", label + "%")
+                .getResultList();
         long elapsed = System.currentTimeMillis() - start;
         System.out.printf("[%s] Order By 정렬 시간: %d ms%n", label, elapsed);
     }

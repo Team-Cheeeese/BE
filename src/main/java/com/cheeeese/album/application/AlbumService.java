@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,8 +97,8 @@ public class AlbumService {
     private long countUserAlbumsCreatedThisWeek(User user) {
         return albumRepository.countByUserAndCreatedAtBetween(
                 user.getId(),
-                LocalDate.now().with(DayOfWeek.MONDAY).atStartOfDay(),
-                LocalDate.now().with(DayOfWeek.SUNDAY).plusDays(1).atStartOfDay()
+                LocalDate.now().with(DayOfWeek.MONDAY).atTime(LocalTime.MIN),
+                LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(1).atTime(LocalTime.now())
         );
     }
 
