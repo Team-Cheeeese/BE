@@ -17,7 +17,7 @@ public class AlbumValidator {
     private final AlbumRepository albumRepository;
     private final AlbumParticipantRepository albumParticipantRepository;
 
-    public void validateAlbumCreation(User user, AlbumCreationRequest request) {
+    public void validateAlbumCreation(long createdThisWeek, AlbumCreationRequest request) {
         if (!request.isTermsAgreement()) {
             throw new AlbumException(AlbumErrorCode.ALBUM_REQUIRED_TERMS_NOT_AGREED);
         }
@@ -26,7 +26,7 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_INVALID_CAPACITY);
         }
 
-        if (user.getAlbumCnt() > 3) {
+        if (createdThisWeek > 3) {
             throw new AlbumException(AlbumErrorCode.ALBUM_CREATION_LIMIT_EXCEEDED);
         }
     }

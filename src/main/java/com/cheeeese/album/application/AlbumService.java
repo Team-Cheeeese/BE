@@ -25,6 +25,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -46,7 +48,9 @@ public class AlbumService {
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
         String code = UUID.randomUUID().toString();
 
-        albumValidator.validateAlbumCreation(user, request);
+        long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
+
+        albumValidator.validateAlbumCreation(createdThisWeek, request);
 
         Album album = AlbumMapper.toEntity(
                 user.getId(),
@@ -87,6 +91,14 @@ public class AlbumService {
 
         // 4. 응답 DTO 생성
         return createAlbumEnterResponse(freshAlbum);
+    }
+
+    private long countUserAlbumsCreatedThisWeek(User user) {
+        return albumRepository.countByUserAndCreatedAtBetween(
+                user.getId(),
+                LocalDate.now().with(DayOfWeek.MONDAY).atStartOfDay(),
+                LocalDate.now().with(DayOfWeek.SUNDAY).plusDays(1).atStartOfDay()
+        );
     }
 
     private Album handleAlbumParticipation(Album album, User currentUser) {
