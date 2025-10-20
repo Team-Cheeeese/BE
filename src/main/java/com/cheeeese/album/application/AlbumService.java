@@ -65,7 +65,7 @@ public class AlbumService {
         );
         albumRepository.save(album);
 
-        return AlbumMapper.toCreateResponse(album);
+        return AlbumMapper.toCreationResponse(album);
     }
 
     public AlbumInvitationResponse getInvitationInfo(String code) {

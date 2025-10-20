@@ -49,11 +49,12 @@ public class AlbumMapper {
     /**
      * Album 생성 후, UUID Code 발급
      */
-    public static AlbumCreationResponse toCreateResponse(Album album) {
+    public static AlbumCreationResponse toCreationResponse(Album album) {
         return AlbumCreationResponse.builder()
                 .themeImageUrl(album.getThemeImageUrl())
+                .title(album.getTitle())
                 .eventDate(album.getEventDate())
-                .currentParticipant(album.getCurrentParticipant())
+                .currentPhotoCnt(album.getCurrentPhotoCount())
                 .code(album.getCode())
                 .build();
     }
