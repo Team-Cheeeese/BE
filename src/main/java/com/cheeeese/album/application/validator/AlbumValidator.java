@@ -22,6 +22,10 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_REQUIRED_TERMS_NOT_AGREED);
         }
 
+        if (request.themeImageUrl() == null || request.themeImageUrl().isBlank()) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_THEME_IMAGE_NOT_SELECTED);
+        }
+
         if (request.participant() < 1 || request.participant() > 64) {
             throw new AlbumException(AlbumErrorCode.ALBUM_INVALID_CAPACITY);
         }
