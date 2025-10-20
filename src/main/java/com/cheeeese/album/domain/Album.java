@@ -30,8 +30,8 @@ public class Album extends BaseEntity {
     @Column(name = "code", nullable = false, unique = true)
     private String code;
 
-    @Column(name = "theme_image_url")
-    private String themeImageUrl;
+    @Column(name = "emoji")
+    private String emoji;
 
     @Column(name = "participant", nullable = false)
     private int participant;
@@ -74,7 +74,7 @@ public class Album extends BaseEntity {
             Long hostId,
             String title,
             String code,
-            String themeImageUrl,
+            String emoji,
             int participant,
             int currentParticipant,
             LocalDate eventDate,
@@ -88,7 +88,7 @@ public class Album extends BaseEntity {
         this.hostId = hostId;
         this.title = title;
         this.code = code;
-        this.themeImageUrl = themeImageUrl;
+        this.emoji = emoji;
         this.participant = participant;
         this.currentParticipant = currentParticipant;
         this.eventDate = eventDate;

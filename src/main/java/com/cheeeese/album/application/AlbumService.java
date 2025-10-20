@@ -57,7 +57,7 @@ public class AlbumService {
                 user.getId(),
                 request.title(),
                 code,
-                request.themeImageUrl(),
+                request.emoji(),
                 request.participant(),
                 request.eventDate(),
                 true,

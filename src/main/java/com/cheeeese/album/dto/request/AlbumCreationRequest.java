@@ -8,8 +8,8 @@ import java.time.LocalDate;
 @Builder
 @Schema(description = "앨범 생성 API")
 public record AlbumCreationRequest(
-        @Schema(description = "썸네일 이미지", example = "https://theme.jpg")
-        String themeImageUrl,
+        @Schema(description = "썸네일 이모지", example = "U+1F9C0")
+        String emoji,
 
         @Schema(description = "앨범 이름", example = "졸업식")
         String title,

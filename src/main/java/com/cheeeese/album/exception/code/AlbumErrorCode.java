@@ -15,7 +15,7 @@ public enum AlbumErrorCode implements BaseCode {
     USER_IS_BLACKLISTED(HttpStatus.FORBIDDEN, "앨범 관리자에 의해 접근이 금지된 사용자입니다."),
     USER_ALREADY_JOINED_CONCURRENTLY(HttpStatus.CONFLICT, "동시성 오류: 이미 앨범에 참여 요청이 완료되었습니다."),
     ALBUM_REQUIRED_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST, "앨범 생성 필수 약관에 동의하지 않았습니다."),
-    ALBUM_THEME_IMAGE_NOT_SELECTED(HttpStatus.BAD_REQUEST, "앨범 썸네일 이미지가 선택되지 않았습니다."),
+    ALBUM_THEME_EMOJI_NOT_SELECTED(HttpStatus.BAD_REQUEST, "앨범 썸네일 이모지가 선택되지 않았습니다."),
     ALBUM_TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "행사 이름이 입력되지 않았습니다."),
     ALBUM_EVENT_DATE_REQUIRED(HttpStatus.BAD_REQUEST, "행사 날짜가 입력되지 않았습니다."),
     ALBUM_EVENT_DATE_INVALID(HttpStatus.BAD_REQUEST, "행사 날짜는 오늘 또는 과거만 선택 가능합니다."),

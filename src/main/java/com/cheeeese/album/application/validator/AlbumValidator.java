@@ -24,8 +24,8 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_REQUIRED_TERMS_NOT_AGREED);
         }
 
-        if (request.themeImageUrl() == null || request.themeImageUrl().isBlank()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_THEME_IMAGE_NOT_SELECTED);
+        if (request.emoji() == null || request.emoji().isBlank()) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_THEME_EMOJI_NOT_SELECTED);
         }
 
         if (request.title() == null || request.title().isBlank()) {
