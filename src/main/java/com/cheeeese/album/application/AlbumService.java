@@ -19,6 +19,7 @@ import com.cheeeese.user.domain.User;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,7 +30,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,7 +46,7 @@ public class AlbumService {
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
-        String code = UUID.randomUUID().toString();
+        String code = UuidCreator.getTimeOrdered().toString();
 
         long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
 
