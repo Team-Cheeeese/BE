@@ -17,7 +17,7 @@ public record AlbumCreationRequest(
         @Schema(description = "참여자 수", example = "64")
         int participant,
 
-        @Schema(description = "행사 날짜", example = "2025.02.01")
+        @Schema(description = "행사 날짜", example = "2025-02-01")
         LocalDate eventDate,
 
         @Schema(description = "앨범 생성 필수 약관 동의", example = "true")
