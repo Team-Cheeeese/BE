@@ -26,7 +26,7 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_INVALID_CAPACITY);
         }
 
-        if (createdThisWeek > 3) {
+        if (createdThisWeek >= 3) {
             throw new AlbumException(AlbumErrorCode.ALBUM_CREATION_LIMIT_EXCEEDED);
         }
     }
