@@ -10,6 +10,8 @@ import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 @RequiredArgsConstructor
 public class AlbumValidator {
@@ -24,6 +26,14 @@ public class AlbumValidator {
 
         if (request.themeImageUrl() == null || request.themeImageUrl().isBlank()) {
             throw new AlbumException(AlbumErrorCode.ALBUM_THEME_IMAGE_NOT_SELECTED);
+        }
+
+        if (request.eventDate() == null) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_EVENT_DATE_REQUIRED);
+        }
+
+        if (request.eventDate().isAfter(LocalDate.now())) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_EVENT_DATE_INVALID);
         }
 
         if (request.participant() < 1 || request.participant() > 64) {
