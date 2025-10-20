@@ -24,7 +24,7 @@ public interface AlbumSwagger {
             description = """ 
                     ### RequestBody
                     ---
-                    `themeImageUrl`: 앨범 썸네일 이미지 (String) \n
+                    `themeEmoji`: 앨범 썸네일 이모지 (String) \n
                     `title`: 앨범 이름 (String) \n
                     `participant`: 참여자 수 (int) \n
                     `eventDate`: 행사 날짜 (LocalDate) \n
