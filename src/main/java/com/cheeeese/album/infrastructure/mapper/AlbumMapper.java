@@ -1,17 +1,63 @@
 package com.cheeeese.album.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.domain.UserAlbum;
-import com.cheeeese.album.domain.UserAlbumRole;
+import com.cheeeese.album.domain.AlbumParticipant;
+import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.user.domain.User;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class AlbumMapper {
+
+    /**
+     * Album Entity 생성
+     */
+    public static Album toEntity(
+            Long hostId,
+            String title,
+            String code,
+            String themeEmoji,
+            int participant,
+            LocalDate eventDate,
+            boolean isInfoAvailable,
+            LocalDateTime expiredAt,
+            boolean isTermsAgreement
+    ) {
+        return Album.builder()
+                .hostId(hostId)
+                .title(title)
+                .code(code)
+                .themeEmoji(themeEmoji)
+                .participant(participant)
+                .currentParticipant(1)
+                .eventDate(eventDate)
+                .maxPhotoCount(2000)
+                .currentPhotoCount(0)
+                .isInfoAvailable(isInfoAvailable)
+                .expiredAt(expiredAt)
+                .status(Album.AlbumStatus.ACTIVE)
+                .isTermsAgreement(isTermsAgreement)
+                .build();
+    }
+
+    /**
+     * Album 생성 후, UUID Code 발급
+     */
+    public static AlbumCreationResponse toCreationResponse(Album album) {
+        return AlbumCreationResponse.builder()
+                .themeEmoji(album.getThemeEmoji())
+                .title(album.getTitle())
+                .eventDate(album.getEventDate())
+                .currentPhotoCnt(album.getCurrentPhotoCount())
+                .code(album.getCode())
+                .build();
+    }
 
     /**
      * Album 엔티티와 Host User 정보를 초대장 응답 DTO로 변환합니다.
@@ -19,7 +65,7 @@ public class AlbumMapper {
     public static AlbumInvitationResponse toInvitationResponse(Album album, User host) {
         return AlbumInvitationResponse.builder()
                 .title(album.getTitle())
-                .themeImageUrl(album.getThemeImageUrl())
+                .themeEmoji(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
                 .hostName(host.getName())
@@ -39,7 +85,7 @@ public class AlbumMapper {
     ) {
         return AlbumEnterResponse.builder()
                 .title(album.getTitle())
-                .themeImageUrl(album.getThemeImageUrl())
+                .themeEmoji(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
                 .maxParticipantCount(album.getParticipant())
@@ -63,13 +109,13 @@ public class AlbumMapper {
     }
 
     /**
-     * User와 Album 엔티티를 기반으로 GUEST 역할의 UserAlbum 엔티티를 생성합니다.
+     * User와 Album 엔티티를 기반으로 isBlacklisted = false 역할의 AlbumParticipant 엔티티를 생성합니다.
      */
-    public static UserAlbum toGuestUserAlbum(User user, Album album) {
-        return UserAlbum.builder()
+    public static AlbumParticipant toGuestUserAlbum(User user, Album album) {
+        return AlbumParticipant.builder()
                 .userId(user.getId())
                 .albumId(album.getId())
-                .role(UserAlbumRole.GUEST)
+                .isBlacklisted(false)
                 .build();
     }
 

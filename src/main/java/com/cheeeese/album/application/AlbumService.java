@@ -2,27 +2,34 @@ package com.cheeeese.album.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.dto.request.AlbumCreationRequest;
+import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.PhotoService;
-import com.cheeeese.album.domain.UserAlbum;
+import com.cheeeese.album.domain.AlbumParticipant;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
-import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
+import com.cheeeese.album.infrastructure.persistence.AlbumParticipantRepository;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
+import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,9 +41,33 @@ public class AlbumService {
 
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
-    private final UserAlbumRepository userAlbumRepository;
+    private final AlbumParticipantRepository albumParticipantRepository;
     private final UserRepository userRepository;
     private final PhotoService photoService;
+
+    @Transactional
+    public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
+        String code = UuidCreator.getTimeOrdered().toString();
+
+        long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
+
+        albumValidator.validateAlbumCreation(createdThisWeek, request);
+
+        Album album = AlbumMapper.toEntity(
+                user.getId(),
+                request.title(),
+                code,
+                request.themeEmoji(),
+                request.participant(),
+                request.eventDate(),
+                true,
+                LocalDateTime.now().plusDays(7),
+                request.isTermsAgreement()
+        );
+        albumRepository.save(album);
+
+        return AlbumMapper.toCreationResponse(album);
+    }
 
     public AlbumInvitationResponse getInvitationInfo(String code) {
         Album album = albumValidator.validateAlbumCode(code);
@@ -56,15 +87,23 @@ public class AlbumService {
         // 2. 앨범 입장 인가 검증 (만료, 블랙리스트, 정원 초과)
         albumValidator.validateAlbumEntry(album, currentUser);
 
-        // 3. 사용자 앨범 참가 로직: 첫 입장 시 GUEST로 등록 및 참가자 수 증가
+        // 3. 사용자 앨범 참가 로직: 첫 입장 시 isBlacklisted = false로 등록 및 참가자 수 증가
         Album freshAlbum = handleAlbumParticipation(album, currentUser);
 
         // 4. 응답 DTO 생성
         return createAlbumEnterResponse(freshAlbum);
     }
 
+    private long countUserAlbumsCreatedThisWeek(User user) {
+        return albumRepository.countByUserAndCreatedAtBetween(
+                user.getId(),
+                LocalDate.now().with(DayOfWeek.MONDAY).atTime(LocalTime.MIN),
+                LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(1).atTime(LocalTime.now())
+        );
+    }
+
     private Album handleAlbumParticipation(Album album, User currentUser) {
-        boolean isAlreadyParticipant = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId()).isPresent();
+        boolean isAlreadyParticipant = albumParticipantRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId()).isPresent();
 
         if (isAlreadyParticipant) {
             log.info("User {} is already a participant of album {}. Skipping registration.",
@@ -72,10 +111,10 @@ public class AlbumService {
             return album;
         }
 
-        // 첫 입장: UserAlbum에 GUEST로 저장하고, Album 참가자 수 증가
-        UserAlbum newUserAlbum = AlbumMapper.toGuestUserAlbum(currentUser, album);
+        // 첫 입장: AlbumParticipant에 isBlacklisted = false로 저장하고, Album 참가자 수 증가
+        AlbumParticipant newAlbumParticipant = AlbumMapper.toGuestUserAlbum(currentUser, album);
         try {
-            userAlbumRepository.save(newUserAlbum);
+            albumParticipantRepository.save(newAlbumParticipant);
 
             int updatedRows = albumRepository.incrementParticipantCountAtomically(album.getId());
             if (updatedRows == 0) {
@@ -126,8 +165,8 @@ public class AlbumService {
     }
 
     private List<AlbumParticipantResponse> getParticipantResponses(Long albumId) {
-        List<Long> participantUserIds = userAlbumRepository.findAllByAlbumId(albumId).stream()
-                .map(UserAlbum::getUserId)
+        List<Long> participantUserIds = albumParticipantRepository.findAllByAlbumId(albumId).stream()
+                .map(AlbumParticipant::getUserId)
                 .collect(Collectors.toList());
 
         List<User> participants = userRepository.findAllById(participantUserIds);

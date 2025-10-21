@@ -11,6 +11,7 @@ src/main/resources/secret/
 application.yml
 application-dev.yml
 application-prod.yml
+application-test.yml
 
 ### STS ###
 .apt_generated

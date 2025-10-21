@@ -1,5 +1,7 @@
 package com.cheeeese.album.presentation.swagger;
 
+import com.cheeeese.album.dto.request.AlbumCreationRequest;
+import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.global.common.CommonResponse;
@@ -11,10 +13,35 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "[앨범]", description = "앨범 관련 API")
 public interface AlbumSwagger {
+    @Operation(
+            summary = "앨범 생성 API",
+            description = """ 
+                    ### RequestBody
+                    ---
+                    `themeEmoji`: 앨범 썸네일 이모지 (String) \n
+                    `title`: 앨범 이름 (String) \n
+                    `participant`: 참여자 수 (int) \n
+                    `eventDate`: 행사 날짜 (LocalDate) \n
+                    `isTermsAgreement`: 앨범 생성 필수 약관 동의 (boolean)
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "앨범 생성이 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<AlbumCreationResponse> createAlbum(
+            @CurrentUser User user,
+            @RequestBody @Valid AlbumCreationRequest request
+    );
+
     @Operation(
             summary = "앨범 초대장 기본 정보 확인 API (로그인 불필요)",
             description = """

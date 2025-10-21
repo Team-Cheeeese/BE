@@ -17,12 +17,22 @@ import java.util.Collections;
         info = @Info(
                 title = "Cheeeese API 명세서",
                 description = "Cheeeese API 명세서",
-                version = "v1"
+                version = "v1.0.0"
         ),
-        servers = @Server(
-                url = "/",
-                description = "Default Server URL"
-        )
+        servers = {
+                @Server(
+                        url = "${springdoc.local-server-url}",
+                        description = "Local Server URL"
+                ),
+                @Server(
+                        url = "${springdoc.dev-server-url}",
+                        description = "Develop Server URL"
+                ),
+                @Server(
+                        url = "${springdoc.prod-server-url}",
+                        description = "Production Server URL"
+                )
+        }
 )
 public class SwaggerConfig {
         @Bean
