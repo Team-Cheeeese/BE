@@ -10,6 +10,7 @@ public class AuthMapper {
         return AuthExchangeResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .isOnboarded(user.isOnboarded())
                 .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
