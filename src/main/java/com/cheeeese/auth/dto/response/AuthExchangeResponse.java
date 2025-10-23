@@ -18,6 +18,12 @@ public record AuthExchangeResponse(
         String refreshToken,
 
         @Schema(
+                description = "온보딩 여부",
+                example = "true"
+        )
+        boolean isOnboarded,
+
+        @Schema(
                 description = "사용자 고유 식별 ID",
                 example = "1"
         )

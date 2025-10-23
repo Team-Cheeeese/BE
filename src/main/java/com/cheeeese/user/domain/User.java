@@ -41,6 +41,9 @@ public class User extends BaseEntity {
     @Column(name = "is_third_party_agreement", nullable = false)
     private boolean isThirdPartyAgreement;
 
+    @Column(name = "is_onboarded", nullable = false)
+    private boolean isOnboarded;
+
     @Column(name = "album_cnt", nullable = false)
     private int albumCnt;
 
@@ -60,6 +63,7 @@ public class User extends BaseEntity {
             boolean isUserInfoAgreement,
             boolean isMarketingAgreement,
             boolean isThirdPartyAgreement,
+            boolean isOnboarded,
             int albumCnt,
             int photoCnt,
             int likesCnt
@@ -72,6 +76,7 @@ public class User extends BaseEntity {
         this.isUserInfoAgreement = isUserInfoAgreement;
         this.isMarketingAgreement = isMarketingAgreement;
         this.isThirdPartyAgreement = isThirdPartyAgreement;
+        this.isOnboarded = isOnboarded;
         this.albumCnt = albumCnt;
         this.photoCnt = photoCnt;
         this.likesCnt = likesCnt;
@@ -82,11 +87,13 @@ public class User extends BaseEntity {
     }
 
     public void saveUserAgreement(
+            boolean isOnboarded,
             boolean isServiceAgreement,
             boolean isUserInfoAgreement,
             boolean isMarketingAgreement,
             boolean isThirdPartyAgreement
     ) {
+        this.isOnboarded = isOnboarded;
         this.isServiceAgreement = isServiceAgreement;
         this.isUserInfoAgreement = isUserInfoAgreement;
         this.isMarketingAgreement = isMarketingAgreement;
