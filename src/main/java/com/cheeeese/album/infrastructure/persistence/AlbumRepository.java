@@ -28,4 +28,8 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Album a SET a.currentPhotoCount = a.currentPhotoCount + :count WHERE a.id = :albumId")
+    int incrementPhotoCount(@Param("albumId") Long albumId, @Param("count") int count);
 }
