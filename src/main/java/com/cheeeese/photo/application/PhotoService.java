@@ -177,9 +177,11 @@ public class PhotoService {
             throw new PhotoException(PhotoErrorCode.PHOTO_STATUS_UPDATE_FAILED);
         }
 
-        int decremented = albumRepository.decrementPhotoCount(albumId, failurePhotoIds.size());
-        if (decremented == 0) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
+        if (updatedRows > 0) {
+            int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
+            if (decremented == 0) {
+                throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
+            }
         }
     }
 
