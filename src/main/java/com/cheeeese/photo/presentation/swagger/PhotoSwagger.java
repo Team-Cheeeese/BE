@@ -52,6 +52,20 @@ public interface PhotoSwagger {
                                     }
                                     """)
                     )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자는 해당 앨범의 참가자가 아닙니다.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                        {
+                          "isSuccess": false,
+                          "code": 403,
+                          "message": "사용자는 해당 앨범의 참가자가 아닙니다."
+                        }
+                        """)
+                    )
             )
     })
     CommonResponse<PhotoPresignedUrlResponse> createPresignedUrls(
@@ -77,6 +91,48 @@ public interface PhotoSwagger {
             @ApiResponse(
                     responseCode = "200",
                     description = "사진 업로드 결과 보고가 성공적으로 처리되었습니다."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "보고된 사진들은 반드시 동일한 앨범에 속해야 합니다.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                        {
+                          "isSuccess": false,
+                          "code": 400,
+                          "message": "보고된 사진들은 반드시 동일한 앨범에 속해야 합니다."
+                        }
+                        """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "사용자와 사진의 소유자가 일치하지 않습니다.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                        {
+                          "isSuccess": false,
+                          "code": 403,
+                          "message": "사용자와 사진의 소유자가 일치하지 않습니다."
+                        }
+                        """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "보고된 사진 ID 중 존재하지 않는 ID가 포함되어 있습니다.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                        {
+                          "isSuccess": false,
+                          "code": 404,
+                          "message": "보고된 사진 ID 중 존재하지 않는 ID가 포함되어 있습니다."
+                        }
+                        """)
+                    )
             )
     })
     CommonResponse<Void> reportUploadResult(
