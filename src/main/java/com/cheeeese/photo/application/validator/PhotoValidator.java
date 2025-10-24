@@ -1,16 +1,24 @@
 package com.cheeeese.photo.application.validator;
 
+import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
+import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PhotoValidator {
+
+    private final PhotoRepository photoRepository;
 
     private static final long MAX_FILE_SIZE = 6 * 1024 * 1024; // 6MB
     private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/jpg");
@@ -46,4 +54,78 @@ public class PhotoValidator {
             throw new PhotoException(PhotoErrorCode.PHOTO_MAX_COUNT_EXCEEDED);
         }
     }
+
+    /**
+     * 존재, 소유, 동일 앨범 검증을 통합 수행
+     */
+    public ValidatedPhotos validatePhotos(Long userId, List<Long> photoIds) {
+        validatePhotoIdsNotEmpty(photoIds);
+        List<Photo> photos = findAndValidateExistence(photoIds);
+        validateOwnership(photos, userId);
+        Long albumId = validateSingleAlbum(photos);
+        return new ValidatedPhotos(photos, albumId);
+    }
+
+    /**
+     * photoIds가 비어있지 않은지 검증
+     */
+    private void validatePhotoIdsNotEmpty(List<Long> photoIds) {
+        if (photoIds == null || photoIds.isEmpty()) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_ID_LIST_EMPTY);
+        }
+    }
+
+    /**
+     * photoId 리스트 기반으로 존재하는 사진 조회 및 존재 검증
+     */
+    private List<Photo> findAndValidateExistence(List<Long> photoIds) {
+        List<Photo> photos = photoRepository.findAllById(photoIds);
+
+        if (photos.size() != photoIds.size()) {
+            Set<Long> foundIds = photos.stream()
+                    .map(Photo::getId)
+                    .collect(Collectors.toSet());
+
+            List<Long> missingIds = photoIds.stream()
+                    .filter(id -> !foundIds.contains(id))
+                    .toList();
+
+            log.error("존재하지 않는 photoIds: {}", missingIds);
+            throw new PhotoException(PhotoErrorCode.PHOTO_ID_NOT_FOUND);
+        }
+
+        return photos;
+    }
+
+    /**
+     * 소유자 일치 검증
+     */
+    private void validateOwnership(List<Photo> photos, Long userId) {
+        boolean invalidOwner = photos.stream()
+                .anyMatch(photo -> !photo.getUserId().equals(userId));
+
+        if (invalidOwner) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_OWNER_MISMATCH);
+        }
+    }
+
+    /**
+     * 동일 앨범 검증
+     */
+    private Long validateSingleAlbum(List<Photo> photos) {
+        Set<Long> albumIds = photos.stream()
+                .map(Photo::getAlbumId)
+                .collect(Collectors.toSet());
+
+        if (albumIds.size() != 1) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_REPORT_INVALID_ALBUM);
+        }
+
+        return albumIds.iterator().next();
+    }
+
+    /**
+     * 검증 결과 객체: 앨범 ID + 사진 리스트 보관
+     */
+    public record ValidatedPhotos(List<Photo> photos, Long albumId) {}
 }

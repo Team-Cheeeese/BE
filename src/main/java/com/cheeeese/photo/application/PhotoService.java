@@ -5,7 +5,9 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
+import com.cheeeese.photo.dto.request.PhotoUploadReportRequest;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +87,37 @@ public class PhotoService {
         albumRepository.incrementPhotoCount(album.getId(), requestedCount);
 
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
+    }
+
+    @Transactional
+    public void reportUploadResult(User user, PhotoUploadReportRequest request) {
+        List<Long> allPhotoIds = Stream.concat(
+                request.successPhotoIds().stream(),
+                request.failurePhotoIds().stream()
+        ).toList();
+
+        PhotoValidator.ValidatedPhotos validated = photoValidator.validatePhotos(user.getId(), allPhotoIds);
+        Long albumId = validated.albumId();
+
+
+        if (!request.successPhotoIds().isEmpty()) {
+            photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
+                    request.successPhotoIds(),
+                    user.getId(),
+                    PhotoStatus.PROCESSING,
+                    PhotoStatus.UPLOADING
+            );
+        }
+
+        if (!request.failurePhotoIds().isEmpty()) {
+            photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
+                    request.failurePhotoIds(),
+                    user.getId(),
+                    PhotoStatus.FAILED,
+                    PhotoStatus.UPLOADING
+            );
+            albumRepository.decrementPhotoCount(albumId, request.failurePhotoIds().size());
+        }
     }
 
 }

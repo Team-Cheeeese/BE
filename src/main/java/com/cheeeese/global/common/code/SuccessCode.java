@@ -28,6 +28,7 @@ public enum SuccessCode implements BaseCode {
 
     // photo
     PRESIGNED_URL_ISSUE_SUCCESS(HttpStatus.OK, "Presigned URL 발급이 성공적으로 완료되었습니다."),
+    PHOTO_UPLOAD_REPORT_SUCCESS(HttpStatus.OK, "사진 업로드 결과 보고가 성공적으로 처리되었습니다."),
     ;
 
     private final HttpStatus httpStatus;
