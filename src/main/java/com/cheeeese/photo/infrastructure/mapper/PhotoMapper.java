@@ -2,7 +2,6 @@ package com.cheeeese.photo.infrastructure.mapper;
 
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
-import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 
 import java.time.LocalDateTime;
