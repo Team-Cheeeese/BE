@@ -28,7 +28,7 @@ public class Photo extends BaseEntity {
     @Column(name = "album_id", nullable = false)
     private Long albumId;
 
-    @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "image_url", nullable = true, columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(name = "likes_cnt", nullable = false)
@@ -40,12 +40,17 @@ public class Photo extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PhotoStatus status;
+
     @Builder
     private Photo(
             Long userId,
             Long albumId,
             String imageUrl,
-            LocalDateTime captureTime
+            LocalDateTime captureTime,
+            PhotoStatus status
     ) {
         this.userId = userId;
         this.albumId = albumId;
@@ -53,5 +58,14 @@ public class Photo extends BaseEntity {
         this.captureTime = captureTime;
         this.likesCnt = 0;
         this.isDeleted = false;
+        this.status = status;
+    }
+
+    public void updateStatus(PhotoStatus newStatus) {
+        this.status = newStatus;
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
