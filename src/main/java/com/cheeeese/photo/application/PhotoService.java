@@ -31,6 +31,8 @@ public class PhotoService {
     private final AlbumRepository albumRepository;
     private final PresignedUrlService presignedUrlService;
 
+    private static final String ORIGINAL_PHOTO_PATH_FORMAT = "album/%d/original/%d_%s";
+
     public long countTotalPhotos(Long albumId) {
         return photoRepository.countByAlbumIdAndIsDeletedFalse(albumId);
     }
@@ -43,81 +45,108 @@ public class PhotoService {
     }
 
     @Transactional
-    public PhotoPresignedUrlResponse createPresignedUrls(
-            User user,
-            PhotoPresignedUrlRequest request
-    ) {
-        Album album = albumValidator.validateAlbumCode(request.albumCode());
-        albumValidator.validateUploadPermission(album, user);
+    public PhotoPresignedUrlResponse createPresignedUrls(User user, PhotoPresignedUrlRequest request) {
+        Album album = validateAlbumAndPermission(user, request.albumCode());
+        validateUploadRequest(album, request);
 
-        int currentCount = album.getCurrentPhotoCount();
-        int maxCount = album.getMaxPhotoCount();
-        int requestedCount = request.fileInfos().size();
-
-        photoValidator.validatePhotoCount(currentCount, requestedCount, maxCount);
-        photoValidator.validateFileInfos(request.fileInfos());
-
-        List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls =
-                request.fileInfos().stream()
-                        .map(file -> {
-                            Photo photo = PhotoMapper.toEntity(
-                                    user.getId(),
-                                    album.getId()
-                            );
-                            photoRepository.save(photo);
-
-                            String objectKey = String.format(
-                                    "album/%d/original/%d_%s",
-                                    album.getId(),
-                                    photo.getId(),
-                                    file.fileName()
-                            );
-
-                            String uploadUrl = presignedUrlService.generatePresignedPutUrl(
-                                    objectKey,
-                                    file.contentType()
-                            );
-
-                            photo.updateImageUrl(objectKey);
-
-                            return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
-                        })
-                        .collect(Collectors.toList());
-
-        albumRepository.incrementPhotoCount(album.getId(), requestedCount);
+        List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
+        albumRepository.incrementPhotoCount(album.getId(), request.fileInfos().size());
 
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
     }
 
     @Transactional
     public void reportUploadResult(User user, PhotoUploadReportRequest request) {
+        PhotoValidator.ValidatedPhotos validated = validateRequestAndPhotos(user, request);
+        Long albumId = validated.albumId();
+
+        handleSuccessfulUploads(user.getId(), request.successPhotoIds());
+
+        handleFailedUploads(user.getId(), albumId, request.failurePhotoIds());
+    }
+
+    private Album validateAlbumAndPermission(User user, String albumCode) {
+        Album album = albumValidator.validateAlbumCode(albumCode);
+        albumValidator.validateUploadPermission(album, user);
+        return album;
+    }
+
+    private void validateUploadRequest(Album album, PhotoPresignedUrlRequest request) {
+        int currentCount = album.getCurrentPhotoCount();
+        int maxCount = album.getMaxPhotoCount();
+        int requestedCount = request.fileInfos().size();
+
+        photoValidator.validatePhotoCount(currentCount, requestedCount, maxCount);
+        photoValidator.validateFileInfos(request.fileInfos());
+    }
+
+    private List<PhotoPresignedUrlResponse.PresignedUrlInfo> generatePresignedUrls(
+            User user,
+            Album album,
+            List<PhotoPresignedUrlRequest.FileInfo> fileInfos
+    ) {
+        return fileInfos.stream()
+                .map(file -> createPresignedUrlForFile(user, album, file))
+                .collect(Collectors.toList());
+    }
+
+    private PhotoPresignedUrlResponse.PresignedUrlInfo createPresignedUrlForFile(
+            User user,
+            Album album,
+            PhotoPresignedUrlRequest.FileInfo file
+    ) {
+        Photo photo = PhotoMapper.toEntity(user.getId(), album.getId());
+        photoRepository.save(photo);
+
+        String objectKey = String.format(
+                ORIGINAL_PHOTO_PATH_FORMAT,
+                album.getId(),
+                photo.getId(),
+                file.fileName()
+        );
+
+        String uploadUrl = presignedUrlService.generatePresignedPutUrl(objectKey, file.contentType());
+        photo.updateImageUrl(objectKey);
+
+        return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
+    }
+
+    private PhotoValidator.ValidatedPhotos validateRequestAndPhotos(User user, PhotoUploadReportRequest request) {
         List<Long> allPhotoIds = Stream.concat(
                 request.successPhotoIds().stream(),
                 request.failurePhotoIds().stream()
         ).toList();
 
-        PhotoValidator.ValidatedPhotos validated = photoValidator.validatePhotos(user.getId(), allPhotoIds);
-        Long albumId = validated.albumId();
-
-
-        if (!request.successPhotoIds().isEmpty()) {
-            photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
-                    request.successPhotoIds(),
-                    user.getId(),
-                    PhotoStatus.PROCESSING,
-                    PhotoStatus.UPLOADING
-            );
-        }
-
-        if (!request.failurePhotoIds().isEmpty()) {
-            photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
-                    request.failurePhotoIds(),
-                    user.getId(),
-                    PhotoStatus.FAILED,
-                    PhotoStatus.UPLOADING
-            );
-            albumRepository.decrementPhotoCount(albumId, request.failurePhotoIds().size());
-        }
+        return photoValidator.validatePhotos(user.getId(), allPhotoIds);
     }
+
+    private void handleSuccessfulUploads(Long userId, List<Long> successPhotoIds) {
+        if (successPhotoIds == null || successPhotoIds.isEmpty()) {
+            return;
+        }
+
+        photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
+                successPhotoIds,
+                userId,
+                PhotoStatus.PROCESSING,
+                PhotoStatus.UPLOADING
+        );
+    }
+
+    private void handleFailedUploads(Long userId, Long albumId, List<Long> failurePhotoIds) {
+        if (failurePhotoIds == null || failurePhotoIds.isEmpty()) {
+            return;
+        }
+
+        photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
+                failurePhotoIds,
+                userId,
+                PhotoStatus.FAILED,
+                PhotoStatus.UPLOADING
+        );
+
+        albumRepository.decrementPhotoCount(albumId, failurePhotoIds.size());
+    }
+
 
 }
