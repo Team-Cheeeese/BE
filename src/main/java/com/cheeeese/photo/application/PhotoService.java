@@ -1,7 +1,15 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.application.validator.AlbumValidator;
+import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
+import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
+import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +23,10 @@ import java.util.stream.Collectors;
 public class PhotoService {
 
     private final PhotoRepository photoRepository;
+    private final PhotoValidator photoValidator;
+    private final AlbumValidator albumValidator;
+    private final AlbumRepository albumRepository;
+    private final PresignedUrlService presignedUrlService;
 
     public long countTotalPhotos(Long albumId) {
         return photoRepository.countByAlbumIdAndIsDeletedFalse(albumId);
@@ -26,4 +38,52 @@ public class PhotoService {
                 .map(Photo::getImageUrl)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public PhotoPresignedUrlResponse createPresignedUrls(
+            User user,
+            PhotoPresignedUrlRequest request
+    ) {
+        Album album = albumValidator.validateAlbumCode(request.albumCode());
+        albumValidator.validateAlbumExpiration(album);
+
+        int currentCount = album.getCurrentPhotoCount();
+        int maxCount = album.getMaxPhotoCount();
+        int requestedCount = request.fileInfos().size();
+
+        photoValidator.validatePhotoCount(currentCount, requestedCount, maxCount);
+        photoValidator.validateFileInfos(request.fileInfos());
+
+        List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls =
+                request.fileInfos().stream()
+                        .map(file -> {
+                            Photo photo = PhotoMapper.toEntity(
+                                    user.getId(),
+                                    album.getId()
+                            );
+                            photoRepository.save(photo);
+
+                            String objectKey = String.format(
+                                    "album/%d/original/%d_%s",
+                                    album.getId(),
+                                    photo.getId(),
+                                    file.fileName()
+                            );
+
+                            String uploadUrl = presignedUrlService.generatePresignedPutUrl(
+                                    objectKey,
+                                    file.contentType()
+                            );
+
+                            photo.updateImageUrl(objectKey);
+
+                            return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
+                        })
+                        .collect(Collectors.toList());
+
+        albumRepository.incrementPhotoCount(album.getId(), requestedCount);
+
+        return PhotoMapper.toPresignedUrlResponse(presignedUrls);
+    }
+
 }
