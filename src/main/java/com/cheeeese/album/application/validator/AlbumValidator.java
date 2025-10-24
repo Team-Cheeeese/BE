@@ -68,6 +68,15 @@ public class AlbumValidator {
         validateUserBlacklisted(album, user);
     }
 
+    public void validateUploadPermission(Album album, User user) { // [NEW]
+        validateAlbumExpiration(album);
+
+        validateUserBlacklisted(album, user);
+
+        albumParticipantRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
+                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+    }
+
     /**
      * 사용자가 앨범의 블랙리스트에 등록되어 있는지 확인합니다.
      */

@@ -45,7 +45,7 @@ public class PhotoService {
             PhotoPresignedUrlRequest request
     ) {
         Album album = albumValidator.validateAlbumCode(request.albumCode());
-        albumValidator.validateAlbumExpiration(album);
+        albumValidator.validateUploadPermission(album, user);
 
         int currentCount = album.getCurrentPhotoCount();
         int maxCount = album.getMaxPhotoCount();
