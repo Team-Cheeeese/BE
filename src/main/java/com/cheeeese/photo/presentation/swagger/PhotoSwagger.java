@@ -107,6 +107,20 @@ public interface PhotoSwagger {
                     )
             ),
             @ApiResponse(
+                    responseCode = "400",
+                    description = "업로드 결과(success/failure) 목록에 중복된 사진 ID가 포함되어 있습니다.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                        {
+                          "isSuccess": false,
+                          "code": 400,
+                          "message": "업로드 결과(success/failure) 목록에 중복된 사진 ID가 포함되어 있습니다."
+                        }
+                        """)
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "403",
                     description = "사용자와 사진의 소유자가 일치하지 않습니다.",
                     content = @Content(
@@ -130,6 +144,20 @@ public interface PhotoSwagger {
                           "isSuccess": false,
                           "code": 404,
                           "message": "보고된 사진 ID 중 존재하지 않는 ID가 포함되어 있습니다."
+                        }
+                        """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "사진 상태 업데이트에 실패했습니다.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                        {
+                          "isSuccess": false,
+                          "code": 409,
+                          "message": "사진 상태 업데이트에 실패했습니다."
                         }
                         """)
                     )

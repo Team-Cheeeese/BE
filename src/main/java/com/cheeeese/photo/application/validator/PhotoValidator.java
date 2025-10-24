@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,21 +80,21 @@ public class PhotoValidator {
      * photoId 리스트 기반으로 존재하는 사진 조회 및 존재 검증
      */
     private List<Photo> findAndValidateExistence(List<Long> photoIds) {
-        List<Photo> photos = photoRepository.findAllById(photoIds);
+        Set<Long> requestedIds = new HashSet<>(photoIds);
+        List<Photo> photos = photoRepository.findAllById(requestedIds);
 
-        if (photos.size() != photoIds.size()) {
-            Set<Long> foundIds = photos.stream()
-                    .map(Photo::getId)
-                    .collect(Collectors.toSet());
+        Set<Long> foundIds = photos.stream()
+                .map(Photo::getId)
+                .collect(Collectors.toSet());
 
-            List<Long> missingIds = photoIds.stream()
-                    .filter(id -> !foundIds.contains(id))
-                    .toList();
+        Set<Long> missingIds = requestedIds.stream()
+                .filter(id -> !foundIds.contains(id))
+                .collect(Collectors.toSet());
 
+        if (!missingIds.isEmpty()) {
             log.error("존재하지 않는 photoIds: {}", missingIds);
             throw new PhotoException(PhotoErrorCode.PHOTO_ID_NOT_FOUND);
         }
-
         return photos;
     }
 
