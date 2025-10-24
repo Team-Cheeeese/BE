@@ -61,10 +61,6 @@ public class Photo extends BaseEntity {
         this.status = status;
     }
 
-    public void updateStatus(PhotoStatus newStatus) {
-        this.status = newStatus;
-    }
-
     public void updateImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
