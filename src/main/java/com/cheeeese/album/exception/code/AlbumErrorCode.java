@@ -21,6 +21,7 @@ public enum AlbumErrorCode implements BaseCode {
     ALBUM_EVENT_DATE_INVALID(HttpStatus.BAD_REQUEST, "행사 날짜는 오늘 또는 과거만 선택 가능합니다."),
     ALBUM_INVALID_CAPACITY(HttpStatus.BAD_REQUEST, "앨범 인원은 최소 1명 이상 최대 64명 이하여야 합니다."),
     ALBUM_CREATION_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "사용자는 일주일에 최대 3개의 앨범만 생성할 수 있습니다."),
+    USER_NOT_PARTICIPANT(HttpStatus.FORBIDDEN, "사용자는 해당 앨범의 참가자가 아닙니다."),
     ;
 
     private final HttpStatus httpStatus;
