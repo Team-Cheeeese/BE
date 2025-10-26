@@ -35,7 +35,7 @@ public class UserAlbumServiceIntegrationTest {
         albumRepository.save(album);
         testAlbumId = album.getId();
 
-        UserAlbum userAlbum = FixtureFactory.createHostUserAlbum(testAlbumId, TEST_USER);
+        UserAlbum userAlbum = FixtureFactory.createHostUserAlbum(TEST_USER, testAlbumId);
         userAlbumRepository.save(userAlbum);
 
         System.out.println("[테스트 데이터 생성 완료]");
@@ -46,7 +46,7 @@ public class UserAlbumServiceIntegrationTest {
     void compareJoinQueryAndDirectQueryPerformance() {
         for (int i = 0; i < 5; i++) {
             albumRepository.findByHostId(TEST_USER);
-            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbumId, TEST_USER, Role.HOST);
+            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbumId, TEST_USER, Role.MAKER);
         }
 
         long total1 = 0;
@@ -58,7 +58,7 @@ public class UserAlbumServiceIntegrationTest {
             total1 += System.nanoTime() - start;
 
             start = System.nanoTime();
-            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbumId, TEST_USER, Role.HOST);
+            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbumId, TEST_USER, Role.MAKER);
             total2 += System.nanoTime() - start;
         }
 

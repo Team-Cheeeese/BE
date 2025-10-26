@@ -55,11 +55,11 @@ public class FixtureFactory {
         );
     }
 
-    public static UserAlbum createHostUserAlbum(Long albumId, Long userId) {
+    public static UserAlbum createHostUserAlbum(Long userId, Long albumId) {
         return UserAlbumMapper.toEntity(
-                albumId,
                 userId,
-                Role.HOST
+                albumId,
+                Role.MAKER
         );
     }
 }

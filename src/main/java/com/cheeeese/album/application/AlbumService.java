@@ -71,7 +71,7 @@ public class AlbumService {
         userAlbumRepository.save(UserAlbumMapper.toEntity(
                 user.getId(),
                 album.getId(),
-                Role.HOST
+                Role.MAKER
         ));
 
         return AlbumMapper.toCreationResponse(album);
