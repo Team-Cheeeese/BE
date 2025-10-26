@@ -2,12 +2,14 @@ package com.cheeeese.album.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
+import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
@@ -66,6 +68,12 @@ public class AlbumService {
         );
         albumRepository.save(album);
 
+        userAlbumRepository.save(UserAlbumMapper.toEntity(
+                user.getId(),
+                album.getId(),
+                Role.HOST
+        ));
+
         return AlbumMapper.toCreationResponse(album);
     }
 
@@ -112,7 +120,7 @@ public class AlbumService {
         }
 
         // 첫 입장: AlbumParticipant에 isBlacklisted = false로 저장하고, Album 참가자 수 증가
-        UserAlbum newAlbumParticipant = AlbumMapper.toGuestUserAlbum(currentUser, album);
+        UserAlbum newAlbumParticipant = UserAlbumMapper.toGuestUserAlbum(currentUser, album);
         try {
             userAlbumRepository.save(newAlbumParticipant);
 
