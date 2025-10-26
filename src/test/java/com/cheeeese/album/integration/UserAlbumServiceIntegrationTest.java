@@ -31,11 +31,11 @@ public class UserAlbumServiceIntegrationTest {
             @Autowired AlbumRepository albumRepository,
             @Autowired UserAlbumRepository userAlbumRepository
     ) {
-        Album album = FixtureFactory.createAlbum(null);
+        Album album = FixtureFactory.createAlbum(TEST_USER);
         albumRepository.save(album);
         testAlbumId = album.getId();
 
-        UserAlbum userAlbum = FixtureFactory.createHostUserAlbum(null);
+        UserAlbum userAlbum = FixtureFactory.createHostUserAlbum(testAlbumId, TEST_USER);
         userAlbumRepository.save(userAlbum);
 
         System.out.println("[테스트 데이터 생성 완료]");
