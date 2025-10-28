@@ -112,7 +112,7 @@ public class AlbumService {
 
         int availableCount = Math.max(0, maxCount - currentCount);
 
-        return AlbumMapper.toAvailableCountResponse(availableCount,maxCount,currentCount);
+        return AlbumMapper.toAvailableCountResponse(availableCount, maxCount, currentCount);
     }
 
     private long countUserAlbumsCreatedThisWeek(User user) {
