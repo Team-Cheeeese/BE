@@ -1,11 +1,12 @@
 package com.cheeeese.album.application.validator;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
-import com.cheeeese.album.infrastructure.persistence.AlbumParticipantRepository;
+import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ import java.time.LocalDate;
 public class AlbumValidator {
 
     private final AlbumRepository albumRepository;
-    private final AlbumParticipantRepository albumParticipantRepository;
+    private final UserAlbumRepository userAlbumRepository;
 
     public void validateAlbumCreation(long createdThisWeek, AlbumCreationRequest request) {
         if (!request.isTermsAgreement()) {
@@ -73,7 +74,7 @@ public class AlbumValidator {
 
         validateUserBlacklisted(album, user);
 
-        albumParticipantRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
+        userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
     }
 
@@ -81,8 +82,8 @@ public class AlbumValidator {
      * 사용자가 앨범의 블랙리스트에 등록되어 있는지 확인합니다.
      */
     private void validateUserBlacklisted(Album album, User user) {
-        albumParticipantRepository.findByAlbumIdAndUserIdAndIsBlacklistedTrue(album.getId(), user.getId())
-                .ifPresent(blacklisted -> {
+        userAlbumRepository.findByAlbumIdAndUserIdAndRole(album.getId(), user.getId(), Role.BLACK)
+                .ifPresent(userAlbum -> {
                     throw new AlbumException(AlbumErrorCode.USER_IS_BLACKLISTED);
                 });
     }
