@@ -8,6 +8,7 @@ import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.album.presentation.swagger.AlbumSwagger;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
+import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +47,17 @@ public class AlbumController implements AlbumSwagger {
     ) {
         AlbumEnterResponse response = albumService.enterAlbum(code, user);
         return CommonResponse.success(ALBUM_ENTER_SUCCESS, response);
+    }
+
+    @Override
+    @GetMapping("/{code}/available-count")
+    public CommonResponse<UploadAvailableCountResponse> getAvailableUploadCount(
+            @CurrentUser User user,
+            @PathVariable String code
+    ) {
+        return CommonResponse.success(
+                PHOTO_AVAILABLE_COUNT_FETCH_SUCCESS,
+                albumService.getAvailablePhotoCount(user, code)
+        );
     }
 }

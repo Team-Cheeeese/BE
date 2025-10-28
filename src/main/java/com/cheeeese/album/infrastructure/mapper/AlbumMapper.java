@@ -7,6 +7,7 @@ import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
+import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.user.domain.User;
 
 import java.time.LocalDate;
@@ -126,6 +127,18 @@ public class AlbumMapper {
         return AlbumParticipantResponse.builder()
                 .name(user.getName())
                 .profileImage(user.getProfileImage())
+                .build();
+    }
+
+    public static UploadAvailableCountResponse toAvailableCountResponse(
+            int availableCount,
+            int maxCount,
+            int currentCount
+    ){
+        return UploadAvailableCountResponse.builder()
+                .availableCount(availableCount)
+                .maxPhotoCount(maxCount)
+                .currentPhotoCount(currentCount)
                 .build();
     }
 }
