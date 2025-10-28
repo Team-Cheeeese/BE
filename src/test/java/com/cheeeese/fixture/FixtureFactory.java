@@ -1,9 +1,11 @@
 package com.cheeeese.fixture;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.UserAlbum;
+import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
+import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,9 +13,9 @@ import java.util.UUID;
 
 public class FixtureFactory {
 
-    public static Album createAlbum(Long id) {
-        Album album = AlbumMapper.toEntity(
-                1L,
+    public static Album createAlbum(Long userId) {
+        return AlbumMapper.toEntity(
+                userId,
                 "테스트 앨범",
                 "테스트 코드",
                 "테스트 이미지",
@@ -23,8 +25,6 @@ public class FixtureFactory {
                 LocalDateTime.now().plusDays(7),
                 true
         );
-        ReflectionTestUtils.setField(album, "id", id);
-        return album;
     }
 
     public static Album createAlbumV4(int i) {
@@ -52,6 +52,14 @@ public class FixtureFactory {
                 true,
                 LocalDateTime.now().plusDays(7),
                 true
+        );
+    }
+
+    public static UserAlbum createHostUserAlbum(Long userId, Long albumId) {
+        return UserAlbumMapper.toEntity(
+                userId,
+                albumId,
+                Role.MAKER
         );
     }
 }
