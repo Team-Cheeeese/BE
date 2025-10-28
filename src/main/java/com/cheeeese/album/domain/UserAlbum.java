@@ -1,5 +1,6 @@
 package com.cheeeese.album.domain;
 
+import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.global.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "user_album", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "album_id"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AlbumParticipant extends BaseEntity {
+public class UserAlbum extends BaseEntity {
 
     @Id
     @Column(name = "user_album_id", nullable = false)
@@ -26,13 +27,14 @@ public class AlbumParticipant extends BaseEntity {
     @Column(name = "album_id", nullable = false)
     private Long albumId;
 
-    @Column(name = "is_blacklisted", nullable = false)
-    private boolean isBlacklisted;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
 
     @Builder
-    private AlbumParticipant(Long userId, Long albumId, boolean isBlacklisted) {
+    private UserAlbum(Long userId, Long albumId, Role role) {
         this.userId = userId;
         this.albumId = albumId;
-        this.isBlacklisted = isBlacklisted;
+        this.role = role;
     }
 }
