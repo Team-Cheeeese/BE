@@ -16,6 +16,7 @@ import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
 import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
+import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.exception.UserException;
@@ -100,6 +101,18 @@ public class AlbumService {
 
         // 4. 응답 DTO 생성
         return createAlbumEnterResponse(freshAlbum);
+    }
+
+    public UploadAvailableCountResponse getAvailablePhotoCount(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateUploadPermission(album, user);
+
+        int currentCount = album.getCurrentPhotoCount();
+        int maxCount = album.getMaxPhotoCount();
+
+        int availableCount = Math.max(0, maxCount - currentCount);
+
+        return AlbumMapper.toAvailableCountResponse(availableCount, maxCount, currentCount);
     }
 
     private long countUserAlbumsCreatedThisWeek(User user) {
