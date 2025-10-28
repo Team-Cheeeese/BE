@@ -193,7 +193,7 @@ public interface AlbumSwagger {
                             schema = @Schema(example = """
                                 {
                                   "isSuccess": false,
-                                  "code": 404,
+                                  "code": 403,
                                   "message": "사용자가 해당 앨범의 참가자가 아닙니다."
                                 }
                                 """)
