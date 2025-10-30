@@ -31,6 +31,9 @@ public class Photo extends BaseEntity {
     @Column(name = "image_url", nullable = true, columnDefinition = "TEXT")
     private String imageUrl;
 
+    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
+    private String thumbnailUrl;
+
     @Column(name = "likes_cnt", nullable = false)
     private int likesCnt;
 
@@ -49,12 +52,14 @@ public class Photo extends BaseEntity {
             Long userId,
             Long albumId,
             String imageUrl,
+            String thumbnailUrl,
             LocalDateTime captureTime,
             PhotoStatus status
     ) {
         this.userId = userId;
         this.albumId = albumId;
         this.imageUrl = imageUrl;
+        this.thumbnailUrl = thumbnailUrl;
         this.captureTime = captureTime;
         this.likesCnt = 0;
         this.isDeleted = false;
