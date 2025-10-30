@@ -29,4 +29,8 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
             @Param("newStatus") PhotoStatus newStatus,
             @Param("expectedStatus") PhotoStatus expectedStatus
     );
+
+    @Modifying
+    @Query("UPDATE Photo p SET p.status = :status WHERE p.id = :photoId")
+    int updateStatus(Long photoId, PhotoStatus status);
 }
