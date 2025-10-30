@@ -1,6 +1,7 @@
 package com.cheeeese.photo.application;
 
 import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.dto.request.PhotoCompleteRequest;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
@@ -15,10 +16,16 @@ public class PhotoCallbackService {
 
     private final PhotoRepository photoRepository;
 
-    public void markUploadCompleted(Long photoId) {
-        int updated = photoRepository.updateStatus(photoId, PhotoStatus.COMPLETED);
+    public void markUploadCompleted(PhotoCompleteRequest request) {
+        int updated = photoRepository.updateStatusAndUrl(
+                request.photoId(),
+                PhotoStatus.UPLOADING,
+                PhotoStatus.COMPLETED,
+                request.thumbnailUrl()
+        );
+
         if (updated == 0) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_ID_NOT_FOUND);
+            throw new PhotoException(PhotoErrorCode.THUMBNAIL_UPDATE_FAILED);
         }
     }
 }

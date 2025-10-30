@@ -25,6 +25,7 @@ public enum PhotoErrorCode implements BaseCode {
     PHOTO_REPORT_CONFLICTING_IDS(HttpStatus.BAD_REQUEST, "업로드 결과(success/failure) 목록에 중복된 사진 ID가 포함되어 있습니다."),
     PHOTO_STATUS_UPDATE_FAILED(HttpStatus.CONFLICT, "사진 상태 업데이트에 실패했습니다."),
     PHOTO_COUNT_DECREMENT_FAILED(HttpStatus.CONFLICT, "앨범 사진 개수 감소에 실패했습니다."),
+    THUMBNAIL_UPDATE_FAILED(HttpStatus.CONFLICT, "썸네일 상태 업데이트에 실패했습니다."),
     ;
 
     private final HttpStatus httpStatus;
