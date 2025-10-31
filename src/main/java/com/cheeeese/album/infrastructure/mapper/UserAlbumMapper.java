@@ -12,6 +12,7 @@ public class UserAlbumMapper {
                 .userId(userId)
                 .albumId(albumId)
                 .role(role)
+                .isVisible(true)
                 .build();
     }
 
@@ -23,6 +24,7 @@ public class UserAlbumMapper {
                 .userId(user.getId())
                 .albumId(album.getId())
                 .role(Role.GUEST)
+                .isVisible(true)
                 .build();
     }
 }
