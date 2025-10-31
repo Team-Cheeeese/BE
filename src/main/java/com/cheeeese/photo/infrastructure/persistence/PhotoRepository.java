@@ -2,6 +2,7 @@ package com.cheeeese.photo.infrastructure.persistence;
 
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,16 +12,26 @@ import java.util.List;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
-    List<Photo> findTop5ByAlbumIdAndIsDeletedFalseAndStatusOrderByCreatedAtDesc(
-            Long albumId,
-            PhotoStatus status
+    @Query("""
+        SELECT p 
+        FROM Photo p 
+        WHERE p.album.id = :albumId 
+        AND p.isDeleted = FALSE 
+        AND p.status = :status
+        ORDER BY p.createdAt DESC
+    """)
+    List<Photo> findRecentPhotosByAlbumIdAndStatus(
+            @Param("albumId") Long albumId,
+            @Param("status") PhotoStatus status,
+            Pageable pageable
     );
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
         UPDATE Photo p
         SET p.status = :newStatus
         WHERE p.id IN :photoIds
-        AND p.userId = :userId
+        AND p.user.id = :userId
         AND p.status = :expectedStatus
     """)
     int updateStatusByIdsAndUserIdAndExpectedStatus(

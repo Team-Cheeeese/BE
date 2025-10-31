@@ -69,8 +69,8 @@ public class AlbumService {
         albumRepository.save(album);
 
         userAlbumRepository.save(UserAlbumMapper.toEntity(
-                user.getId(),
-                album.getId(),
+                user,
+                album,
                 Role.MAKER
         ));
 
@@ -110,8 +110,11 @@ public class AlbumService {
 
         // Case 2: 신규 참여
         albumValidator.validateAlbumCapacity(album);
-        UserAlbum newUserAlbum = UserAlbumMapper.toGuestUserAlbum(currentUser, album);
-        userAlbumRepository.save(newUserAlbum);
+        userAlbumRepository.save(UserAlbumMapper.toEntity(
+                currentUser,
+                album,
+                Role.MAKER
+        ));
 
         int updated = albumRepository.incrementParticipantCountAtomically(album.getId());
         if (updated == 0) {
