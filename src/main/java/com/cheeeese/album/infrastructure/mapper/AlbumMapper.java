@@ -3,6 +3,7 @@ package com.cheeeese.album.infrastructure.mapper;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.dto.response.*;
+import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.user.domain.User;
 
 import java.time.LocalDate;
@@ -100,7 +101,7 @@ public class AlbumMapper {
             Album album,
             AlbumMakerInfo makerInfo,
             int remainingUploadSlots,
-            List<String> recentPhotoUrls
+            List<NewEnterResponse.RecentPhotoResponse> recentPhotos
     ) {
         return NewEnterResponse.builder()
                 .joinStatus(AlbumJoinStatus.NEW)
@@ -110,7 +111,17 @@ public class AlbumMapper {
                 .expiredAt(album.getExpiredAt())
                 .makerInfo(makerInfo)
                 .remainingUploadSlots(remainingUploadSlots)
-                .recentPhotoUrls(recentPhotoUrls)
+                .recentPhotos(recentPhotos)
+                .build();
+    }
+
+    public static NewEnterResponse.RecentPhotoResponse toRecentPhotoResponse(Photo photo) {
+        User uploader = photo.getUser();
+
+        return NewEnterResponse.RecentPhotoResponse.builder()
+                .thumbnailUrl(photo.getThumbnailUrl())
+                .uploaderName(uploader.getName())
+                .uploaderProfileImage(uploader.getProfileImage())
                 .build();
     }
 

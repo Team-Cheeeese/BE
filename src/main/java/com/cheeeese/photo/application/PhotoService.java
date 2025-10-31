@@ -36,24 +36,12 @@ public class PhotoService {
 
     private static final String ORIGINAL_PHOTO_PATH_FORMAT = "album/%s/original/%d_%s";
 
-    public List<String> getRecentThumbnailUrls(Long albumId) {
-        List<Photo> photos = photoRepository.findRecentPhotosByAlbumIdAndStatus(
+    public List<Photo> getRecentPhotosForNewEnter(Long albumId) {
+        return photoRepository.findRecentPhotosByAlbumIdAndStatus(
                 albumId,
                 PhotoStatus.COMPLETED,
                 PageRequest.of(0, 5)
         );
-
-        if (photos.isEmpty()) {
-            return List.of();
-        }
-
-        if (photos.size() < 5) {
-            return List.of(photos.get(0).getThumbnailUrl());
-        }
-
-        return photos.stream()
-                .map(Photo::getThumbnailUrl)
-                .collect(Collectors.toList());
     }
 
     @Transactional
