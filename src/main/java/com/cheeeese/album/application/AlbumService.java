@@ -81,8 +81,9 @@ public class AlbumService {
     public AlbumInvitationResponse getInvitationInfo(String code) {
         Album album = albumValidator.validateAlbumCode(code);
 
-        albumValidator.validateAlbumExpiration(album);
-
+        if (album.isExpired()) {
+            return AlbumMapper.toExpiredInvitationResponse(album);
+        }
         User host = getHostUser(album.getHostId());
 
         return AlbumMapper.toInvitationResponse(album, host);

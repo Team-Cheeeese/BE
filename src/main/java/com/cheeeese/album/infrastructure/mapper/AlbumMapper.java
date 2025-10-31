@@ -70,6 +70,22 @@ public class AlbumMapper {
                 .expiredAt(album.getExpiredAt())
                 .hostName(host.getName())
                 .hostProfileImage(host.getProfileImage())
+                .isExpired(false)
+                .build();
+    }
+
+    /**
+     * 앨범 만료 시, 최소 정보만 담아 응답 DTO로 변환합니다.
+     */
+    public static AlbumInvitationResponse toExpiredInvitationResponse(Album album) {
+        return AlbumInvitationResponse.builder()
+                .title(album.getTitle())
+                .themeEmoji(album.getThemeEmoji())
+                .eventDate(album.getEventDate().toString())
+                .expiredAt(album.getExpiredAt())
+                .hostName(null)
+                .hostProfileImage(null)
+                .isExpired(true)
                 .build();
     }
 
