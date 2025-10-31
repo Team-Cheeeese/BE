@@ -1,6 +1,8 @@
 package com.cheeeese.photo.domain;
 
+import com.cheeeese.album.domain.Album;
 import com.cheeeese.global.domain.BaseEntity;
+import com.cheeeese.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,15 +22,15 @@ public class Photo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: 추후 필요시 ManyToOne, JoinColumn 넣을 예정
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // TODO: 추후 필요시 ManyToOne, JoinColumn 넣을 예정
-    @Column(name = "album_id", nullable = false)
-    private Long albumId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "album_id", nullable = false)
+    private Album album;
 
-    @Column(name = "image_url", nullable = true, columnDefinition = "TEXT")
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(name = "thumbnail_url", columnDefinition = "TEXT")
@@ -49,15 +51,15 @@ public class Photo extends BaseEntity {
 
     @Builder
     private Photo(
-            Long userId,
-            Long albumId,
+            User user,
+            Album album,
             String imageUrl,
             String thumbnailUrl,
             LocalDateTime captureTime,
             PhotoStatus status
     ) {
-        this.userId = userId;
-        this.albumId = albumId;
+        this.user = user;
+        this.album = album;
         this.imageUrl = imageUrl;
         this.thumbnailUrl = thumbnailUrl;
         this.captureTime = captureTime;

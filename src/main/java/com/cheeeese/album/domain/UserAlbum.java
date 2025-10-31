@@ -2,6 +2,7 @@ package com.cheeeese.album.domain;
 
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.global.domain.BaseEntity;
+import com.cheeeese.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,13 +20,13 @@ public class UserAlbum extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: 추후 필요시 ManyToOne, JoinColumn 넣을 예정
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // TODO: 추후 필요시 ManyToOne, JoinColumn 넣을 예정
-    @Column(name = "album_id", nullable = false)
-    private Long albumId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "album_id", nullable = false)
+    private Album album;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
@@ -35,9 +36,9 @@ public class UserAlbum extends BaseEntity {
     private boolean isVisible;
 
     @Builder
-    private UserAlbum(Long userId, Long albumId, Role role, boolean isVisible) {
-        this.userId = userId;
-        this.albumId = albumId;
+    private UserAlbum(User user, Album album, Role role, boolean isVisible) {
+        this.user = user;
+        this.album = album;
         this.role = role;
         this.isVisible = isVisible;
     }
