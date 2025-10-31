@@ -6,6 +6,7 @@ import com.cheeeese.album.dto.response.AlbumEnterResponse;
 import com.cheeeese.album.dto.response.AlbumInvitationResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
+import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -162,6 +163,58 @@ public interface AlbumSwagger {
             )
     })
     CommonResponse<AlbumEnterResponse> enterAlbum(
+            @CurrentUser User user,
+            @PathVariable String code
+    );
+
+    @Operation(
+            summary = "업로드 가능 사진 수 조회 API",
+            description = """ 
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드
+                    
+                    ### 로직 상세
+                    ---
+                    1. 앨범의 존재, 만료 여부 및 사용자 참가 권한 확인
+                    2. `maxPhotoCount` - `currentPhotoCount`를 계산하여 반환
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "업로드 가능 사진 수 조회가 성공적으로 완료되었습니다."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "참여자가 아닌 사용자의 경우",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                                {
+                                  "isSuccess": false,
+                                  "code": 403,
+                                  "message": "사용자가 해당 앨범의 참가자가 아닙니다."
+                                }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "존재하지 않거나 유효하지 않은 앨범 코드",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                                {
+                                  "isSuccess": false,
+                                  "code": 404,
+                                  "message": "존재하지 않거나 유효하지 않은 앨범 코드입니다."
+                                }
+                                """)
+                    )
+            )
+    })
+    CommonResponse<UploadAvailableCountResponse> getAvailableUploadCount(
             @CurrentUser User user,
             @PathVariable String code
     );

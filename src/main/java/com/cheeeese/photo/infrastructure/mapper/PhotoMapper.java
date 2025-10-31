@@ -14,6 +14,7 @@ public class PhotoMapper {
                 .userId(userId)
                 .albumId(albumId)
                 .imageUrl(null) // presigned URL 생성 후 updateImageUrl()로 세팅됨
+                .thumbnailUrl(null)
                 .captureTime(LocalDateTime.now())
                 .status(PhotoStatus.UPLOADING)
                 .build();
