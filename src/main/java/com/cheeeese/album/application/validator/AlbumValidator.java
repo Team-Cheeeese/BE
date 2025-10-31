@@ -55,12 +55,6 @@ public class AlbumValidator {
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.ALBUM_NOT_FOUND));
     }
 
-    public void validateAlbumExpiration(Album album) {
-        if (album.isExpired()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
-        }
-    }
-
     public void validateAlbumEntry(Album album, User user) {
         // 1. 앨범 만료 확인
         validateAlbumExpiration(album);
@@ -76,6 +70,12 @@ public class AlbumValidator {
 
         userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+    }
+
+    private void validateAlbumExpiration(Album album) {
+        if (album.isExpired()) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
+        }
     }
 
     /**
