@@ -63,6 +63,15 @@ public class AlbumValidator {
         validateUserBlacklisted(album, user);
     }
 
+    public void validateAlbumCapacity(Album album) {
+        int current = album.getCurrentParticipant();
+        int max = album.getParticipant();
+
+        if (current >= max) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
+        }
+    }
+
     public void validateUploadPermission(Album album, User user) { // [NEW]
         validateAlbumExpiration(album);
 
