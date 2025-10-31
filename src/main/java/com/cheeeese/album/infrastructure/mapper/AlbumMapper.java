@@ -56,7 +56,7 @@ public class AlbumMapper {
     }
 
     /**
-     * Album 엔티티와 Host User 정보를 초대장 응답 DTO로 변환합니다.
+     * Album 엔티티와 Maker User 정보를 초대장 응답 DTO로 변환합니다.
      */
     public static AlbumInvitationResponse toInvitationResponse(Album album, User host) {
         return AlbumInvitationResponse.builder()
@@ -115,7 +115,7 @@ public class AlbumMapper {
     }
 
     /**
-     * 호스트 User 엔티티를 호스트 정보 응답 DTO로 변환합니다.
+     * 메이커 User 엔티티를 호스트 정보 응답 DTO로 변환합니다.
      */
     public static AlbumMakerInfo toMakerInfo(User user) {
         return AlbumMakerInfo.builder()
