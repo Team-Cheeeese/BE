@@ -55,18 +55,21 @@ public class AlbumValidator {
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.ALBUM_NOT_FOUND));
     }
 
-    public void validateAlbumExpiration(Album album) {
-        if (album.isExpired()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
-        }
-    }
-
     public void validateAlbumEntry(Album album, User user) {
         // 1. 앨범 만료 확인
         validateAlbumExpiration(album);
 
         // 2. 블랙리스트 확인 (권한 체크)
         validateUserBlacklisted(album, user);
+    }
+
+    public void validateAlbumCapacity(Album album) {
+        int current = album.getCurrentParticipant();
+        int max = album.getParticipant();
+
+        if (current >= max) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
+        }
     }
 
     public void validateUploadPermission(Album album, User user) { // [NEW]
@@ -76,6 +79,12 @@ public class AlbumValidator {
 
         userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+    }
+
+    private void validateAlbumExpiration(Album album) {
+        if (album.isExpired()) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
+        }
     }
 
     /**

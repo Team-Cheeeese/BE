@@ -45,7 +45,7 @@ public class UserAlbumServiceIntegrationTest {
     @DisplayName("JOIN 조회 vs 직접 조회 성능 테스트")
     void compareJoinQueryAndDirectQueryPerformance() {
         for (int i = 0; i < 5; i++) {
-            albumRepository.findByHostId(TEST_USER);
+            albumRepository.findByMakerId(TEST_USER);
             userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbumId, TEST_USER, Role.MAKER);
         }
 
@@ -54,7 +54,7 @@ public class UserAlbumServiceIntegrationTest {
 
         for (int i = 0; i < ITERATIONS; i++) {
             long start = System.nanoTime();
-            albumRepository.findByHostId(TEST_USER);
+            albumRepository.findByMakerId(TEST_USER);
             total1 += System.nanoTime() - start;
 
             start = System.nanoTime();

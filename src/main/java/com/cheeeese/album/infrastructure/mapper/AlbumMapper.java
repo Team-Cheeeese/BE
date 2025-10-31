@@ -1,12 +1,8 @@
 package com.cheeeese.album.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.dto.response.AlbumCreationResponse;
-import com.cheeeese.album.dto.response.AlbumEnterResponse;
-import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
-import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
-import com.cheeeese.album.dto.response.AlbumInvitationResponse;
-import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
+import com.cheeeese.album.domain.type.AlbumJoinStatus;
+import com.cheeeese.album.dto.response.*;
 import com.cheeeese.user.domain.User;
 
 import java.time.LocalDate;
@@ -19,7 +15,7 @@ public class AlbumMapper {
      * Album Entity 생성
      */
     public static Album toEntity(
-            Long hostId,
+            Long makerId,
             String title,
             String code,
             String themeEmoji,
@@ -30,7 +26,7 @@ public class AlbumMapper {
             boolean isTermsAgreement
     ) {
         return Album.builder()
-                .hostId(hostId)
+                .makerId(makerId)
                 .title(title)
                 .code(code)
                 .themeEmoji(themeEmoji)
@@ -60,7 +56,7 @@ public class AlbumMapper {
     }
 
     /**
-     * Album 엔티티와 Host User 정보를 초대장 응답 DTO로 변환합니다.
+     * Album 엔티티와 Maker User 정보를 초대장 응답 DTO로 변환합니다.
      */
     public static AlbumInvitationResponse toInvitationResponse(Album album, User host) {
         return AlbumInvitationResponse.builder()
@@ -70,51 +66,61 @@ public class AlbumMapper {
                 .expiredAt(album.getExpiredAt())
                 .hostName(host.getName())
                 .hostProfileImage(host.getProfileImage())
+                .isExpired(false)
                 .build();
     }
 
     /**
-     * 앨범 입장 시 필요한 모든 정보들을 통합하여 응답 DTO로 변환합니다.
+     * 앨범 만료 시, 최소 정보만 담아 응답 DTO로 변환합니다.
      */
-    public static AlbumEnterResponse toEnterResponse(
-            Album album,
-            AlbumHostInfo hostInfo,
-            long totalPhotoCount,
-            List<AlbumParticipantResponse> participants,
-            List<String> recentPhotoUrls
-    ) {
-        return AlbumEnterResponse.builder()
+    public static AlbumInvitationResponse toExpiredInvitationResponse(Album album) {
+        return AlbumInvitationResponse.builder()
                 .title(album.getTitle())
                 .themeEmoji(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
-                .maxParticipantCount(album.getParticipant())
-                .currentParticipantCount(album.getCurrentParticipant())
-                .hostInfo(hostInfo)
-                .totalPhotoCount(totalPhotoCount)
-                .maxPhotoCount(album.getMaxPhotoCount())
-                .participants(participants)
+                .hostName(null)
+                .hostProfileImage(null)
+                .isExpired(true)
+                .build();
+    }
+
+    public static ExistingEnterResponse toExistingResponse(Album album, AlbumJoinStatus status, AlbumMakerInfo makerInfo) {
+        return ExistingEnterResponse.builder()
+                .joinStatus(status)
+                .title(album.getTitle())
+                .themeEmoji(album.getThemeEmoji())
+                .eventDate(album.getEventDate().toString())
+                .expiredAt(album.getExpiredAt())
+                .makerInfo(makerInfo)
+                .build();
+    }
+
+    public static NewEnterResponse toNewResponse(
+            Album album,
+            AlbumMakerInfo makerInfo,
+            int remainingUploadSlots,
+            List<String> recentPhotoUrls
+    ) {
+        return NewEnterResponse.builder()
+                .joinStatus(AlbumJoinStatus.NEW)
+                .title(album.getTitle())
+                .themeEmoji(album.getThemeEmoji())
+                .eventDate(album.getEventDate().toString())
+                .expiredAt(album.getExpiredAt())
+                .makerInfo(makerInfo)
+                .remainingUploadSlots(remainingUploadSlots)
                 .recentPhotoUrls(recentPhotoUrls)
                 .build();
     }
 
     /**
-     * 호스트 User 엔티티를 호스트 정보 응답 DTO로 변환합니다.
+     * 메이커 User 엔티티를 호스트 정보 응답 DTO로 변환합니다.
      */
-    public static AlbumHostInfo toHostInfo(User host) {
-        return AlbumHostInfo.builder()
-                .hostName(host.getName())
-                .hostProfileImage(host.getProfileImage())
-                .build();
-    }
-
-    /**
-     * 참가자 User 엔티티 리스트를 응답 DTO 리스트로 변환합니다.
-     */
-    public static AlbumParticipantResponse toParticipantResponse(User user) {
-        return AlbumParticipantResponse.builder()
-                .name(user.getName())
-                .profileImage(user.getProfileImage())
+    public static AlbumMakerInfo toMakerInfo(User user) {
+        return AlbumMakerInfo.builder()
+                .makerName(user.getName())
+                .makerProfileImage(user.getProfileImage())
                 .build();
     }
 

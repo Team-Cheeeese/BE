@@ -31,10 +31,22 @@ public class UserAlbum extends BaseEntity {
     @Column(name = "role", nullable = false)
     private Role role;
 
+    @Column(name = "is_visible", nullable = false)
+    private boolean isVisible;
+
     @Builder
-    private UserAlbum(Long userId, Long albumId, Role role) {
+    private UserAlbum(Long userId, Long albumId, Role role, boolean isVisible) {
         this.userId = userId;
         this.albumId = albumId;
         this.role = role;
+        this.isVisible = isVisible;
+    }
+
+    public void hide() {
+        this.isVisible = false;
+    }
+
+    public void show() {
+        this.isVisible = true;
     }
 }
