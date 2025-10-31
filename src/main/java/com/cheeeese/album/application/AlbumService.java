@@ -102,7 +102,7 @@ public class AlbumService {
 
             if (!userAlbum.isVisible()) {
                 userAlbum.show();
-                return AlbumMapper.toExistingResponse(album, AlbumJoinStatus.RESTORED, makerInfo);
+                return AlbumMapper.toExistingResponse(album, AlbumJoinStatus.REJOINED, makerInfo);
             }
 
             return AlbumMapper.toExistingResponse(album, AlbumJoinStatus.EXISTING, makerInfo);
