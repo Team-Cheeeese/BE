@@ -21,8 +21,8 @@ public class Album extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "host_id", nullable = false)
-    private Long hostId;
+    @Column(name = "maker_id", nullable = false)
+    private Long makerId;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -71,7 +71,7 @@ public class Album extends BaseEntity {
 
     @Builder
     private Album(
-            Long hostId,
+            Long makerId,
             String title,
             String code,
             String themeEmoji,
@@ -85,7 +85,7 @@ public class Album extends BaseEntity {
             AlbumStatus status,
             boolean isTermsAgreement
     ) {
-        this.hostId = hostId;
+        this.makerId = makerId;
         this.title = title;
         this.code = code;
         this.themeEmoji = themeEmoji;

@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface AlbumRepository extends JpaRepository<Album, Long> {
     Optional<Album> findByCode(String code);
 
-    Optional<Album> findByHostId(Long hostId);
+    Optional<Album> findByMakerId(Long makerId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Album a SET a.currentParticipant = a.currentParticipant + 1 WHERE a.id = :albumId AND a.currentParticipant < a.participant")
@@ -21,7 +21,7 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Query("""
         SELECT COUNT(a)
         FROM Album a
-        WHERE a.hostId = :userId
+        WHERE a.makerId = :userId
         AND a.createdAt >= :start
         AND a.createdAt < :end
     """)
