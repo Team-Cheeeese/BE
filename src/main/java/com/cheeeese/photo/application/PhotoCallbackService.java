@@ -19,7 +19,7 @@ public class PhotoCallbackService {
     public void markUploadCompleted(PhotoCompleteRequest request) {
         int updated = photoRepository.updateStatusAndUrl(
                 request.photoId(),
-                PhotoStatus.UPLOADING,
+                PhotoStatus.PROCESSING,
                 PhotoStatus.COMPLETED,
                 request.thumbnailUrl()
         );
