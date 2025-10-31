@@ -111,7 +111,7 @@ public class AlbumService {
         userAlbumRepository.save(UserAlbumMapper.toEntity(
                 currentUser,
                 album,
-                Role.MAKER
+                Role.GUEST
         ));
 
         int updated = albumRepository.incrementParticipantCountAtomically(album.getId());
