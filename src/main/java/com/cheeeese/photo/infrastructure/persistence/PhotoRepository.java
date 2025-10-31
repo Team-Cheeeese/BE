@@ -11,10 +11,10 @@ import java.util.List;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
-    long countByAlbumIdAndIsDeletedFalse(Long albumId);
-
-    List<Photo> findTop9ByAlbumIdAndIsDeletedFalseOrderByCreatedAtDesc(Long albumId);
-
+    List<Photo> findTop5ByAlbumIdAndIsDeletedFalseAndStatusOrderByCreatedAtDesc(
+            Long albumId,
+            PhotoStatus status
+    );
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
         UPDATE Photo p

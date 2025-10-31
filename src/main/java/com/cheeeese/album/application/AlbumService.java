@@ -2,6 +2,7 @@ package com.cheeeese.album.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.dto.response.AlbumCreationResponse;
@@ -14,8 +15,7 @@ import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
-import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumHostInfo;
-import com.cheeeese.album.dto.response.AlbumEnterResponse.AlbumParticipantResponse;
+import com.cheeeese.album.dto.response.AlbumMakerInfo;
 import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.user.domain.User;
@@ -25,7 +25,6 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -84,36 +83,65 @@ public class AlbumService {
         if (album.isExpired()) {
             return AlbumMapper.toExpiredInvitationResponse(album);
         }
-        User host = getHostUser(album.getHostId());
+        User host = getMaker(album.getMakerId());
 
         return AlbumMapper.toInvitationResponse(album, host);
     }
 
     @Transactional
     public AlbumEnterResponse enterAlbum(String code, User currentUser) {
-        // 1. 앨범 유효성 검증 (존재 여부)
         Album album = albumValidator.validateAlbumCode(code);
-
-        // 2. 앨범 입장 인가 검증 (만료, 블랙리스트, 정원 초과)
         albumValidator.validateAlbumEntry(album, currentUser);
 
-        // 3. 사용자 앨범 참가 로직: 첫 입장 시 isBlacklisted = false로 등록 및 참가자 수 증가
-        Album freshAlbum = handleAlbumParticipation(album, currentUser);
+        Optional<UserAlbum> existing = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId());
+        AlbumMakerInfo makerInfo = AlbumMapper.toMakerInfo(getMaker(album.getMakerId()));
 
-        // 4. 응답 DTO 생성
-        return createAlbumEnterResponse(freshAlbum);
+        // Case 1: 기존 참여 이력 존재
+        if (existing.isPresent()) {
+            UserAlbum userAlbum = existing.get();
+
+            if (!userAlbum.isVisible()) {
+                userAlbum.show();
+                return AlbumMapper.toExistingResponse(album, AlbumJoinStatus.RESTORED, makerInfo);
+            }
+
+            return AlbumMapper.toExistingResponse(album, AlbumJoinStatus.EXISTING, makerInfo);
+        }
+
+        // Case 2: 신규 참여
+        albumValidator.validateAlbumCapacity(album);
+        UserAlbum newUserAlbum = UserAlbumMapper.toGuestUserAlbum(currentUser, album);
+        userAlbumRepository.save(newUserAlbum);
+
+        int updated = albumRepository.incrementParticipantCountAtomically(album.getId());
+        if (updated == 0) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
+        }
+
+        List<String> recentThumbnails = photoService.getRecentThumbnailUrls(album.getId());
+
+        int remainingUploadSlots = calculateRemainingUploadSlots(album);
+
+        return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentThumbnails);
     }
 
     public UploadAvailableCountResponse getAvailablePhotoCount(User user, String code) {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateUploadPermission(album, user);
 
-        int currentCount = album.getCurrentPhotoCount();
-        int maxCount = album.getMaxPhotoCount();
+        int availableCount = calculateRemainingUploadSlots(album);
 
-        int availableCount = Math.max(0, maxCount - currentCount);
+        return AlbumMapper.toAvailableCountResponse(
+                availableCount,
+                album.getMaxPhotoCount(),
+                album.getCurrentPhotoCount()
+        );
+    }
 
-        return AlbumMapper.toAvailableCountResponse(availableCount, maxCount, currentCount);
+    private int calculateRemainingUploadSlots(Album album) {
+        int current = album.getCurrentPhotoCount();
+        int max = album.getMaxPhotoCount();
+        return Math.max(0, max - current);
     }
 
     private long countUserAlbumsCreatedThisWeek(User user) {
@@ -124,77 +152,8 @@ public class AlbumService {
         );
     }
 
-    private Album handleAlbumParticipation(Album album, User currentUser) {
-        boolean isAlreadyParticipant = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId()).isPresent();
-
-        if (isAlreadyParticipant) {
-            log.info("User {} is already a participant of album {}. Skipping registration.",
-                    currentUser.getId(), album.getId());
-            return album;
-        }
-
-        // 첫 입장: AlbumParticipant에 isBlacklisted = false로 저장하고, Album 참가자 수 증가
-        UserAlbum newAlbumParticipant = UserAlbumMapper.toGuestUserAlbum(currentUser, album);
-        try {
-            userAlbumRepository.save(newAlbumParticipant);
-
-            int updatedRows = albumRepository.incrementParticipantCountAtomically(album.getId());
-            if (updatedRows == 0) {
-                // 정원 초과 조건(currentParticipant < participant) 불만족 시 예외 처리
-                throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new AlbumException(AlbumErrorCode.USER_ALREADY_JOINED_CONCURRENTLY);
-        }
-
-        return albumRepository.findById(album.getId())
-                .orElseThrow(() -> {
-                    log.error("Failed to re-fetch album {} after atomic update.", album.getId());
-                    return new AlbumException(AlbumErrorCode.ALBUM_NOT_FOUND);
-                });
-    }
-
-    private AlbumEnterResponse createAlbumEnterResponse(Album album) {
-        Long albumId = album.getId();
-
-        // 1. 호스트 정보 조회
-        User host = getHostUser(album.getHostId());
-        AlbumHostInfo hostInfo = AlbumMapper.toHostInfo(host);
-
-        // 2. 총 사진 수
-        // TODO: softdelete 논의 필요
-        long totalPhotoCount = photoService.countTotalPhotos(albumId);
-
-        // 3. 참가자 정보 목록 조회
-        List<AlbumParticipantResponse> participantResponses = getParticipantResponses(albumId);
-
-        // 4. 최신 사진 9장
-        // TODO: 썸네일 생성 후 썸네일 이미지 제공, 아래 코드는 임시
-        List<String> recentPhotoUrls = photoService.getRecentPhotoUrls(albumId);
-
-        return AlbumMapper.toEnterResponse(
-                album,
-                hostInfo,
-                totalPhotoCount,
-                participantResponses,
-                recentPhotoUrls
-        );
-    }
-
-    private User getHostUser(Long hostId) {
-        return userRepository.findById(hostId)
+    private User getMaker(Long makerId) {
+        return userRepository.findById(makerId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-    }
-
-    private List<AlbumParticipantResponse> getParticipantResponses(Long albumId) {
-        List<Long> participantUserIds = userAlbumRepository.findAllByAlbumId(albumId).stream()
-                .map(UserAlbum::getUserId)
-                .collect(Collectors.toList());
-
-        List<User> participants = userRepository.findAllById(participantUserIds);
-
-        return participants.stream()
-                .map(AlbumMapper::toParticipantResponse)
-                .collect(Collectors.toList());
     }
 }

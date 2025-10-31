@@ -35,14 +35,20 @@ public class PhotoService {
 
     private static final String ORIGINAL_PHOTO_PATH_FORMAT = "album/%s/original/%d_%s";
 
-    public long countTotalPhotos(Long albumId) {
-        return photoRepository.countByAlbumIdAndIsDeletedFalse(albumId);
-    }
+    public List<String> getRecentThumbnailUrls(Long albumId) {
+        List<Photo> photos = photoRepository
+                .findTop5ByAlbumIdAndIsDeletedFalseAndStatusOrderByCreatedAtDesc(albumId, PhotoStatus.COMPLETED);
 
-    public List<String> getRecentPhotoUrls(Long albumId) {
-        List<Photo> recentPhotos = photoRepository.findTop9ByAlbumIdAndIsDeletedFalseOrderByCreatedAtDesc(albumId);
-        return recentPhotos.stream()
-                .map(Photo::getImageUrl)
+        if (photos.isEmpty()) {
+            return List.of();
+        }
+
+        if (photos.size() < 5) {
+            return List.of(photos.get(0).getThumbnailUrl());
+        }
+
+        return photos.stream()
+                .map(Photo::getThumbnailUrl)
                 .collect(Collectors.toList());
     }
 
