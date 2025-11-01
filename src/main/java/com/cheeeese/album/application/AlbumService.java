@@ -83,9 +83,9 @@ public class AlbumService {
         if (album.isExpired()) {
             return AlbumMapper.toExpiredInvitationResponse(album);
         }
-        User host = getMaker(album.getMakerId());
+        User maker = getMaker(album.getMakerId());
 
-        return AlbumMapper.toInvitationResponse(album, host);
+        return AlbumMapper.toInvitationResponse(album, maker);
     }
 
     @Transactional

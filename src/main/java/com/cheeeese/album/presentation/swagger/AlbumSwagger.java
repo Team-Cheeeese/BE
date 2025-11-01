@@ -51,7 +51,7 @@ public interface AlbumSwagger {
                           
                           ### API 설명
                           ---
-                          URL/QR을 통해 앨범 코드를 전달 받아 제목, 만료일, 호스트 등 기본 정보를 제공합니다. 로그인 여부와 관계없이 호출 가능
+                          URL/QR을 통해 앨범 코드를 전달 받아 제목, 만료일, 메이커 등 기본 정보를 제공합니다. 로그인 여부와 관계없이 호출 가능
                           """
     )
     @ApiResponses(value = {

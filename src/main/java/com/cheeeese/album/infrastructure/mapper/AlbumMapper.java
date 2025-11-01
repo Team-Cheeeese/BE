@@ -59,14 +59,14 @@ public class AlbumMapper {
     /**
      * Album 엔티티와 Maker User 정보를 초대장 응답 DTO로 변환합니다.
      */
-    public static AlbumInvitationResponse toInvitationResponse(Album album, User host) {
+    public static AlbumInvitationResponse toInvitationResponse(Album album, User user) {
         return AlbumInvitationResponse.builder()
                 .title(album.getTitle())
                 .themeEmoji(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
-                .hostName(host.getName())
-                .hostProfileImage(host.getProfileImage())
+                .makerName(user.getName())
+                .makerProfileImage(user.getProfileImage())
                 .isExpired(false)
                 .build();
     }
@@ -80,8 +80,8 @@ public class AlbumMapper {
                 .themeEmoji(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
-                .hostName(null)
-                .hostProfileImage(null)
+                .makerName(null)
+                .makerProfileImage(null)
                 .isExpired(true)
                 .build();
     }

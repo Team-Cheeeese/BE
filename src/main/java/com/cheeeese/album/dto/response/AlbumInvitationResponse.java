@@ -20,11 +20,11 @@ public record AlbumInvitationResponse(
         @Schema(description = "열람 종료 시각 (만료일)", example = "2025-03-05T00:00:00")
         LocalDateTime expiredAt,
 
-        @Schema(description = "호스트 이름", example = "이유")
-        String hostName,
+        @Schema(description = "메이커 이름", example = "이유")
+        String makerName,
 
-        @Schema(description = "호스트 프로필 이미지 URL", example = "http://example.com/host_profile.png")
-        String hostProfileImage,
+        @Schema(description = "메이커 프로필 이미지 URL", example = "http://example.com/host_profile.png")
+        String makerProfileImage,
 
         @Schema(description = "앨범 만료 여부", example = "false")
         boolean isExpired
