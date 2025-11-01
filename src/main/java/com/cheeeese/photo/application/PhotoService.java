@@ -15,6 +15,7 @@ import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +36,12 @@ public class PhotoService {
 
     private static final String ORIGINAL_PHOTO_PATH_FORMAT = "album/%s/original/%d_%s";
 
-    public long countTotalPhotos(Long albumId) {
-        return photoRepository.countByAlbumIdAndIsDeletedFalse(albumId);
-    }
-
-    public List<String> getRecentPhotoUrls(Long albumId) {
-        List<Photo> recentPhotos = photoRepository.findTop9ByAlbumIdAndIsDeletedFalseOrderByCreatedAtDesc(albumId);
-        return recentPhotos.stream()
-                .map(Photo::getImageUrl)
-                .collect(Collectors.toList());
+    public List<Photo> getRecentPhotosForNewEnter(Long albumId) {
+        return photoRepository.findRecentPhotosByAlbumIdAndStatus(
+                albumId,
+                PhotoStatus.COMPLETED,
+                PageRequest.of(0, 5)
+        );
     }
 
     @Transactional
@@ -100,7 +98,7 @@ public class PhotoService {
             Album album,
             PhotoPresignedUrlRequest.FileInfo file
     ) {
-        Photo photo = PhotoMapper.toEntity(user.getId(), album.getId());
+        Photo photo = PhotoMapper.toEntity(user, album);
         photoRepository.save(photo);
 
         String safeFileName = sanitizeFileName(file.fileName());

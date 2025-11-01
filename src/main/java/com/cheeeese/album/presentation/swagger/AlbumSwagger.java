@@ -28,8 +28,7 @@ public interface AlbumSwagger {
                     `themeEmoji`: 앨범 썸네일 이모지 (String) \n
                     `title`: 앨범 이름 (String) \n
                     `participant`: 참여자 수 (int) \n
-                    `eventDate`: 행사 날짜 (LocalDate) \n
-                    `isTermsAgreement`: 앨범 생성 필수 약관 동의 (boolean)
+                    `eventDate`: 행사 날짜 (LocalDate)
                     """
     )
     @ApiResponses(value = {
@@ -84,21 +83,22 @@ public interface AlbumSwagger {
     @Operation(
             summary = "앨범 입장 및 정보 확인 API",
             description = """
-                          ### PathVariable
-                          ---
-                          `code`: 앨범 접근 코드 (URL의 일부)
-                          
-                          <br>
-                         
-                          ### 로직 상세
-                          ---
-                          1. **인증 확인**: 로그인 여부 확인 (Spring Security)
-                          2. **앨범 유효성 확인**: 코드 존재, 만료 여부 확인
-                          3. **인가 확인**: 블랙리스트 여부 확인
-                          4. **정원 확인**: 앨범 참여자 max 초과 확인 (신규 참여자만 해당)
-                          5. **참가 처리**: 첫 입장 시 GUEST로 등록 및 참가 인원 수 증가
-                          6. **앨범 정보 반환**
-                          """
+              ### Path Variable
+              ---
+              - `code` : 앨범 접근 코드 (초대 URL의 일부)
+
+              <br>
+
+              ### 처리 로직
+              ---
+              1. **인증 검증** : 로그인 여부 확인
+              2. **앨범 검증** : 전달된 코드로 앨범 존재 여부 및 만료 상태 확인
+              3. **접근 권한 검증** : 블랙리스트 사용자 여부 확인
+              4. **정원 확인** : 신규 참여자일 경우, 최대 인원 초과 여부 검사
+              5. **참여 등록** : 첫 입장 시 `GUEST` 역할로 등록하고, 현재 참여 인원 수 증가
+              6. **응답 반환** : 참여 상태(`NEW`, `EXISTING`, `RESTORED`) 및 앨범 정보를 포함한 응답 반환
+              """
+
     )
     @ApiResponses(value = {
             @ApiResponse(

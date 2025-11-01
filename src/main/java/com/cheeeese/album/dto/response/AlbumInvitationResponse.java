@@ -24,6 +24,9 @@ public record AlbumInvitationResponse(
         String hostName,
 
         @Schema(description = "호스트 프로필 이미지 URL", example = "http://example.com/host_profile.png")
-        String hostProfileImage
+        String hostProfileImage,
+
+        @Schema(description = "앨범 만료 여부", example = "false")
+        boolean isExpired
 ) {
 }

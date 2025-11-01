@@ -21,8 +21,8 @@ public class Album extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "host_id", nullable = false)
-    private Long hostId;
+    @Column(name = "maker_id", nullable = false)
+    private Long makerId;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -58,9 +58,6 @@ public class Album extends BaseEntity {
     @Column(name = "status", nullable = false)
     private AlbumStatus status;
 
-    @Column(name = "is_terms_agreement", nullable = false)
-    private boolean isTermsAgreement;
-
     public enum AlbumStatus {
         ACTIVE, EXPIRED, DELETED
     }
@@ -71,7 +68,7 @@ public class Album extends BaseEntity {
 
     @Builder
     private Album(
-            Long hostId,
+            Long makerId,
             String title,
             String code,
             String themeEmoji,
@@ -82,10 +79,9 @@ public class Album extends BaseEntity {
             int currentPhotoCount,
             boolean isInfoAvailable,
             LocalDateTime expiredAt,
-            AlbumStatus status,
-            boolean isTermsAgreement
+            AlbumStatus status
     ) {
-        this.hostId = hostId;
+        this.makerId = makerId;
         this.title = title;
         this.code = code;
         this.themeEmoji = themeEmoji;
@@ -97,6 +93,5 @@ public class Album extends BaseEntity {
         this.isInfoAvailable = isInfoAvailable;
         this.expiredAt = expiredAt;
         this.status = status;
-        this.isTermsAgreement = isTermsAgreement;
     }
 }
