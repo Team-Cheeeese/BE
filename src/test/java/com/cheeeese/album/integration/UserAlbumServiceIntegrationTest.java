@@ -6,6 +6,8 @@ import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.fixture.FixtureFactory;
+import com.cheeeese.user.domain.User;
+import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,19 +25,22 @@ public class UserAlbumServiceIntegrationTest {
 
     private static final int ITERATIONS = 1000;
 
-    private static final Long TEST_USER = 1L;
-    private static Long testAlbumId;
+    private static User testUser;
+    private static Album testAlbum;
 
     @BeforeAll
     static void setUp(
+            @Autowired UserRepository userRepository,
             @Autowired AlbumRepository albumRepository,
             @Autowired UserAlbumRepository userAlbumRepository
     ) {
-        Album album = FixtureFactory.createAlbum(TEST_USER);
-        albumRepository.save(album);
-        testAlbumId = album.getId();
+        testUser = FixtureFactory.createKakaoUser();
+        userRepository.save(testUser);
 
-        UserAlbum userAlbum = FixtureFactory.createHostUserAlbum(TEST_USER, testAlbumId);
+        testAlbum = FixtureFactory.createAlbum(testUser.getId());
+        albumRepository.save(testAlbum);
+
+        UserAlbum userAlbum = FixtureFactory.createHostUserAlbum(testUser, testAlbum);
         userAlbumRepository.save(userAlbum);
 
         System.out.println("[테스트 데이터 생성 완료]");
@@ -45,8 +50,8 @@ public class UserAlbumServiceIntegrationTest {
     @DisplayName("JOIN 조회 vs 직접 조회 성능 테스트")
     void compareJoinQueryAndDirectQueryPerformance() {
         for (int i = 0; i < 5; i++) {
-            albumRepository.findByMakerId(TEST_USER);
-            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbumId, TEST_USER, Role.MAKER);
+            albumRepository.findByMakerId(testAlbum.getMakerId());
+            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbum.getId(), testUser.getId(), Role.MAKER);
         }
 
         long total1 = 0;
@@ -54,11 +59,11 @@ public class UserAlbumServiceIntegrationTest {
 
         for (int i = 0; i < ITERATIONS; i++) {
             long start = System.nanoTime();
-            albumRepository.findByMakerId(TEST_USER);
+            albumRepository.findByMakerId(testAlbum.getMakerId());
             total1 += System.nanoTime() - start;
 
             start = System.nanoTime();
-            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbumId, TEST_USER, Role.MAKER);
+            userAlbumRepository.findByAlbumIdAndUserIdAndRole(testAlbum.getId(), testUser.getId(), Role.MAKER);
             total2 += System.nanoTime() - start;
         }
 

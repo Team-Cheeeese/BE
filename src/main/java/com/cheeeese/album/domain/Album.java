@@ -58,9 +58,6 @@ public class Album extends BaseEntity {
     @Column(name = "status", nullable = false)
     private AlbumStatus status;
 
-    @Column(name = "is_terms_agreement", nullable = false)
-    private boolean isTermsAgreement;
-
     public enum AlbumStatus {
         ACTIVE, EXPIRED, DELETED
     }
@@ -82,8 +79,7 @@ public class Album extends BaseEntity {
             int currentPhotoCount,
             boolean isInfoAvailable,
             LocalDateTime expiredAt,
-            AlbumStatus status,
-            boolean isTermsAgreement
+            AlbumStatus status
     ) {
         this.makerId = makerId;
         this.title = title;
@@ -97,6 +93,5 @@ public class Album extends BaseEntity {
         this.isInfoAvailable = isInfoAvailable;
         this.expiredAt = expiredAt;
         this.status = status;
-        this.isTermsAgreement = isTermsAgreement;
     }
 }

@@ -23,8 +23,7 @@ public class AlbumMapper {
             int participant,
             LocalDate eventDate,
             boolean isInfoAvailable,
-            LocalDateTime expiredAt,
-            boolean isTermsAgreement
+            LocalDateTime expiredAt
     ) {
         return Album.builder()
                 .makerId(makerId)
@@ -39,7 +38,6 @@ public class AlbumMapper {
                 .isInfoAvailable(isInfoAvailable)
                 .expiredAt(expiredAt)
                 .status(Album.AlbumStatus.ACTIVE)
-                .isTermsAgreement(isTermsAgreement)
                 .build();
     }
 

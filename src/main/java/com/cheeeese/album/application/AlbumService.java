@@ -61,8 +61,7 @@ public class AlbumService {
                 request.participant(),
                 request.eventDate(),
                 true,
-                LocalDateTime.now().plusDays(7),
-                request.isTermsAgreement()
+                LocalDateTime.now().plusDays(7)
         );
         albumRepository.save(album);
 
