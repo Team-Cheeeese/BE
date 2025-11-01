@@ -155,13 +155,7 @@ public class AlbumService {
         // 앨범의 전체 참여자 목록
         List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumId(album.getId());
 
-        Map<Long, Role> roleMap = userAlbums.stream()
-                .collect(Collectors.toMap(
-                        ua -> ua.getUser().getId(),
-                        UserAlbum::getRole
-                ));
-
-        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, roleMap, currentUser);
+        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUser);
 
         return UserAlbumMapper.toAlbumParticipantResponse(
                 album,
@@ -211,13 +205,12 @@ public class AlbumService {
 
     private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
             List<UserAlbum> userAlbums,
-            Map<Long, Role> roleMap,
             User currentUser
     ) {
         return userAlbums.stream()
-                .map(UserAlbum::getUser)
-                .map(user -> {
-                    Role role = roleMap.getOrDefault(user.getId(), Role.GUEST);
+                .map(userAlbum -> {
+                    User user = userAlbum.getUser();
+                    Role role = userAlbum.getRole();
                     boolean isMe = user.getId().equals(currentUser.getId());
                     return UserAlbumMapper.toParticipantInfo(user, role, isMe);
                 })

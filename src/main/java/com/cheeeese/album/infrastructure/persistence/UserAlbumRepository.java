@@ -13,7 +13,7 @@ public interface UserAlbumRepository extends JpaRepository<UserAlbum, Long> {
     @Query("SELECT ua FROM UserAlbum ua WHERE ua.user.id = :userId AND ua.album.id = :albumId")
     Optional<UserAlbum> findByUserIdAndAlbumId(@Param("userId") Long userId, @Param("albumId") Long albumId);
 
-    @Query("SELECT ua FROM UserAlbum ua WHERE ua.album.id = :albumId")
+    @Query("SELECT ua FROM UserAlbum ua JOIN FETCH ua.user WHERE ua.album.id = :albumId")
     List<UserAlbum> findAllByAlbumId(@Param("albumId") Long albumId);
 
     @Query("SELECT ua FROM UserAlbum ua WHERE ua.album.id = :albumId AND ua.user.id = :userId AND ua.role = :role")

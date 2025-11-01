@@ -226,7 +226,7 @@ public interface AlbumSwagger {
                     
                     ### 로직 상세
                     ---
-                    1. 만료된 앨범의 경우 -> title, emoji, evnetDate, participant, 참여자 리스트 제공
+                    1. 만료된 앨범의 경우 -> title, emoji, eventDate, participant, 참여자 리스트 제공
                     2. 유효한 앨범의 경우 -> 현재 참여한 수, 전체 앨범 수, 참여자 리스트 제공(정렬 O)
                     """
     )
