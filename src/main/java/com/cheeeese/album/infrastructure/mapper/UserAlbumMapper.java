@@ -7,23 +7,11 @@ import com.cheeeese.user.domain.User;
 
 public class UserAlbumMapper {
 
-    public static UserAlbum toEntity(Long userId, Long albumId, Role role) {
+    public static UserAlbum toEntity(User user, Album album, Role role) {
         return UserAlbum.builder()
-                .userId(userId)
-                .albumId(albumId)
+                .user(user)
+                .album(album)
                 .role(role)
-                .isVisible(true)
-                .build();
-    }
-
-    /**
-     * User와 Album 엔티티를 기반으로 GUEST 역할의 UserAlbum 엔티티를 생성합니다.
-     */
-    public static UserAlbum toGuestUserAlbum(User user, Album album) {
-        return UserAlbum.builder()
-                .userId(user.getId())
-                .albumId(album.getId())
-                .role(Role.GUEST)
                 .isVisible(true)
                 .build();
     }

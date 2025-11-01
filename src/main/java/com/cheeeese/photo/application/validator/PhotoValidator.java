@@ -103,7 +103,7 @@ public class PhotoValidator {
      */
     private void validateOwnership(List<Photo> photos, Long userId) {
         boolean invalidOwner = photos.stream()
-                .anyMatch(photo -> !photo.getUserId().equals(userId));
+                .anyMatch(photo -> !photo.getUser().getId().equals(userId));
 
         if (invalidOwner) {
             throw new PhotoException(PhotoErrorCode.PHOTO_OWNER_MISMATCH);
@@ -115,7 +115,7 @@ public class PhotoValidator {
      */
     private Long validateSingleAlbum(List<Photo> photos) {
         Set<Long> albumIds = photos.stream()
-                .map(Photo::getAlbumId)
+                .map(photo -> photo.getAlbum().getId())
                 .collect(Collectors.toSet());
 
         if (albumIds.size() != 1) {

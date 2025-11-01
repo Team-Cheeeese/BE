@@ -1,18 +1,20 @@
 package com.cheeeese.photo.infrastructure.mapper;
 
+import com.cheeeese.album.domain.Album;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
+import com.cheeeese.user.domain.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class PhotoMapper {
 
-    public static Photo toEntity(Long userId, Long albumId) {
+    public static Photo toEntity(User user, Album album) {
         return Photo.builder()
-                .userId(userId)
-                .albumId(albumId)
+                .user(user)
+                .album(album)
                 .imageUrl(null) // presigned URL 생성 후 updateImageUrl()로 세팅됨
                 .thumbnailUrl(null)
                 .captureTime(LocalDateTime.now())

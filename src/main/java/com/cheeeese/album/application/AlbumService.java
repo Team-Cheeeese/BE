@@ -5,8 +5,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
-import com.cheeeese.album.dto.response.AlbumCreationResponse;
-import com.cheeeese.album.dto.response.AlbumInvitationResponse;
+import com.cheeeese.album.dto.response.*;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
@@ -14,10 +13,8 @@ import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
-import com.cheeeese.album.dto.response.AlbumEnterResponse;
-import com.cheeeese.album.dto.response.AlbumMakerInfo;
-import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
+import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
@@ -34,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -69,8 +67,8 @@ public class AlbumService {
         albumRepository.save(album);
 
         userAlbumRepository.save(UserAlbumMapper.toEntity(
-                user.getId(),
-                album.getId(),
+                user,
+                album,
                 Role.MAKER
         ));
 
@@ -110,19 +108,22 @@ public class AlbumService {
 
         // Case 2: 신규 참여
         albumValidator.validateAlbumCapacity(album);
-        UserAlbum newUserAlbum = UserAlbumMapper.toGuestUserAlbum(currentUser, album);
-        userAlbumRepository.save(newUserAlbum);
+        userAlbumRepository.save(UserAlbumMapper.toEntity(
+                currentUser,
+                album,
+                Role.GUEST
+        ));
 
         int updated = albumRepository.incrementParticipantCountAtomically(album.getId());
         if (updated == 0) {
             throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
         }
 
-        List<String> recentThumbnails = photoService.getRecentThumbnailUrls(album.getId());
+        List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
         int remainingUploadSlots = calculateRemainingUploadSlots(album);
 
-        return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentThumbnails);
+        return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
 
     public UploadAvailableCountResponse getAvailablePhotoCount(User user, String code) {
@@ -155,5 +156,24 @@ public class AlbumService {
     private User getMaker(Long makerId) {
         return userRepository.findById(makerId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    }
+
+    private List<NewEnterResponse.RecentPhotoResponse> getRecentPhotosWithUploaderInfo(Long albumId) {
+        List<Photo> photos = photoService.getRecentPhotosForNewEnter(albumId);
+
+        if (photos.isEmpty()) {
+            return List.of();
+        }
+
+        // 1~4개인 경우, 1개만 반환하는 비즈니스 로직 적용
+        if (photos.size() < 5) {
+            Photo photo = photos.get(0);
+            return List.of(AlbumMapper.toRecentPhotoResponse(photo));
+        }
+
+        // 5개인 경우, 5개 모두 반환
+        return photos.stream()
+                .map(AlbumMapper::toRecentPhotoResponse)
+                .collect(Collectors.toList());
     }
 }

@@ -2,6 +2,7 @@ package com.cheeeese.album.dto.response;
 
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,22 @@ public record NewEnterResponse(
         @Schema(description = "남은 업로드 가능 사진 수", example = "5")
         Integer remainingUploadSlots,
 
-        @Schema(description = "최근 업로드된 사진 썸네일 URL 목록 (최대 5개)", example = "[\"https://cdn.cheeeese.com/album/1/thumb1.jpg\"]")
-        List<String> recentPhotoUrls
-) implements AlbumEnterResponse {}
+        @Schema(description = "최근 업로드된 사진 목록 (최대 5개)", implementation = RecentPhotoResponse.class)
+        List<RecentPhotoResponse> recentPhotos
+) implements AlbumEnterResponse {
+        @Builder
+        @Schema(description = "최근 업로드 사진 정보 DTO")
+        public record RecentPhotoResponse(
+                @NotNull
+                @Schema(description = "사진 썸네일 URL", example = "https://cdn.cheeeese.com/album/1/thumb1.jpg")
+                String thumbnailUrl,
+
+                @NotNull
+                @Schema(description = "업로드 사용자 이름", example = "김치즈")
+                String uploaderName,
+
+                @NotNull
+                @Schema(description = "업로드 사용자 프로필 이미지 URL", example = "https://cdn.cheeeese.com/user/1/profile.jpg")
+                String uploaderProfileImage
+        ) {}
+}
