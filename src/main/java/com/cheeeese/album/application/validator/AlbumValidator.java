@@ -21,10 +21,6 @@ public class AlbumValidator {
     private final UserAlbumRepository userAlbumRepository;
 
     public void validateAlbumCreation(long createdThisWeek, AlbumCreationRequest request) {
-        if (!request.isTermsAgreement()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_REQUIRED_TERMS_NOT_AGREED);
-        }
-
         if (request.themeEmoji() == null || request.themeEmoji().isBlank()) {
             throw new AlbumException(AlbumErrorCode.ALBUM_THEME_EMOJI_NOT_SELECTED);
         }
