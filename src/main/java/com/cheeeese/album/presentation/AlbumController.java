@@ -2,13 +2,10 @@ package com.cheeeese.album.presentation;
 
 import com.cheeeese.album.application.AlbumService;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
-import com.cheeeese.album.dto.response.AlbumCreationResponse;
-import com.cheeeese.album.dto.response.AlbumEnterResponse;
-import com.cheeeese.album.dto.response.AlbumInvitationResponse;
+import com.cheeeese.album.dto.response.*;
 import com.cheeeese.album.presentation.swagger.AlbumSwagger;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
-import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -60,4 +57,17 @@ public class AlbumController implements AlbumSwagger {
                 albumService.getAvailablePhotoCount(user, code)
         );
     }
+
+    @Override
+    @GetMapping("/{code}/participants")
+    public CommonResponse<AlbumParticipantResponse> getAlbumParticipants(
+            @CurrentUser User user,
+            @PathVariable String code
+    ) {
+      return CommonResponse.success(
+              ALBUM_PARTICIPANT_FETCH_SUCCESS,
+              albumService.getAlbumParticipantList(user,code)
+      );
+    }
+
 }

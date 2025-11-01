@@ -1,12 +1,9 @@
 package com.cheeeese.album.presentation.swagger;
 
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
-import com.cheeeese.album.dto.response.AlbumCreationResponse;
-import com.cheeeese.album.dto.response.AlbumEnterResponse;
-import com.cheeeese.album.dto.response.AlbumInvitationResponse;
+import com.cheeeese.album.dto.response.*;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
-import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
 import com.cheeeese.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -216,6 +213,44 @@ public interface AlbumSwagger {
             )
     })
     CommonResponse<UploadAvailableCountResponse> getAvailableUploadCount(
+            @CurrentUser User user,
+            @PathVariable String code
+    );
+
+    @Operation(
+            summary = "앨범 참여자 정보 제공 API",
+            description = """ 
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드
+                    
+                    ### 로직 상세
+                    ---
+                    1. 만료된 앨범의 경우 -> title, emoji, evnetDate, participant, 참여자 리스트 제공
+                    2. 유효한 앨범의 경우 -> 현재 참여한 수, 전체 앨범 수, 참여자 리스트 제공(정렬 O)
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "앨범 참여자 조회가 성공적으로 완료되었습니다."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "참여자가 아닌 사용자의 경우",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(example = """
+                                {
+                                  "isSuccess": false,
+                                  "code": 403,
+                                  "message": "사용자가 해당 앨범의 참가자가 아닙니다."
+                                }
+                                """)
+                    )
+            )
+    })
+    CommonResponse<AlbumParticipantResponse> getAlbumParticipants(
             @CurrentUser User user,
             @PathVariable String code
     );
