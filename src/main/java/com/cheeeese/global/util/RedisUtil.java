@@ -1,6 +1,7 @@
 package com.cheeeese.global.util;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RedisUtil {
 
+    @Qualifier("tokenRedisTemplate")
     private final RedisTemplate<String, Object> redisTemplate;
 
     public void setValue(String key, Object value, Long expiredTime) {
