@@ -99,12 +99,4 @@ public class User extends BaseEntity {
         this.isMarketingAgreement = isMarketingAgreement;
         this.isThirdPartyAgreement = isThirdPartyAgreement;
     }
-
-    public void incrementPhotoCount(int count) {
-        this.photoCnt += count;
-    }
-
-    public void decrementPhotoCount(int count) {
-        this.photoCnt -= count;
-    }
 }

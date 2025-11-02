@@ -13,6 +13,7 @@ import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PhotoService {
 
+    private final UserService userService;
     private final PhotoRepository photoRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
@@ -59,7 +61,7 @@ public class PhotoService {
             throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_INCREMENT_FAILED);
         }
 
-        user.incrementPhotoCount(uploadCount);
+        userService.incrementPhotoCount(user.getId(), uploadCount);
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
@@ -148,7 +150,7 @@ public class PhotoService {
         }
 
         if (updatedRows > 0) {
-            user.decrementPhotoCount(updatedRows);
+            userService.decrementPhotoCount(user.getId(), updatedRows);
             int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
             if (decremented == 0) {
                 throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
