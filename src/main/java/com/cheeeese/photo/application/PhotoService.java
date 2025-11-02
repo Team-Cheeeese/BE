@@ -15,6 +15,7 @@ import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,9 @@ public class PhotoService {
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
     private final PresignedUrlService presignedUrlService;
+
+    @Value("${ncp.object-storage.bucket}")
+    private String bucket;
 
     private static final String ORIGINAL_PHOTO_PATH_FORMAT = "album/%s/original/%d_%s";
 
@@ -108,9 +112,10 @@ public class PhotoService {
                 photo.getId(),
                 safeFileName
         );
+        String imageUrl = bucket + "/" + objectKey;
+        photo.updateImageUrl(imageUrl);
 
         String uploadUrl = presignedUrlService.generatePresignedPutUrl(objectKey, file.contentType());
-        photo.updateImageUrl(objectKey);
 
         return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
     }
