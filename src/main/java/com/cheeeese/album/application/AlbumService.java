@@ -29,6 +29,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,9 +81,9 @@ public class AlbumService {
         if (album.isExpired()) {
             return AlbumMapper.toExpiredInvitationResponse(album);
         }
-        User host = getMaker(album.getMakerId());
+        User maker = getMaker(album.getMakerId());
 
-        return AlbumMapper.toInvitationResponse(album, host);
+        return AlbumMapper.toInvitationResponse(album, maker);
     }
 
     @Transactional
@@ -138,6 +139,30 @@ public class AlbumService {
         );
     }
 
+    public AlbumParticipantResponse getAlbumParticipantList(User currentUser, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+
+        boolean isExpired = album.isExpired();
+
+        // 참여 여부 검증
+        UserAlbum myUserAlbum = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId())
+                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+
+        Role myRole = myUserAlbum.getRole();
+
+        // 앨범의 전체 참여자 목록
+        List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumId(album.getId());
+
+        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUser);
+
+        return UserAlbumMapper.toAlbumParticipantResponse(
+                album,
+                isExpired,
+                myRole,
+                participantInfos
+        );
+    }
+
     private int calculateRemainingUploadSlots(Album album) {
         int current = album.getCurrentPhotoCount();
         int max = album.getMaxPhotoCount();
@@ -175,4 +200,28 @@ public class AlbumService {
                 .map(AlbumMapper::toRecentPhotoResponse)
                 .collect(Collectors.toList());
     }
+
+    private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
+            List<UserAlbum> userAlbums,
+            User currentUser
+    ) {
+        return userAlbums.stream()
+                .map(userAlbum -> {
+                    User user = userAlbum.getUser();
+                    Role role = userAlbum.getRole();
+                    boolean isMe = user.getId().equals(currentUser.getId());
+                    return UserAlbumMapper.toParticipantInfo(user, role, isMe);
+                })
+                .sorted(Comparator
+                        .comparing(AlbumParticipantListResponse.ParticipantInfo::isMe, Comparator.reverseOrder())
+                        .thenComparing(p -> p.role() == Role.MAKER ? 0 : 1)
+                        .thenComparing(AlbumParticipantListResponse.ParticipantInfo::name)
+                )
+                .toList();
+    }
+
+
+
+
+
 }

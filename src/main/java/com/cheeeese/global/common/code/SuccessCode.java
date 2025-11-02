@@ -24,6 +24,7 @@ public enum SuccessCode implements BaseCode {
     ALBUM_INVITATION_FETCH_SUCCESS(HttpStatus.OK, "앨범 초대장 정보 조회가 성공적으로 완료되었습니다."),
     ALBUM_ENTER_SUCCESS(HttpStatus.OK, "앨범 입장이 성공적으로 완료되었습니다."),
     ALBUM_CREATE_SUCCESS(HttpStatus.OK, "앨범 생성이 성공적으로 완료되었습니다."),
+    ALBUM_PARTICIPANT_FETCH_SUCCESS(HttpStatus.OK, "앨범 참여자 조회가 성공적으로 완료되었습니다."),
 
     // photo
     PHOTO_AVAILABLE_COUNT_FETCH_SUCCESS(HttpStatus.OK, "업로드 가능 사진 수 조회가 성공적으로 완료되었습니다."),
