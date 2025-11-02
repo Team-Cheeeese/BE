@@ -12,17 +12,17 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
 
     @Qualifier("tokenRedisTemplate")
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> tokenRedisTemplate;
 
     public void setValue(String key, Object value, Long expiredTime) {
-        redisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.MILLISECONDS);
+        tokenRedisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.MILLISECONDS);
     }
 
     public String getValue(String key) {
-        return (String) redisTemplate.opsForValue().get(key);
+        return (String) tokenRedisTemplate.opsForValue().get(key);
     }
 
     public void deleteValue(String key) {
-        redisTemplate.delete(key);
+        tokenRedisTemplate.delete(key);
     }
 }

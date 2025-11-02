@@ -3,6 +3,7 @@ package com.cheeeese.photo.infrastructure.persistence;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,15 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
+
+    @Query("""
+        SELECT p
+        FROM Photo p
+        JOIN p.album a
+        WHERE a.code = :code
+        ORDER BY p.createdAt DESC
+    """)
+    Slice<Photo> findAllByAlbumCode(@Param("code") String code, Pageable pageable);
 
     @Query("""
         SELECT p 

@@ -5,6 +5,9 @@ import lombok.Builder;
 @Builder
 public record PhotoListResponse(
         Long photoId,
-        String thumbnailUrl
+        String thumbnailUrl,
+        int likeCnt,
+        boolean isLiked,
+        boolean isDownloaded
 ) {
 }

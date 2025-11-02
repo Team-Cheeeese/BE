@@ -13,24 +13,21 @@ import java.util.concurrent.TimeUnit;
 public class RedisCacheUtil {
 
     @Qualifier("cacheRedisTemplate")
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> cacheRedisTemplate;
 
     /**
-     * 캐시 저장 (유효 기간 존재)
+     * 캐시 저장
      */
     public void setValue(String key, Object value, Long expiredTime) {
-        redisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * 캐시 영구 저장
-     */
-    public void setPermanent(String key, Object value) {
-        redisTemplate.opsForValue().set(key, value);
+        if (expiredTime != null) {
+            cacheRedisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.SECONDS);
+        } else {
+            cacheRedisTemplate.opsForValue().set(key, value);
+        }
     }
 
     public Long getValue(String key) {
-        return (Long) redisTemplate.opsForValue().get(key);
+        return (Long) cacheRedisTemplate.opsForValue().get(key);
     }
 
     /**
@@ -38,18 +35,18 @@ public class RedisCacheUtil {
      */
     @SuppressWarnings("unchecked")
     public <T> T getObject(String key, Class<T> clazz) {
-        return (T) redisTemplate.opsForValue().get(key);
+        return (T) cacheRedisTemplate.opsForValue().get(key);
     }
 
     /**
      * 패턴 기반 키 삭제 (대규모 삭제)
      */
     public void deletePattern(String pattern) {
-        Set<String> keys = redisTemplate.keys(pattern);
-        redisTemplate.delete(keys);
+        Set<String> keys = cacheRedisTemplate.keys(pattern);
+        cacheRedisTemplate.delete(keys);
     }
 
     public boolean exists(String key) {
-        return redisTemplate.hasKey(key);
+        return cacheRedisTemplate.hasKey(key);
     }
 }

@@ -9,6 +9,8 @@ import com.cheeeese.album.presentation.swagger.AlbumSwagger;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.album.dto.response.UploadAvailableCountResponse;
+import com.cheeeese.photo.application.PhotoQueryService;
+import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import static com.cheeeese.global.common.code.SuccessCode.*;
 public class AlbumController implements AlbumSwagger {
 
     private final AlbumService albumService;
+    private final PhotoQueryService photoQueryService;
 
     @Override
     @PostMapping
@@ -58,6 +61,18 @@ public class AlbumController implements AlbumSwagger {
         return CommonResponse.success(
                 PHOTO_AVAILABLE_COUNT_FETCH_SUCCESS,
                 albumService.getAvailablePhotoCount(user, code)
+        );
+    }
+
+    @GetMapping("/{code}/photos")
+    public CommonResponse<PhotoPageResponse> getAlbumPhotoPage(
+            @PathVariable String code,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return CommonResponse.success(
+                PHOTO_UPLOAD_REPORT_SUCCESS,
+                photoQueryService.getPhotoPage(code, page, size)
         );
     }
 }

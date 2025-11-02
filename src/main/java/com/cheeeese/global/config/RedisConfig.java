@@ -32,7 +32,7 @@ public class RedisConfig {
     }
 
     @Bean(name = "tokenRedisTemplate")
-    public RedisTemplate<String, Object> redisTemplate() {
+    public RedisTemplate<String, Object> tokenRedisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
 
@@ -43,7 +43,7 @@ public class RedisConfig {
     }
 
     @Bean(name = "cacheRedisTemplate")
-    public RedisTemplate<String, Object> cahceRedisTemplate() {
+    public RedisTemplate<String, Object> cacheRedisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
 
