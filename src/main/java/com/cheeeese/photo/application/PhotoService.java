@@ -52,10 +52,14 @@ public class PhotoService {
         Album album = validateAlbumAndPermission(user, request.albumCode());
         validateUploadRequest(album, request);
 
-        int updatedRows = albumRepository.incrementPhotoCount(album.getId(), request.fileInfos().size());
+        int uploadCount = request.fileInfos().size();
+
+        int updatedRows = albumRepository.incrementPhotoCount(album.getId(), uploadCount);
         if (updatedRows != 1) {
             throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_INCREMENT_FAILED);
         }
+
+        user.incrementPhotoCount(uploadCount);
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
@@ -70,7 +74,7 @@ public class PhotoService {
         PhotoValidator.ValidatedPhotos validated = photoValidator.validatePhotos(user.getId(), failurePhotoIds);
         Long albumId = validated.albumId();
 
-        handleFailedUploads(user.getId(), albumId, failurePhotoIds);
+        handleFailedUploads(user, albumId, failurePhotoIds);
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {
@@ -131,10 +135,10 @@ public class PhotoService {
         return name;
     }
 
-    private void handleFailedUploads(Long userId, Long albumId, List<Long> failurePhotoIds) {
+    private void handleFailedUploads(User user, Long albumId, List<Long> failurePhotoIds) {
         int updatedRows = photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
                 failurePhotoIds,
-                userId,
+                user.getId(),
                 PhotoStatus.FAILED,
                 PhotoStatus.UPLOADING
         );
@@ -144,6 +148,7 @@ public class PhotoService {
         }
 
         if (updatedRows > 0) {
+            user.decrementPhotoCount(updatedRows);
             int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
             if (decremented == 0) {
                 throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
