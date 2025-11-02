@@ -150,11 +150,11 @@ public class PhotoService {
         }
 
         if (updatedRows > 0) {
-            userService.decrementPhotoCount(user.getId(), updatedRows);
             int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
             if (decremented == 0) {
                 throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
             }
+            userService.decrementPhotoCount(user.getId(), updatedRows);
         }
     }
 

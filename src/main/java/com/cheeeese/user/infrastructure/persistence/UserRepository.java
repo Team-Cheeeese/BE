@@ -16,6 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int incrementPhotoCount(@Param("userId") Long userId, @Param("count") int count);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE User u SET u.photoCnt = u.photoCnt - :count WHERE u.id = :userId")
+    @Query("UPDATE User u SET u.photoCnt = u.photoCnt - :count WHERE u.id = :userId AND u.photoCnt >= :count")
     int decrementPhotoCount(@Param("userId") Long userId, @Param("count") int count);
 }

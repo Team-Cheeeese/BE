@@ -10,7 +10,7 @@ import java.util.List;
 @Schema(description = "사진 업로드 결과 보고 요청 (실패 처리)")
 public record PhotoUploadReportRequest(
         @NotNull
-        @Schema(description = "업로드 중 실패하거나 취소된 사진 ID 목록 (PROCESSING -> FAILED & 롤백)", example = "[1, 3]")
+        @Schema(description = "업로드 중 실패하거나 취소된 사진 ID 목록 (UPLOADING -> FAILED & 롤백)", example = "[1, 3]")
         List<Long> failurePhotoIds
 ) {
 }
