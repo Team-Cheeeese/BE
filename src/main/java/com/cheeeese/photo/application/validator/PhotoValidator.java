@@ -80,14 +80,15 @@ public class PhotoValidator {
      * photoId 리스트 기반으로 존재하는 사진 조회 및 존재 검증
      */
     private List<Photo> findAndValidateExistence(List<Long> photoIds) {
-        Set<Long> requestedIds = new HashSet<>(photoIds);
-        List<Photo> photos = photoRepository.findAllById(requestedIds);
+        List<Photo> photos = photoRepository.findAllById(photoIds);
+
+        Set<Long> uniqueRequestedIds = new HashSet<>(photoIds);
 
         Set<Long> foundIds = photos.stream()
                 .map(Photo::getId)
                 .collect(Collectors.toSet());
 
-        Set<Long> missingIds = requestedIds.stream()
+        Set<Long> missingIds = uniqueRequestedIds.stream()
                 .filter(id -> !foundIds.contains(id))
                 .collect(Collectors.toSet());
 

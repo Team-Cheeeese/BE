@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -64,12 +63,14 @@ public class PhotoService {
 
     @Transactional
     public void reportUploadResult(User user, PhotoUploadReportRequest request) {
-        PhotoValidator.ValidatedPhotos validated = validateRequestAndPhotos(user, request);
+        List<Long> failurePhotoIds = request.failurePhotoIds().stream()
+                .distinct()
+                .toList();
+
+        PhotoValidator.ValidatedPhotos validated = photoValidator.validatePhotos(user.getId(), failurePhotoIds);
         Long albumId = validated.albumId();
 
-        handleSuccessfulUploads(user.getId(), request.successPhotoIds());
-
-        handleFailedUploads(user.getId(), albumId, request.failurePhotoIds());
+        handleFailedUploads(user.getId(), albumId, failurePhotoIds);
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {
@@ -130,45 +131,7 @@ public class PhotoService {
         return name;
     }
 
-    private PhotoValidator.ValidatedPhotos validateRequestAndPhotos(User user, PhotoUploadReportRequest request) {
-        var success = new java.util.HashSet<>(request.successPhotoIds());
-        var failure = new java.util.HashSet<>(request.failurePhotoIds());
-        success.retainAll(failure);
-
-        if (!success.isEmpty()) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_REPORT_CONFLICTING_IDS);
-        }
-
-        List<Long> allPhotoIds = Stream.concat(
-                request.successPhotoIds().stream(),
-                request.failurePhotoIds().stream()
-        ).toList();
-
-        return photoValidator.validatePhotos(user.getId(), allPhotoIds);
-    }
-
-    private void handleSuccessfulUploads(Long userId, List<Long> successPhotoIds) {
-        if (successPhotoIds == null || successPhotoIds.isEmpty()) {
-            return;
-        }
-
-        int updatedRows = photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
-                successPhotoIds,
-                userId,
-                PhotoStatus.PROCESSING,
-                PhotoStatus.UPLOADING
-        );
-
-        if (updatedRows != successPhotoIds.size()) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_STATUS_UPDATE_FAILED);
-        }
-    }
-
     private void handleFailedUploads(Long userId, Long albumId, List<Long> failurePhotoIds) {
-        if (failurePhotoIds == null || failurePhotoIds.isEmpty()) {
-            return;
-        }
-
         int updatedRows = photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
                 failurePhotoIds,
                 userId,

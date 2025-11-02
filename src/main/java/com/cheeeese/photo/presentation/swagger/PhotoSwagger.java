@@ -74,17 +74,15 @@ public interface PhotoSwagger {
     );
 
     @Operation(
-            summary = "사진 업로드 결과 보고 API (부분 성공/실패 처리)", // [추가]
+            summary = "사진 업로드 결과 보고 API (실패 처리)", // [추가]
             description = """ 
                     ### RequestBody
                     ---
-                    `successPhotoIds`: Object Storage 업로드 성공 ID 목록 \n
                     `failurePhotoIds`: Object Storage 업로드 실패 ID 목록 \n
                     
                     ### 로직 상세
                     ---
-                    1. **Success IDs 처리**: `Photo` 상태를 `UPLOADING`에서 `PROCESSING`으로 변경 (후처리 대기).
-                    2. **Failure IDs 처리**: `Photo` 상태를 `UPLOADING`에서 `FAILED`으로 변경, 앨범의 `currentPhotoCount`를 **롤백** (감소)합니다.
+                    1. **Failure IDs 처리**: `Photo` 상태를 `UPLOADING`에서 `FAILED`으로 변경, 앨범의 `currentPhotoCount`를 **롤백** (감소)합니다.
                     """
     )
     @ApiResponses(value = {
@@ -102,20 +100,6 @@ public interface PhotoSwagger {
                           "isSuccess": false,
                           "code": 400,
                           "message": "보고된 사진들은 반드시 동일한 앨범에 속해야 합니다."
-                        }
-                        """)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "업로드 결과(success/failure) 목록에 중복된 사진 ID가 포함되어 있습니다.",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(example = """
-                        {
-                          "isSuccess": false,
-                          "code": 400,
-                          "message": "업로드 결과(success/failure) 목록에 중복된 사진 ID가 포함되어 있습니다."
                         }
                         """)
                     )
