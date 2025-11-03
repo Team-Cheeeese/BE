@@ -3,6 +3,7 @@ package com.cheeeese.photo.infrastructure.mapper;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.dto.response.PhotoDetailResponse;
 import com.cheeeese.photo.dto.response.PhotoListResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
@@ -74,6 +75,17 @@ public class PhotoMapper {
                 .isFirst(response.isFirst())
                 .isLast(response.isLast())
                 .hasNext(response.hasNext())
+                .build();
+    }
+
+    public static PhotoDetailResponse toPhotoDetailResponse(Photo photo, boolean isLiked, boolean isDownloaded) {
+        return PhotoDetailResponse.builder()
+                .photoId(photo.getId())
+                .imageUrl(photo.getImageUrl())
+                .thumbnailUrl(photo.getThumbnailUrl())
+                .likesCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
+                .isDownloaded(isDownloaded)
                 .build();
     }
 }

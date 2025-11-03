@@ -3,8 +3,11 @@ package com.cheeeese.photo.application;
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.dto.response.PhotoDetailResponse;
 import com.cheeeese.photo.dto.response.PhotoListResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
+import com.cheeeese.photo.exception.PhotoException;
+import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
@@ -62,6 +65,16 @@ public class PhotoQueryService {
         redisCacheUtil.setValue(versionKey, version + 1, null);
 
         redisCacheUtil.deletePattern("album:" + code + ":photos:*");
+    }
+
+    public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {
+        Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_ID_NOT_FOUND));
+
+        boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
+        boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
+
+        return PhotoMapper.toPhotoDetailResponse(photo, isLiked, isDownloaded);
     }
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {

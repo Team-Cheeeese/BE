@@ -21,4 +21,6 @@ public interface PhotoHistoryRepository extends JpaRepository<PhotoHistory, Long
             @Param("photoIds") List<Long> photoIds,
             @Param("threshold") LocalDateTime threshold
     );
+
+    boolean existsByUserIdAndPhotoId(Long userId, Long photoId);
 }

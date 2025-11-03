@@ -15,4 +15,6 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
         AND pl.photo.id IN :photoIds
     """)
     List<Long> findAllLikedPhotoIds(@Param("userId") Long userId, @Param("photoIds") List<Long> photoIds);
+
+    boolean existsByUserIdAndPhotoId(Long userId, Long photoId);
 }

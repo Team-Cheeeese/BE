@@ -10,9 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
+    Optional<Photo> findByIdAndAlbum_Code(Long photoId, String albumCode);
     @Query("""
         SELECT p
         FROM Photo p

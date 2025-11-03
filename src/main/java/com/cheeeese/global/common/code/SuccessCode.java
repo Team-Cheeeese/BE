@@ -31,6 +31,7 @@ public enum SuccessCode implements BaseCode {
     PHOTO_UPLOAD_REPORT_SUCCESS(HttpStatus.OK, "사진 업로드 결과 보고가 성공적으로 처리되었습니다."),
     THUMBNAIL_PRODUCE_COMPLETE(HttpStatus.OK, "썸네일 생성이 성공적으로 완료되었습니다."),
     PHOTO_LIST_GET_SUCCESS(HttpStatus.OK, "앨범 내 사진 목록 조회가 성공적으로 완료되었습니다."),
+    PHOTO_DETAIL_GET_SUCCESS(HttpStatus.OK, "앨범 내 사진 상세 조회가 성공적으로 완료되었습니다."),
     ;
 
     private final HttpStatus httpStatus;
