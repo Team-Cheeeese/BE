@@ -1,6 +1,7 @@
 package com.cheeeese.album.presentation;
 
 import com.cheeeese.album.application.AlbumService;
+import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.dto.response.AlbumCreationResponse;
 import com.cheeeese.album.dto.response.AlbumEnterResponse;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.*;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -66,13 +66,15 @@ public class AlbumController implements AlbumSwagger {
 
     @GetMapping("/{code}/photos")
     public CommonResponse<PhotoPageResponse> getAlbumPhotoPage(
+            @CurrentUser User user,
             @PathVariable String code,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "CREATED_AT") AlbumSorting sorting
     ) {
         return CommonResponse.success(
-                PHOTO_UPLOAD_REPORT_SUCCESS,
-                photoQueryService.getPhotoPage(code, page, size)
+                ALBUM_PHOTO_LIST_GET_SUCCESS,
+                photoQueryService.getPhotoPage(user, code, page, size, sorting)
         );
     }
 }

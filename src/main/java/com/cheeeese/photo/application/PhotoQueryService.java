@@ -1,10 +1,15 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.dto.response.PhotoListResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
+import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
+import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -12,55 +17,98 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PhotoQueryService {
 
     private final PhotoRepository photoRepository;
+    private final PhotoLikesRepository photoLikesRepository;
+    private final PhotoHistoryRepository photoHistoryRepository;
     private final RedisCacheUtil redisCacheUtil;
 
     private static final String PHOTO_KEY = "album:%s:photos:page:%d:version:%d";
     private static final String VERSION_KEY = "album:%s:version";
 
-    public PhotoPageResponse getPhotoPage(String code, int page, int size) {
+    public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
         String versionKey = String.format(VERSION_KEY, code);
-        Long curVersion = redisCacheUtil.getValue(versionKey);
-
-        if (curVersion == null) {
-            curVersion = 0L;
-        }
+        Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
         String photoKey = String.format(PHOTO_KEY, code, page, curVersion);
         PhotoPageResponse cachedList = redisCacheUtil.getObject(photoKey, PhotoPageResponse.class);
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
         if (cachedList != null) {
-            return cachedList;
+            return attachUserStatus(user, cachedList);
         }
-        PhotoPageResponse responses = getPhotoPageFromDB(code, page, size);
+        PhotoPageResponse responses = getPhotoPageFromDB(code, page, size, albumSorting);
 
         redisCacheUtil.setValue(photoKey, responses, 300000L);
 
-        return responses;
+        return attachUserStatus(user, responses);
     }
 
     @Transactional
     public void invalidatePhotoCache(String code) {
         String versionKey = String.format(VERSION_KEY, code);
-        Long curVersion = redisCacheUtil.getValue(versionKey);
+        Long version = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
-        if (curVersion == null) {
-            curVersion = 0L;
-        }
-        redisCacheUtil.setValue(versionKey, curVersion + 1, null);
+        redisCacheUtil.setValue(versionKey, version + 1, null);
 
         redisCacheUtil.deletePattern("album:" + code + ":photos:*");
     }
 
-    private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
+        PageRequest pageRequest = PageRequest.of(page, size, getPhotoSortingOption(albumSorting));
         Slice<Photo> photos = photoRepository.findAllByAlbumCode(code, pageRequest);
         return PhotoMapper.toPhotoPageResponse(photos);
+    }
+
+    private PhotoPageResponse attachUserStatus(User user, PhotoPageResponse response) {
+        List<Long> photoIds = extractPhotoIds(response);
+        Set<Long> likedIds = findUserLikedPhotoIds(user.getId(), photoIds);
+        Set<Long> downloadedIds = findUserDownloadedPhotoIds(user.getId(), photoIds);
+        List<PhotoListResponse> updatedResponses = updateUserStatus(response.responses(), likedIds, downloadedIds);
+        return PhotoMapper.toRebuildPhotoPageResponse(response, updatedResponses);
+    }
+
+    private List<Long> extractPhotoIds(PhotoPageResponse response) {
+        return response.responses().stream()
+                .map(PhotoListResponse::photoId)
+                .toList();
+    }
+
+    private Set<Long> findUserLikedPhotoIds(Long userId, List<Long> photoIds) {
+        return new HashSet<>(photoLikesRepository.findAllLikedPhotoIds(userId, photoIds));
+    }
+
+    private Set<Long> findUserDownloadedPhotoIds(Long userId, List<Long> photoIds) {
+        return new HashSet<>(photoHistoryRepository.findAllHistoryPhotoIds(userId, photoIds, LocalDateTime.now().minusHours(1)));
+    }
+
+    private List<PhotoListResponse> updateUserStatus(
+            List<PhotoListResponse> responses,
+            Set<Long> likeIds,
+            Set<Long> downloadedIds
+    ) {
+        return responses.stream()
+                .map(response -> response.withUserStatus(
+                        likeIds.contains(response.photoId()),
+                        downloadedIds.contains(response.photoId())
+                )).toList();
+    }
+
+    private Sort getPhotoSortingOption(AlbumSorting albumSorting) {
+        return switch (albumSorting) {
+            case POPULAR -> Sort.by(Sort.Order.desc("likesCnt"), Sort.Order.desc("createdAt"));
+            case CAPTURED_AT -> Sort.by(Sort.Direction.DESC, "captureTime");
+            case CREATED_AT -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
     }
 }

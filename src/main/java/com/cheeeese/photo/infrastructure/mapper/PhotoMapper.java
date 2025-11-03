@@ -66,4 +66,14 @@ public class PhotoMapper {
                 .hasNext(photos.hasNext())
                 .build();
     }
+
+    public static PhotoPageResponse toRebuildPhotoPageResponse(PhotoPageResponse response, List<PhotoListResponse> updated) {
+        return PhotoPageResponse.builder()
+                .responses(updated)
+                .listSize(updated.size())
+                .isFirst(response.isFirst())
+                .isLast(response.isLast())
+                .hasNext(response.hasNext())
+                .build();
+    }
 }
