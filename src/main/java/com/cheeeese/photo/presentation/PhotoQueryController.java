@@ -8,6 +8,7 @@ import com.cheeeese.photo.dto.response.PhotoDetailResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.PHOTO_DETAIL_GET_SUCCESS;
@@ -31,6 +32,19 @@ public class PhotoQueryController {
         return CommonResponse.success(
                 PHOTO_LIST_GET_SUCCESS,
                 photoQueryService.getPhotoPage(user, code, page, size, sorting)
+        );
+    }
+
+    @GetMapping("/{code}/photos/liked")
+    public CommonResponse<PhotoPageResponse> getAlbumLikedPhotoPage(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return CommonResponse.success(
+                PHOTO_LIST_GET_SUCCESS,
+                photoQueryService.getPhotoLiked(user, code, page, size)
         );
     }
 

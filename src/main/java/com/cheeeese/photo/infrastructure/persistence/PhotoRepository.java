@@ -25,6 +25,22 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     Slice<Photo> findAllByAlbumCode(@Param("code") String code, Pageable pageable);
 
     @Query("""
+        SELECT p
+        FROM Photo p
+        JOIN p.album a
+        JOIN PhotoLikes pl ON pl.photo = p
+        WHERE a.code = :albumCode
+        AND pl.user.id = :userId
+        ORDER BY p.createdAt DESC
+    """)
+    Slice<Photo> findLikedPhotosByAlbumAndUser(
+            @Param("albumCode") String albumCode,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
+
+    @Query("""
         SELECT p 
         FROM Photo p 
         JOIN FETCH p.user

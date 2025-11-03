@@ -67,6 +67,12 @@ public class PhotoQueryService {
         redisCacheUtil.deletePattern("album:" + code + ":photos:*");
     }
 
+    public PhotoPageResponse getPhotoLiked(User user, String code, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Slice<Photo> photos = photoRepository.findLikedPhotosByAlbumAndUser(code, user.getId(), pageRequest);
+        return PhotoMapper.toPhotoPageResponse(photos);
+    }
+
     public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {
         Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_ID_NOT_FOUND));
