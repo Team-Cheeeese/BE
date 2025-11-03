@@ -13,26 +13,31 @@ import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PhotoService {
 
+    private final UserService userService;
     private final PhotoRepository photoRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
     private final PresignedUrlService presignedUrlService;
+
+    @Value("${ncp.object-storage.bucket}")
+    private String bucket;
 
     private static final String ORIGINAL_PHOTO_PATH_FORMAT = "album/%s/original/%d_%s";
 
@@ -49,10 +54,14 @@ public class PhotoService {
         Album album = validateAlbumAndPermission(user, request.albumCode());
         validateUploadRequest(album, request);
 
-        int updatedRows = albumRepository.incrementPhotoCount(album.getId(), request.fileInfos().size());
+        int uploadCount = request.fileInfos().size();
+
+        int updatedRows = albumRepository.incrementPhotoCount(album.getId(), uploadCount);
         if (updatedRows != 1) {
             throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_INCREMENT_FAILED);
         }
+
+        userService.incrementPhotoCount(user.getId(), uploadCount);
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
@@ -60,12 +69,14 @@ public class PhotoService {
 
     @Transactional
     public void reportUploadResult(User user, PhotoUploadReportRequest request) {
-        PhotoValidator.ValidatedPhotos validated = validateRequestAndPhotos(user, request);
+        List<Long> failurePhotoIds = request.failurePhotoIds().stream()
+                .distinct()
+                .toList();
+
+        PhotoValidator.ValidatedPhotos validated = photoValidator.validatePhotos(user.getId(), failurePhotoIds);
         Long albumId = validated.albumId();
 
-        handleSuccessfulUploads(user.getId(), request.successPhotoIds());
-
-        handleFailedUploads(user.getId(), albumId, request.failurePhotoIds());
+        handleFailedUploads(user, albumId, failurePhotoIds);
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {
@@ -108,9 +119,10 @@ public class PhotoService {
                 photo.getId(),
                 safeFileName
         );
+        String imageUrl = bucket + "/" + objectKey;
+        photo.updateImageUrl(imageUrl);
 
         String uploadUrl = presignedUrlService.generatePresignedPutUrl(objectKey, file.contentType());
-        photo.updateImageUrl(objectKey);
 
         return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
     }
@@ -125,48 +137,10 @@ public class PhotoService {
         return name;
     }
 
-    private PhotoValidator.ValidatedPhotos validateRequestAndPhotos(User user, PhotoUploadReportRequest request) {
-        var success = new java.util.HashSet<>(request.successPhotoIds());
-        var failure = new java.util.HashSet<>(request.failurePhotoIds());
-        success.retainAll(failure);
-
-        if (!success.isEmpty()) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_REPORT_CONFLICTING_IDS);
-        }
-
-        List<Long> allPhotoIds = Stream.concat(
-                request.successPhotoIds().stream(),
-                request.failurePhotoIds().stream()
-        ).toList();
-
-        return photoValidator.validatePhotos(user.getId(), allPhotoIds);
-    }
-
-    private void handleSuccessfulUploads(Long userId, List<Long> successPhotoIds) {
-        if (successPhotoIds == null || successPhotoIds.isEmpty()) {
-            return;
-        }
-
-        int updatedRows = photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
-                successPhotoIds,
-                userId,
-                PhotoStatus.PROCESSING,
-                PhotoStatus.UPLOADING
-        );
-
-        if (updatedRows != successPhotoIds.size()) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_STATUS_UPDATE_FAILED);
-        }
-    }
-
-    private void handleFailedUploads(Long userId, Long albumId, List<Long> failurePhotoIds) {
-        if (failurePhotoIds == null || failurePhotoIds.isEmpty()) {
-            return;
-        }
-
+    private void handleFailedUploads(User user, Long albumId, List<Long> failurePhotoIds) {
         int updatedRows = photoRepository.updateStatusByIdsAndUserIdAndExpectedStatus(
                 failurePhotoIds,
-                userId,
+                user.getId(),
                 PhotoStatus.FAILED,
                 PhotoStatus.UPLOADING
         );
@@ -180,6 +154,7 @@ public class PhotoService {
             if (decremented == 0) {
                 throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
             }
+            userService.decrementPhotoCount(user.getId(), updatedRows);
         }
     }
 
