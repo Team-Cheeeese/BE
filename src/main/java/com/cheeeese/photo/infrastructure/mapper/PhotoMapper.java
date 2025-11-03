@@ -80,6 +80,7 @@ public class PhotoMapper {
 
     public static PhotoDetailResponse toPhotoDetailResponse(Photo photo, boolean isLiked, boolean isDownloaded) {
         return PhotoDetailResponse.builder()
+                .name(photo.getUser().getName())
                 .photoId(photo.getId())
                 .imageUrl(photo.getImageUrl())
                 .thumbnailUrl(photo.getThumbnailUrl())
