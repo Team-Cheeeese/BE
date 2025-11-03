@@ -37,6 +37,7 @@ public class PhotoService {
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
     private final PresignedUrlService presignedUrlService;
+    private final PhotoQueryService photoQueryService;
 
     private static final String ORIGINAL_PHOTO_PATH_FORMAT = "album/%s/original/%d_%s";
 
@@ -59,6 +60,9 @@ public class PhotoService {
         }
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
+
+        photoQueryService.invalidatePhotoCache(album.getCode());
+
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
     }
 
@@ -81,6 +85,8 @@ public class PhotoService {
 
         photoRepository.incrementLikeCnt(photo.getId());
         photoLikesRepository.save(photoLikes);
+
+        photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 
     @Transactional
@@ -93,6 +99,8 @@ public class PhotoService {
 
         photoRepository.decrementLikeCnt(photo.getId());
         photoLikesRepository.delete(photoLikes);
+
+        photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {

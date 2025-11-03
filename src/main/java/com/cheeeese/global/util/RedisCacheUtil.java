@@ -27,7 +27,10 @@ public class RedisCacheUtil {
     }
 
     public Long getValue(String key) {
-        return (Long) cacheRedisTemplate.opsForValue().get(key);
+        Object value = cacheRedisTemplate.opsForValue().get(key);
+        if (value instanceof Long) return (Long) value;
+        if (value instanceof Integer) return ((Integer) value).longValue();
+        return null;
     }
 
     /**
