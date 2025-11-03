@@ -8,7 +8,6 @@ import com.cheeeese.photo.dto.response.PhotoDetailResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.PHOTO_DETAIL_GET_SUCCESS;
