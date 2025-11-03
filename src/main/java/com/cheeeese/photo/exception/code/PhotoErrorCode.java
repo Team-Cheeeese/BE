@@ -26,6 +26,10 @@ public enum PhotoErrorCode implements BaseCode {
     PHOTO_STATUS_UPDATE_FAILED(HttpStatus.CONFLICT, "사진 상태 업데이트에 실패했습니다."),
     PHOTO_COUNT_DECREMENT_FAILED(HttpStatus.CONFLICT, "앨범 사진 개수 감소에 실패했습니다."),
     THUMBNAIL_UPDATE_FAILED(HttpStatus.CONFLICT, "썸네일 상태 업데이트에 실패했습니다."),
+
+    // 사진 도메인 관련 오류
+    PHOTO_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사진을 찾을 수 없습니다."),
+    PHOTO_LIKES_NOT_FOUND(HttpStatus.NOT_FOUND, "사진에 대한 좋아요 내역이 존재하지 않습니다."),
     ;
 
     private final HttpStatus httpStatus;

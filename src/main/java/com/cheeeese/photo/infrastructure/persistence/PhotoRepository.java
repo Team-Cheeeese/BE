@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
     Optional<Photo> findByIdAndAlbum_Code(Long photoId, String albumCode);
+
     @Query("""
         SELECT p
         FROM Photo p
@@ -39,6 +40,22 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
             Pageable pageable
     );
 
+    @Modifying
+    @Query("""
+        UPDATE Photo p
+        SET p.likesCnt = p.likesCnt + 1
+        WHERE p.id = :photoId
+    """)
+    void incrementLikeCnt(@Param("photoId") Long photoId);
+
+    @Modifying
+    @Query("""
+        UPDATE Photo p
+        SET p.likesCnt = p.likesCnt - 1
+        WHERE p.id = :photoId
+        AND p.likesCnt > 0
+    """)
+    void decrementLikeCnt(@Param("photoId") Long photoId);
 
     @Query("""
         SELECT p 

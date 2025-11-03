@@ -5,13 +5,16 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.dto.request.PhotoUploadReportRequest;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
+import com.cheeeese.photo.infrastructure.mapper.PhotoLikesMapper;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
+import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import java.util.stream.Stream;
 public class PhotoService {
 
     private final PhotoRepository photoRepository;
+    private final PhotoLikesRepository photoLikesRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
@@ -66,6 +70,29 @@ public class PhotoService {
         handleSuccessfulUploads(user.getId(), request.successPhotoIds());
 
         handleFailedUploads(user.getId(), albumId, request.failurePhotoIds());
+    }
+
+    @Transactional
+    public void createPhotoLikes(User user, Long photoId) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+
+        PhotoLikes photoLikes = PhotoLikesMapper.toEntity(user, photo);
+
+        photoRepository.incrementLikeCnt(photo.getId());
+        photoLikesRepository.save(photoLikes);
+    }
+
+    @Transactional
+    public void deletePhotoLikes(User user, Long photoId) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+
+        PhotoLikes photoLikes = photoLikesRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_LIKES_NOT_FOUND));
+
+        photoRepository.decrementLikeCnt(photo.getId());
+        photoLikesRepository.delete(photoLikes);
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {
