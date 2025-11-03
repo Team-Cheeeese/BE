@@ -55,7 +55,7 @@ public class PhotoQueryService {
     }
 
     @Transactional
-    public void invalidatePhotoCache(String code) {
+    public void invalidatePhotoCache(String code) { // TODO: 사진 삭제, 업로드 등 변화가 일어난 부분에 해당 메서드 추가
         String versionKey = String.format(VERSION_KEY, code);
         Long version = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
