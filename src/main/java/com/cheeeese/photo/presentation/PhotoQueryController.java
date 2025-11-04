@@ -8,13 +8,11 @@ import com.cheeeese.photo.dto.response.PhotoDetailResponse;
 import com.cheeeese.photo.dto.response.PhotoLikedPageResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.photo.presentation.swagger.PhotoQuerySwagger;
-import com.cheeeese.photo.presentation.swagger.PhotoSwagger;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.cheeeese.global.common.code.SuccessCode.PHOTO_DETAIL_GET_SUCCESS;
-import static com.cheeeese.global.common.code.SuccessCode.PHOTO_LIST_GET_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +45,7 @@ public class PhotoQueryController implements PhotoQuerySwagger {
             @RequestParam(defaultValue = "10") int size
     ) {
         return CommonResponse.success(
-                PHOTO_LIST_GET_SUCCESS,
+                PHOTO_LIKES_LIST_GET_SUCCESS,
                 photoQueryService.getPhotoLiked(user, code, page, size)
         );
     }
