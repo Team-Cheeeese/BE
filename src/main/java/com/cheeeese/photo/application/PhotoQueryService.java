@@ -65,26 +65,35 @@ public class PhotoQueryService {
         redisCacheUtil.deletePattern("album:" + code + ":photos:*");
     }
 
+    // TODO: 데이터 조회 로직을 Reader 클래스로 분리하는 것 고려
     public PhotoLikedPageResponse getPhotoLiked(User user, String code, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<Photo> photos = photoRepository.findLikedPhotosByAlbumAndUser(code, user.getId(), pageRequest);
 
-        List<PhotoLikedResponse> responses = photos.getContent().stream()
-                .map(photo -> {
-                    boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
-                    boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAt(
-                            user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
-                    );
-                    return PhotoMapper.toPhotoLikedResponse(photo, isDownloaded, isRecentlyDownloaded);
-                })
+        List<Long> photoIds = photos.getContent().stream()
+                .map(Photo::getId)
                 .toList();
+
+        if (photoIds.isEmpty()) {
+            return PhotoMapper.toPhotoLikedPageResponse(photos, List.of());
+        }
+
+        Set<Long> downloaded = photoHistoryRepository.findDownloadedPhotoIds(user.getId(), photoIds);
+
+        Set<Long> recent = photoHistoryRepository.findRecentlyDownloadedPhotoIds(
+                user.getId(),
+                photoIds,
+                LocalDateTime.now().minusHours(1)
+        );
+
+        List<PhotoLikedResponse> responses = buildPhotoLikedResponses(photos.getContent(), downloaded, recent);
 
         return PhotoMapper.toPhotoLikedPageResponse(photos, responses);
     }
 
     public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {
         Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_ID_NOT_FOUND));
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
 
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
@@ -148,5 +157,16 @@ public class PhotoQueryService {
             case CAPTURED_AT -> Sort.by(Sort.Direction.DESC, "captureTime");
             case CREATED_AT -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+    }
+
+    private List<PhotoLikedResponse> buildPhotoLikedResponses(List<Photo> photos, Set<Long> downloaded, Set<Long> recent) {
+        return photos.stream()
+                .map(photo -> {
+                    Long id = photo.getId();
+                    boolean isDownloaded = downloaded.contains(id);
+                    boolean isRecentlyDownloaded = recent.contains(id);
+                    return PhotoMapper.toPhotoLikedResponse(photo, isDownloaded, isRecentlyDownloaded);
+                })
+                .toList();
     }
 }

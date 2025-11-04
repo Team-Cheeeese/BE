@@ -36,9 +36,14 @@ public class RedisCacheUtil {
     /**
      * 캐시 객체 조회
      */
-    @SuppressWarnings("unchecked")
     public <T> T getObject(String key, Class<T> clazz) {
-        return (T) cacheRedisTemplate.opsForValue().get(key);
+        Object value = cacheRedisTemplate.opsForValue().get(key);
+        if (!clazz.isInstance(value)) {
+            throw new IllegalStateException(
+                    "⚠️ Cached value type mismatch. Expected: " + clazz.getName() + " but found " + value.getClass().getName()
+            );
+        }
+        return clazz.cast(value);
     }
 
     /**
@@ -46,7 +51,9 @@ public class RedisCacheUtil {
      */
     public void deletePattern(String pattern) {
         Set<String> keys = cacheRedisTemplate.keys(pattern);
-        cacheRedisTemplate.delete(keys);
+        if (!keys.isEmpty()) {
+            cacheRedisTemplate.delete(keys);
+        }
     }
 
     public boolean exists(String key) {
