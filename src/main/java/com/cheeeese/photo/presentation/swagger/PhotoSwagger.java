@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "[사진]", description = "사진 업로드 및 관리에 대한 API")
@@ -166,5 +167,43 @@ public interface PhotoSwagger {
     CommonResponse<Void> reportUploadResult(
             @CurrentUser User user,
             @RequestBody @Valid PhotoUploadReportRequest request
+    );
+
+    @Operation(
+            summary = "사진 좋아요 생성 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `photoId`: 사진 ID
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사진에 대한 좋아요 생성이 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<Void> createPhotoLikes(
+            @CurrentUser User user,
+            @PathVariable Long photoId
+    );
+
+    @Operation(
+            summary = "사진 좋아요 삭제 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `photoId`: 사진 ID
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사진에 대한 좋아요 삭제가 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<Void> deletePhotoLikes(
+            @CurrentUser User user,
+            @PathVariable Long photoId
     );
 }

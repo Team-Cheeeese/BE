@@ -7,6 +7,8 @@ import com.cheeeese.photo.application.PhotoQueryService;
 import com.cheeeese.photo.dto.response.PhotoDetailResponse;
 import com.cheeeese.photo.dto.response.PhotoLikedPageResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
+import com.cheeeese.photo.presentation.swagger.PhotoQuerySwagger;
+import com.cheeeese.photo.presentation.swagger.PhotoSwagger;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +19,11 @@ import static com.cheeeese.global.common.code.SuccessCode.PHOTO_LIST_GET_SUCCESS
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/album")
-public class PhotoQueryController {
+public class PhotoQueryController implements PhotoQuerySwagger {
 
     private final PhotoQueryService photoQueryService;
 
+    @Override
     @GetMapping("/{code}/photos")
     public CommonResponse<PhotoPageResponse> getAlbumPhotoPage(
             @CurrentUser User user,
@@ -35,6 +38,7 @@ public class PhotoQueryController {
         );
     }
 
+    @Override
     @GetMapping("/{code}/photos/liked")
     public CommonResponse<PhotoLikedPageResponse> getAlbumLikedPhotoPage(
             @CurrentUser User user,
@@ -48,6 +52,7 @@ public class PhotoQueryController {
         );
     }
 
+    @Override
     @GetMapping("/{code}/photos/{photoId}")
     public CommonResponse<PhotoDetailResponse> getPhotoDetail(
             @CurrentUser User user,
