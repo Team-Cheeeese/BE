@@ -3,9 +3,7 @@ package com.cheeeese.photo.application;
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.photo.domain.Photo;
-import com.cheeeese.photo.dto.response.PhotoDetailResponse;
-import com.cheeeese.photo.dto.response.PhotoListResponse;
-import com.cheeeese.photo.dto.response.PhotoPageResponse;
+import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
@@ -67,10 +65,18 @@ public class PhotoQueryService {
         redisCacheUtil.deletePattern("album:" + code + ":photos:*");
     }
 
-    public PhotoPageResponse getPhotoLiked(User user, String code, int page, int size) {
+    public PhotoLikedPageResponse getPhotoLiked(User user, String code, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<Photo> photos = photoRepository.findLikedPhotosByAlbumAndUser(code, user.getId(), pageRequest);
-        return PhotoMapper.toPhotoPageResponse(photos);
+
+        List<PhotoLikedResponse> responses = photos.getContent().stream()
+                .map(photo -> {
+                    boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
+                    return PhotoMapper.toPhotoLikedResponse(photo, isDownloaded);
+                })
+                .toList();
+
+        return PhotoMapper.toPhotoLikedPageResponse(photos, responses);
     }
 
     public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {

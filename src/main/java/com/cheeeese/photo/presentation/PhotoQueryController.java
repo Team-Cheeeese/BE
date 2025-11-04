@@ -5,6 +5,7 @@ import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.photo.application.PhotoQueryService;
 import com.cheeeese.photo.dto.response.PhotoDetailResponse;
+import com.cheeeese.photo.dto.response.PhotoLikedPageResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class PhotoQueryController {
     }
 
     @GetMapping("/{code}/photos/liked")
-    public CommonResponse<PhotoPageResponse> getAlbumLikedPhotoPage(
+    public CommonResponse<PhotoLikedPageResponse> getAlbumLikedPhotoPage(
             @CurrentUser User user,
             @PathVariable String code,
             @RequestParam(defaultValue = "0") int page,
