@@ -19,12 +19,16 @@ public record PhotoListResponse(
         boolean isLiked,
 
         @Schema(description = "다운로드 여부", example = "false")
-        boolean isDownloaded
+        boolean isDownloaded,
+
+        @Schema(description = "1시간 이내 다운로드 여부", example = "false")
+        boolean isRecentlyDownloaded
 ) {
-    public PhotoListResponse withUserStatus(boolean isLiked, boolean isDownloaded) {
+    public PhotoListResponse withUserStatus(boolean isLiked, boolean isDownloaded, boolean isRecentlyDownloaded) {
         return this.toBuilder()
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
+                .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
     }
 }

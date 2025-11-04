@@ -8,7 +8,19 @@ import java.util.List;
 @Builder
 @Schema(description = "내가 띱한 사진 조회 페이지네이션")
 public record PhotoLikedPageResponse(
-        @Schema(description = "좋아요한 사진 목록", example = "[{ \"photoId\": 1, \"thumbnailUrl\": \"https://cdn.cheeeese.me/thumb1.jpg\", \"isDownloaded\": true }]")
+        @Schema(
+                description = "사진 목록",
+                example = """
+                        [
+                          {
+                            "photoId": 1,
+                            "thumbnailUrl": "https://cdn.cheeeese.me/thumb1.jpg",
+                            "isDownloaded": false,
+                            "isRecentlyDownloaded": false
+                          }
+                        ]
+                        """
+        )
         List<PhotoLikedResponse> responses,
 
         @Schema(description = "현재 페이지의 사진 개수", example = "10")

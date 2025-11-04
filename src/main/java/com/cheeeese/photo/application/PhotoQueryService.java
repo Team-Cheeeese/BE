@@ -72,7 +72,10 @@ public class PhotoQueryService {
         List<PhotoLikedResponse> responses = photos.getContent().stream()
                 .map(photo -> {
                     boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
-                    return PhotoMapper.toPhotoLikedResponse(photo, isDownloaded);
+                    boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAt(
+                            user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
+                    );
+                    return PhotoMapper.toPhotoLikedResponse(photo, isDownloaded, isRecentlyDownloaded);
                 })
                 .toList();
 
@@ -85,8 +88,11 @@ public class PhotoQueryService {
 
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
+        boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAt(
+                user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
+        );
 
-        return PhotoMapper.toPhotoDetailResponse(photo, isLiked, isDownloaded);
+        return PhotoMapper.toPhotoDetailResponse(photo, isLiked, isDownloaded, isRecentlyDownloaded);
     }
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
@@ -99,7 +105,8 @@ public class PhotoQueryService {
         List<Long> photoIds = extractPhotoIds(response);
         Set<Long> likedIds = findUserLikedPhotoIds(user.getId(), photoIds);
         Set<Long> downloadedIds = findUserDownloadedPhotoIds(user.getId(), photoIds);
-        List<PhotoListResponse> updatedResponses = updateUserStatus(response.responses(), likedIds, downloadedIds);
+        Set<Long> recentlyDownloadedIds = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
+        List<PhotoListResponse> updatedResponses = updateUserStatus(response.responses(), likedIds, downloadedIds, recentlyDownloadedIds);
         return PhotoMapper.toRebuildPhotoPageResponse(response, updatedResponses);
     }
 
@@ -114,18 +121,24 @@ public class PhotoQueryService {
     }
 
     private Set<Long> findUserDownloadedPhotoIds(Long userId, List<Long> photoIds) {
-        return new HashSet<>(photoHistoryRepository.findAllHistoryPhotoIds(userId, photoIds, LocalDateTime.now().minusHours(1)));
+        return new HashSet<>(photoHistoryRepository.findDownloadedPhotoIdsByUserId(userId, photoIds));
+    }
+
+    private Set<Long> findUserRecentlyDownloadedPhotoIds(Long userId, List<Long> photoIds) {
+        return new HashSet<>(photoHistoryRepository.findRecentlyDownloadedPhotoIdsByUserId(userId, photoIds, LocalDateTime.now().minusHours(1)));
     }
 
     private List<PhotoListResponse> updateUserStatus(
             List<PhotoListResponse> responses,
             Set<Long> likeIds,
-            Set<Long> downloadedIds
+            Set<Long> downloadedIds,
+            Set<Long> recentlyDownloadedIds
     ) {
         return responses.stream()
                 .map(response -> response.withUserStatus(
                         likeIds.contains(response.photoId()),
-                        downloadedIds.contains(response.photoId())
+                        downloadedIds.contains(response.photoId()),
+                        recentlyDownloadedIds.contains(response.photoId())
                 )).toList();
     }
 

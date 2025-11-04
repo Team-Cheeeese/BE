@@ -13,6 +13,9 @@ public record PhotoLikedResponse(
         String thumbnailUrl,
 
         @Schema(description = "다운로드 여부", example = "false")
-        boolean isDownloaded
+        boolean isDownloaded,
+
+        @Schema(description = "1시간 이내 다운로드 여부", example = "false")
+        boolean isRecentlyDownloaded
 ) {
 }

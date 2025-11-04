@@ -51,11 +51,12 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoLikedResponse toPhotoLikedResponse(Photo photo, boolean isDownloaded) {
+    public static PhotoLikedResponse toPhotoLikedResponse(Photo photo, boolean isDownloaded, boolean isRecentlyDownloaded) {
         return PhotoLikedResponse.builder()
                 .photoId(photo.getId())
                 .thumbnailUrl(photo.getThumbnailUrl())
                 .isDownloaded(isDownloaded)
+                .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
     }
 
@@ -93,7 +94,7 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoDetailResponse toPhotoDetailResponse(Photo photo, boolean isLiked, boolean isDownloaded) {
+    public static PhotoDetailResponse toPhotoDetailResponse(Photo photo, boolean isLiked, boolean isDownloaded, boolean isRecentlyDownloaded) {
         return PhotoDetailResponse.builder()
                 .name(photo.getUser().getName())
                 .photoId(photo.getId())
@@ -102,6 +103,7 @@ public class PhotoMapper {
                 .likesCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
+                .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
     }
 }
