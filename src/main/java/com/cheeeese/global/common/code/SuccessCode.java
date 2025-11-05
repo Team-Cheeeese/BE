@@ -31,6 +31,11 @@ public enum SuccessCode implements BaseCode {
     PRESIGNED_URL_ISSUE_SUCCESS(HttpStatus.OK, "Presigned URL 발급이 성공적으로 완료되었습니다."),
     PHOTO_UPLOAD_REPORT_SUCCESS(HttpStatus.OK, "사진 업로드 결과 보고가 성공적으로 처리되었습니다."),
     THUMBNAIL_PRODUCE_COMPLETE(HttpStatus.OK, "썸네일 생성이 성공적으로 완료되었습니다."),
+    PHOTO_LIST_GET_SUCCESS(HttpStatus.OK, "앨범 내 사진 목록 조회가 성공적으로 완료되었습니다."),
+    PHOTO_LIKES_LIST_GET_SUCCESS(HttpStatus.OK, "내가 띱한 사진 목록 조회가 성공적으로 완료되었습니다."),
+    PHOTO_DETAIL_GET_SUCCESS(HttpStatus.OK, "앨범 내 사진 상세 조회가 성공적으로 완료되었습니다."),
+    PHOTO_LIKES_CREATE_SUCCESS(HttpStatus.OK, "사진 좋아요 생성이 완료되었습니다."),
+    PHOTO_LIKES_DELETE_SUCCESS(HttpStatus.OK, "사진 좋아요 삭제가 완료되었습니다."),
     ;
 
     private final HttpStatus httpStatus;

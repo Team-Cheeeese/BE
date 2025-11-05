@@ -3,8 +3,9 @@ package com.cheeeese.photo.infrastructure.mapper;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
-import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
+import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.user.domain.User;
+import org.springframework.data.domain.Slice;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +38,72 @@ public class PhotoMapper {
     ) {
         return PhotoPresignedUrlResponse.builder()
                 .presignedUrlInfos(presignedUrlInfos)
+                .build();
+    }
+
+    public static PhotoListResponse toPhotoListResponse(Photo photo, boolean isLiked, boolean isDownloaded) {
+        return PhotoListResponse.builder()
+                .photoId(photo.getId())
+                .thumbnailUrl(photo.getThumbnailUrl())
+                .likeCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
+                .isDownloaded(isDownloaded)
+                .build();
+    }
+
+    public static PhotoLikedResponse toPhotoLikedResponse(Photo photo, boolean isDownloaded, boolean isRecentlyDownloaded) {
+        return PhotoLikedResponse.builder()
+                .photoId(photo.getId())
+                .thumbnailUrl(photo.getThumbnailUrl())
+                .isDownloaded(isDownloaded)
+                .isRecentlyDownloaded(isRecentlyDownloaded)
+                .build();
+    }
+
+    public static PhotoPageResponse toPhotoPageResponse(Slice<Photo> photos) {
+        List<PhotoListResponse> responses = photos.getContent().stream()
+                .map(photo -> PhotoMapper.toPhotoListResponse(photo, false, false))
+                .toList();
+
+        return PhotoPageResponse.builder()
+                .responses(responses)
+                .listSize(responses.size())
+                .isFirst(photos.isFirst())
+                .isLast(photos.isLast())
+                .hasNext(photos.hasNext())
+                .build();
+    }
+
+    public static PhotoLikedPageResponse toPhotoLikedPageResponse(Slice<Photo> photos, List<PhotoLikedResponse> responses) {
+        return PhotoLikedPageResponse.builder()
+                .responses(responses)
+                .listSize(responses.size())
+                .isFirst(photos.isFirst())
+                .isLast(photos.isLast())
+                .hasNext(photos.hasNext())
+                .build();
+    }
+
+    public static PhotoPageResponse toRebuildPhotoPageResponse(PhotoPageResponse response, List<PhotoListResponse> updated) {
+        return PhotoPageResponse.builder()
+                .responses(updated)
+                .listSize(updated.size())
+                .isFirst(response.isFirst())
+                .isLast(response.isLast())
+                .hasNext(response.hasNext())
+                .build();
+    }
+
+    public static PhotoDetailResponse toPhotoDetailResponse(Photo photo, boolean isLiked, boolean isDownloaded, boolean isRecentlyDownloaded) {
+        return PhotoDetailResponse.builder()
+                .name(photo.getUser().getName())
+                .photoId(photo.getId())
+                .imageUrl(photo.getImageUrl())
+                .thumbnailUrl(photo.getThumbnailUrl())
+                .likesCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
+                .isDownloaded(isDownloaded)
+                .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
     }
 }

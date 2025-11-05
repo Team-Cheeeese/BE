@@ -94,7 +94,7 @@ public class PhotoValidator {
 
         if (!missingIds.isEmpty()) {
             log.error("존재하지 않는 photoIds: {}", missingIds);
-            throw new PhotoException(PhotoErrorCode.PHOTO_ID_NOT_FOUND);
+            throw new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND);
         }
         return photos;
     }

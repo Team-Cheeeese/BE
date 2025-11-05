@@ -3,14 +3,59 @@ package com.cheeeese.photo.infrastructure.persistence;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
+
+    Optional<Photo> findByIdAndAlbum_Code(Long photoId, String albumCode);
+
+    @Query("""
+        SELECT p
+        FROM Photo p
+        JOIN p.album a
+        WHERE a.code = :code
+        ORDER BY p.createdAt DESC
+    """)
+    Slice<Photo> findAllByAlbumCode(@Param("code") String code, Pageable pageable);
+
+    @Query("""
+        SELECT p
+        FROM Photo p
+        JOIN p.album a
+        JOIN PhotoLikes pl ON pl.photo = p
+        WHERE a.code = :albumCode
+        AND pl.user.id = :userId
+        ORDER BY p.createdAt DESC
+    """)
+    Slice<Photo> findLikedPhotosByAlbumAndUser(
+            @Param("albumCode") String albumCode,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
+    @Modifying
+    @Query("""
+        UPDATE Photo p
+        SET p.likesCnt = p.likesCnt + 1
+        WHERE p.id = :photoId
+    """)
+    void incrementLikeCnt(@Param("photoId") Long photoId);
+
+    @Modifying
+    @Query("""
+        UPDATE Photo p
+        SET p.likesCnt = p.likesCnt - 1
+        WHERE p.id = :photoId
+        AND p.likesCnt > 0
+    """)
+    void decrementLikeCnt(@Param("photoId") Long photoId);
 
     @Query("""
         SELECT p 

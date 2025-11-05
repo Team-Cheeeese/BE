@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.*;
 
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/album")
