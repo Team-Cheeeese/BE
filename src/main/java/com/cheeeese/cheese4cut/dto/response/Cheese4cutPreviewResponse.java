@@ -12,7 +12,13 @@ public record Cheese4cutPreviewResponse(
         boolean isFinalized,
 
         @Schema(description = "미리보기 사진 목록 (최대 4개)")
-        List<PreviewPhotoInfo> previewPhotos
+        List<PreviewPhotoInfo> previewPhotos,
+
+        @Schema(description = "4개 사진에 좋아요를 누른 유니크한 참여자 수", example = "5")
+        int uniqueLikesCount,
+
+        @Schema(description = "전체 참여자 수", example = "6")
+        int participant
 
 ) implements Cheese4cutResponse {
     @Builder

@@ -6,9 +6,12 @@ import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
+import com.cheeeese.cheese4cut.exception.Cheese4cutException;
+import com.cheeeese.cheese4cut.exception.code.Cheese4cutErrorCode;
 import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class Cheese4cutService {
     private final Cheese4cutRepository cheese4cutRepository;
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
+    private final PhotoLikesRepository photoLikesRepository;
 
     @Transactional(readOnly = true)
     public Cheese4cutResponse getCheese4cutByAlbumCode(String code) {
@@ -38,17 +45,30 @@ public class Cheese4cutService {
             return Cheese4cutMapper.toFinalResponse(cheese4cutOptional.get());
         }
 
-        return getPreviewResponse(album.getId());
+        return getPreviewResponse(album.getId(), album.getParticipant());
     }
 
-    private Cheese4cutResponse getPreviewResponse(Long albumId) {
+    private Cheese4cutResponse getPreviewResponse(Long albumId, int participant) {
         List<Long> topPhotoIds = photoRepository.findTop4CompletedPhotoIdsByLikes(
                 albumId,
                 PageRequest.of(0, 4)
         );
 
+        if (topPhotoIds.size() < 4) {
+            throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
+        }
+
         List<Photo> topPhotos = photoRepository.findAllById(topPhotoIds);
 
-        return Cheese4cutMapper.toPreviewResponse(topPhotos);
+        Map<Long, Photo> photoMap = topPhotos.stream()
+                .collect(Collectors.toMap(Photo::getId, Function.identity()));
+
+        List<Photo> orderedPhotos = topPhotoIds.stream()
+                .map(photoMap::get)
+                .toList();
+
+        long uniqueLikesCount = photoLikesRepository.countDistinctUserIdsByPhotoIds(topPhotoIds);
+
+        return Cheese4cutMapper.toPreviewResponse(orderedPhotos, uniqueLikesCount, participant);
     }
 }

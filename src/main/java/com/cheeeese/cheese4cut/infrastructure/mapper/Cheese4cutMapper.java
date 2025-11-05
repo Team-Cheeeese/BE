@@ -25,7 +25,11 @@ public class Cheese4cutMapper {
     /**
      * 확정 전 응답 (좋아요 TOP 4 사진 목록 기반)
      */
-    public static Cheese4cutPreviewResponse toPreviewResponse(List<Photo> topPhotos) {
+    public static Cheese4cutPreviewResponse toPreviewResponse(
+            List<Photo> topPhotos,
+            long uniqueLikesCount,
+            int participant
+    ) {
         List<Cheese4cutPreviewResponse.PreviewPhotoInfo> photoInfos = topPhotos.stream()
                 .map(photo -> Cheese4cutPreviewResponse.PreviewPhotoInfo.builder()
                         .photoId(photo.getId())
@@ -36,6 +40,8 @@ public class Cheese4cutMapper {
         return Cheese4cutPreviewResponse.builder()
                 .isFinalized(false)
                 .previewPhotos(photoInfos)
+                .uniqueLikesCount((int) uniqueLikesCount)
+                .participant(participant)
                 .build();
     }
 }
