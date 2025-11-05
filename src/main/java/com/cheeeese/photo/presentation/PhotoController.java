@@ -40,4 +40,18 @@ public class PhotoController implements PhotoSwagger {
         photoService.reportUploadResult(user, request);
         return CommonResponse.success(PHOTO_UPLOAD_REPORT_SUCCESS);
     }
+
+    @Override
+    @PostMapping("/{photoId}/liked")
+    public CommonResponse<Void> createPhotoLikes(@CurrentUser User user, @PathVariable Long photoId) {
+        photoService.createPhotoLikes(user, photoId);
+        return CommonResponse.success(PHOTO_LIKES_CREATE_SUCCESS);
+    }
+
+    @Override
+    @DeleteMapping("/{photoId}/unliked")
+    public CommonResponse<Void> deletePhotoLikes(@CurrentUser User user, @PathVariable Long photoId) {
+        photoService.deletePhotoLikes(user, photoId);
+        return CommonResponse.success(PHOTO_LIKES_DELETE_SUCCESS);
+    }
 }

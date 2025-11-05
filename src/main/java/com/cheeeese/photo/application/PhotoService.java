@@ -5,13 +5,16 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.dto.request.PhotoUploadReportRequest;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
+import com.cheeeese.photo.infrastructure.mapper.PhotoLikesMapper;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
+import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
@@ -31,10 +34,12 @@ public class PhotoService {
 
     private final UserService userService;
     private final PhotoRepository photoRepository;
+    private final PhotoLikesRepository photoLikesRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
     private final PresignedUrlService presignedUrlService;
+    private final PhotoQueryService photoQueryService;
 
     @Value("${ncp.object-storage.bucket}")
     private String bucket;
@@ -64,6 +69,9 @@ public class PhotoService {
         userService.incrementPhotoCount(user.getId(), uploadCount);
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
+
+        photoQueryService.invalidatePhotoCache(album.getCode());
+
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
     }
 
@@ -77,6 +85,33 @@ public class PhotoService {
         Long albumId = validated.albumId();
 
         handleFailedUploads(user, albumId, failurePhotoIds);
+    }
+
+    @Transactional
+    public void createPhotoLikes(User user, Long photoId) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+
+        PhotoLikes photoLikes = PhotoLikesMapper.toEntity(user, photo);
+
+        photoRepository.incrementLikeCnt(photo.getId());
+        photoLikesRepository.save(photoLikes);
+
+        photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
+    }
+
+    @Transactional
+    public void deletePhotoLikes(User user, Long photoId) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+
+        PhotoLikes photoLikes = photoLikesRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_LIKES_NOT_FOUND));
+
+        photoRepository.decrementLikeCnt(photo.getId());
+        photoLikesRepository.delete(photoLikes);
+
+        photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {
@@ -157,6 +192,4 @@ public class PhotoService {
             userService.decrementPhotoCount(user.getId(), updatedRows);
         }
     }
-
-
 }

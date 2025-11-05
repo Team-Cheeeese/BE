@@ -1,0 +1,40 @@
+package com.cheeeese.photo.domain;
+
+import com.cheeeese.global.domain.BaseEntity;
+import com.cheeeese.user.domain.User;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@Table(
+        name = "photo_likes",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"user_id", "photo_id"}
+        )
+)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PhotoLikes extends BaseEntity {
+
+    @Id
+    @Column(name = "photo_likes_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "photo_id", nullable = false)
+    private Photo photo;
+
+    @Builder
+    private PhotoLikes(User user, Photo photo) {
+        this.user = user;
+        this.photo = photo;
+    }
+}
