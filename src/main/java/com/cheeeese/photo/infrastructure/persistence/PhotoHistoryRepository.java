@@ -10,37 +10,15 @@ import java.util.List;
 import java.util.Set;
 
 public interface PhotoHistoryRepository extends JpaRepository<PhotoHistory, Long> {
-    @Query("""
-        SELECT ph.photo.id
-        FROM PhotoHistory ph
-        WHERE ph.user.id = :userId
-        AND ph.photo.id IN :photoIds
-    """)
-    List<Long> findDownloadedPhotoIdsByUserId(@Param("userId") Long userId, @Param("photoIds") List<Long> photoIds);
-
-    @Query("""
-        SELECT ph.photo.id
-        FROM PhotoHistory ph
-        WHERE ph.user.id = :userId
-        AND ph.photo.id IN :photoIds
-        AND ph.createdAt >= :threshold
-    """)
-    List<Long> findRecentlyDownloadedPhotoIdsByUserId(
-            @Param("userId") Long userId,
-            @Param("photoIds") List<Long> photoIds,
-            @Param("threshold") LocalDateTime threshold
-    );
-
     boolean existsByUserIdAndPhotoId(Long userId, Long photoId);
 
-    boolean existsByUserIdAndPhotoIdAndCreatedAt(Long userId, Long photoId, LocalDateTime createdAt);
+    boolean existsByUserIdAndPhotoIdAndCreatedAtAfter(Long userId, Long photoId, LocalDateTime createdAt);
 
     @Query("""
         SELECT ph.photo.id
         FROM PhotoHistory ph
         WHERE ph.user.id = :userId
-        AND ph.photo.id
-        IN :photoIds
+        AND ph.photo.id IN :photoIds
     """)
     Set<Long> findDownloadedPhotoIds(@Param("userId") Long userId, @Param("photoIds") List<Long> photoIds);
 

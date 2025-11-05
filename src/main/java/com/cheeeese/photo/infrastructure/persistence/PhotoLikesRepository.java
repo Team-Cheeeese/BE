@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
     @Query("""
@@ -15,7 +16,7 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
         WHERE pl.user.id = :userId
         AND pl.photo.id IN :photoIds
     """)
-    List<Long> findAllLikedPhotoIds(@Param("userId") Long userId, @Param("photoIds") List<Long> photoIds);
+    Set<Long> findAllLikedPhotoIds(@Param("userId") Long userId, @Param("photoIds") List<Long> photoIds);
 
     boolean existsByUserIdAndPhotoId(Long userId, Long photoId);
 

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -97,7 +96,7 @@ public class PhotoQueryService {
 
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
-        boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAt(
+        boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAtAfter(
                 user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
         );
 
@@ -126,15 +125,15 @@ public class PhotoQueryService {
     }
 
     private Set<Long> findUserLikedPhotoIds(Long userId, List<Long> photoIds) {
-        return new HashSet<>(photoLikesRepository.findAllLikedPhotoIds(userId, photoIds));
+        return photoLikesRepository.findAllLikedPhotoIds(userId, photoIds);
     }
 
     private Set<Long> findUserDownloadedPhotoIds(Long userId, List<Long> photoIds) {
-        return new HashSet<>(photoHistoryRepository.findDownloadedPhotoIdsByUserId(userId, photoIds));
+        return photoHistoryRepository.findDownloadedPhotoIds(userId, photoIds);
     }
 
     private Set<Long> findUserRecentlyDownloadedPhotoIds(Long userId, List<Long> photoIds) {
-        return new HashSet<>(photoHistoryRepository.findRecentlyDownloadedPhotoIdsByUserId(userId, photoIds, LocalDateTime.now().minusHours(1)));
+        return photoHistoryRepository.findRecentlyDownloadedPhotoIds(userId, photoIds, LocalDateTime.now().minusHours(1));
     }
 
     private List<PhotoListResponse> updateUserStatus(
