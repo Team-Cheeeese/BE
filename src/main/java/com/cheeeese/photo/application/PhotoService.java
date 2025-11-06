@@ -7,13 +7,16 @@ import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.dto.request.PhotoDownloadRequest;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.dto.request.PhotoUploadReportRequest;
+import com.cheeeese.photo.dto.response.PhotoDownloadResponse;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.mapper.PhotoLikesMapper;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
+import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
@@ -35,6 +38,7 @@ public class PhotoService {
     private final UserService userService;
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
+    private final PhotoHistoryRepository photoHistoryRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
@@ -73,6 +77,23 @@ public class PhotoService {
         photoQueryService.invalidatePhotoCache(album.getCode());
 
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
+    }
+
+    @Transactional
+    public PhotoPresignedUrlResponse createDownloadPresignedUrls(User user, PhotoDownloadRequest request) {
+        // 1. 권한 검증
+        Album album = validateAlbumAndPermission(user, request.code());
+
+        // 2. 사진 목록 조회
+        List<Photo> photos = photoRepository.findAllByIdIn(request.photoIds());
+
+        // 3. 다운로드용 url 생성
+
+
+        // 4. history 저장
+
+
+        return PhotoMapper.toPresignedUrlResponse(null);
     }
 
     @Transactional
@@ -160,6 +181,13 @@ public class PhotoService {
         String uploadUrl = presignedUrlService.generatePresignedPutUrl(objectKey, file.contentType());
 
         return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
+    }
+
+    private PhotoPresignedUrlResponse.PresignedUrlInfo createPresignedUrlForDownload(User user, Album album, Photo photo) {
+        String objectKey = String.format(ORIGINAL_PHOTO_PATH_FORMAT);
+        String url = presignedUrlService.generatePresignedGetUrl(objectKey);
+
+        return PhotoMapper.toPresignedUrlInfo(photo.getId(), url);
     }
 
     private String sanitizeFileName(String raw) {

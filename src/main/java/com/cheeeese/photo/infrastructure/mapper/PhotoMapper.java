@@ -41,6 +41,12 @@ public class PhotoMapper {
                 .build();
     }
 
+    public static PhotoDownloadResponse toPhotoDownloadResponse(Photo photo) {
+        return PhotoDownloadResponse.builder()
+                .fileName()
+                .build();
+    }
+
     public static PhotoListResponse toPhotoListResponse(Photo photo, boolean isLiked, boolean isDownloaded) {
         return PhotoListResponse.builder()
                 .photoId(photo.getId())
