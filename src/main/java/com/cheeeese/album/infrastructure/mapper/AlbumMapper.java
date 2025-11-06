@@ -33,7 +33,7 @@ public class AlbumMapper {
                 .participant(participant)
                 .currentParticipant(1)
                 .eventDate(eventDate)
-                .maxPhotoCount(2000)
+                .maxPhotoCount(10)
                 .currentPhotoCount(0)
                 .isInfoAvailable(isInfoAvailable)
                 .expiredAt(expiredAt)
