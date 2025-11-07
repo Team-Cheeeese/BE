@@ -1,7 +1,10 @@
 package com.cheeeese.cheese4cut.infrastructure.mapper;
 
+import com.cheeeese.album.domain.Album;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
+import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
 import com.cheeeese.photo.domain.Photo;
 
@@ -43,5 +46,18 @@ public class Cheese4cutMapper {
                 .uniqueLikesCount((int) uniqueLikesCount)
                 .participant(participant)
                 .build();
+    }
+
+    public static Cheese4cut toEntity(Album album, Cheese4cutFixedRequest request) {
+        return Cheese4cut.builder()
+                .album(album)
+                .photoIds(request.photoIds())
+                .frameImageUrl(request.frameImageUrl())
+                .build();
+    }
+
+    public static Cheese4cutPresignedUrlResponse toPresignedUrlResponse(String uploadUrl) {
+        return Cheese4cutPresignedUrlResponse.builder()
+                .uploadUrl(uploadUrl).build();
     }
 }

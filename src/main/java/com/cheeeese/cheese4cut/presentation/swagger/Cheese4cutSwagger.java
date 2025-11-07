@@ -1,9 +1,12 @@
 package com.cheeeese.cheese4cut.presentation.swagger;
 
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
+import com.cheeeese.global.util.CurrentUser;
+import com.cheeeese.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -34,48 +37,7 @@ public interface Cheese4cutSwagger {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "치즈네컷 정보 조회가 성공적으로 실행되었습니다.",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(oneOf = {Cheese4cutPreviewResponse.class, Cheese4cutFinalResponse.class}),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Case 1: 확정 전 미리보기 (버튼 활성화)",
-                                            description = "완료된 사진이 4장 이상이며, 최종 확정 전 상태.",
-                                            value = """
-                                                    {
-                                                      "isSuccess": true,
-                                                      "code": 200,
-                                                      "message": "치즈네컷 정보 조회가 성공적으로 실행되었습니다.",
-                                                      "result": {
-                                                        "isFinalized": false,
-                                                        "previewPhotos": [
-                                                          {"photoId": 101, "imageUrl": "https://cdn.img/101_orig.jpg"},
-                                                          // ... 4 photos
-                                                        ],
-                                                        "uniqueLikesCount": 5,
-                                                        "participant": 6
-                                                      }
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Case 2: 확정 후 최종 이미지",
-                                            description = "앨범이 만료되어 치즈네컷이 자동/수동 확정된 상태.",
-                                            value = """
-                                                    {
-                                                      "isSuccess": true,
-                                                      "code": 200,
-                                                      "message": "치즈네컷 정보 조회가 성공적으로 실행되었습니다.",
-                                                      "result": {
-                                                        "isFinalized": true,
-                                                        "finalFrameImageUrl": "https://cdn.img/cheese4cut/final/1.png"
-                                                      }
-                                                    }
-                                                    """
-                                    )
-                            }
-                    )
+                    description = "치즈네컷 정보 조회가 성공적으로 실행되었습니다."
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -111,6 +73,26 @@ public interface Cheese4cutSwagger {
             )
     })
     CommonResponse<Cheese4cutResponse> getCheese4cut(
+            @PathVariable String code
+    );
+
+    @Operation(
+            summary = "치즈네컷 최종 이미지 업로드용 Presigned URL 발급 API",
+            description = """ 
+                    ### 로직 상세
+                    ---
+                    1. 사용자 권한 확인 (MAKER 혹은 참여자만 가능)
+                    2. **치즈네컷 전용 버킷**에 저장할 Presigned URL을 발급하여 반환
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Presigned URL 발급이 성공적으로 완료되었습니다."
+            )
+    })
+    CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
+            @CurrentUser User user,
             @PathVariable String code
     );
 }
