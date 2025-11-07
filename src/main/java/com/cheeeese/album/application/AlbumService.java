@@ -50,9 +50,9 @@ public class AlbumService {
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
         String code = UuidCreator.getTimeOrdered().toString();
 
-        long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
+        // long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
 
-        albumValidator.validateAlbumCreation(createdThisWeek, request);
+        albumValidator.validateAlbumCreation(request);
 
         Album album = AlbumMapper.toEntity(
                 user.getId(),
