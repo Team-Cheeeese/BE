@@ -1,10 +1,9 @@
 package com.cheeeese.cheese4cut.presentation.swagger;
 
+import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
-import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
-import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +13,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "[치즈네컷]", description = "치즈네컷 관련 API")
 public interface Cheese4cutSwagger {
@@ -94,5 +95,49 @@ public interface Cheese4cutSwagger {
     CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
             @CurrentUser User user,
             @PathVariable String code
+    );
+
+    @Operation(
+            summary = "치즈네컷 수동 확정 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드
+                    
+                    ### RequestBody
+                    ---
+                    `photoIds`: 사용자가 최종 선택한 4장의 사진 ID \n
+                    `frameImageUrl`: 전체 프레임 이미지 URL
+                    
+                    ### 로직 상세
+                    ---
+                    1. 사용자 권한 확인 (MAKER만 가능).
+                    2. 앨범 만료 및 이미 확정 여부 확인.
+                    3. 요청된 4장의 사진 ID가 모두 **COMPLETED 상태**이고 해당 앨범에 속하는지 검증.
+                    4. `Cheese4cut` 레코드를 생성하고 저장.
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "치즈네컷 수동 확정이 성공적으로 완료되었습니다."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "유효성 검증 실패 (사진 개수/상태 오류)"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "권한 없음 (MAKER가 아님) 또는 만료된 앨범"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "이미 치즈네컷이 확정되었습니다."
+            )
+    })
+    CommonResponse<Void> finalizeCheese4cut(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @RequestBody @Valid Cheese4cutFixedRequest request
     );
 }
