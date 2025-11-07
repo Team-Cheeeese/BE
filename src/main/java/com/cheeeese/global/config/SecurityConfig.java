@@ -37,6 +37,7 @@ public class SecurityConfig {
             "/v1/auth/exchange",
             "/v1/auth/reissue",
             "/v1/album/*/invitation",
+            "/v1/cheese4cut/*/preview",
             "/internal/thumbnail/complete"
     };
 
