@@ -5,10 +5,14 @@ import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.dto.response.*;
 import com.cheeeese.album.presentation.swagger.AlbumSwagger;
 import com.cheeeese.global.common.CommonResponse;
+import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.*;
@@ -19,6 +23,7 @@ import static com.cheeeese.global.common.code.SuccessCode.*;
 public class AlbumController implements AlbumSwagger {
 
     private final AlbumService albumService;
+    private final UserRepository userRepository;
 
     @Override
     @PostMapping
@@ -60,12 +65,22 @@ public class AlbumController implements AlbumSwagger {
     @Override
     @GetMapping("/{code}/participants")
     public CommonResponse<AlbumParticipantResponse> getAlbumParticipants(
-            @CurrentUser User user,
+            Authentication authentication,
             @PathVariable String code
     ) {
+        User currentUser = null;
+
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof CustomUserDetails customUserDetails) {
+                currentUser = customUserDetails.getUser();
+            }
+        }
+
       return CommonResponse.success(
               ALBUM_PARTICIPANT_FETCH_SUCCESS,
-              albumService.getAlbumParticipantList(user,code)
+              albumService.getAlbumParticipantList(currentUser,code)
       );
     }
 

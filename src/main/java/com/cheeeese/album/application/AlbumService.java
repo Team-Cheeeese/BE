@@ -144,16 +144,21 @@ public class AlbumService {
 
         boolean isExpired = album.isExpired();
 
-        // 참여 여부 검증
-        UserAlbum myUserAlbum = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId())
-                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+        Role myRole = null;
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
 
-        Role myRole = myUserAlbum.getRole();
+        if (currentUserId != null) {
+            Optional<UserAlbum> myUserAlbumOptional = userAlbumRepository.findByUserIdAndAlbumId(currentUserId, album.getId());
+
+            if (myUserAlbumOptional.isPresent()) {
+                myRole = myUserAlbumOptional.get().getRole();
+            }
+        }
 
         // 앨범의 전체 참여자 목록
         List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumId(album.getId());
 
-        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUser);
+        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUserId);
 
         return UserAlbumMapper.toAlbumParticipantResponse(
                 album,
@@ -203,13 +208,13 @@ public class AlbumService {
 
     private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
             List<UserAlbum> userAlbums,
-            User currentUser
+            Long currentUserId
     ) {
         return userAlbums.stream()
                 .map(userAlbum -> {
                     User user = userAlbum.getUser();
                     Role role = userAlbum.getRole();
-                    boolean isMe = user.getId().equals(currentUser.getId());
+                    boolean isMe = currentUserId != null && user.getId().equals(currentUserId);
                     return UserAlbumMapper.toParticipantInfo(user, role, isMe);
                 })
                 .sorted(Comparator
