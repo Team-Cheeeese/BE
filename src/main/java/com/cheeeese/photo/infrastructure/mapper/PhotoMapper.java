@@ -124,12 +124,19 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoDetailResponse toPhotoDetailResponse(Photo photo, boolean isLiked, boolean isDownloaded, boolean isRecentlyDownloaded) {
+    public static PhotoDetailResponse toPhotoDetailResponse(
+            Photo photo,
+            String imageUrl,
+            String thumbnailUrl,
+            boolean isLiked,
+            boolean isDownloaded,
+            boolean isRecentlyDownloaded
+    ) {
         return PhotoDetailResponse.builder()
                 .name(photo.getUser().getName())
                 .photoId(photo.getId())
-                .imageUrl(photo.getImageUrl())
-                .thumbnailUrl(photo.getThumbnailUrl())
+                .imageUrl(imageUrl)
+                .thumbnailUrl(thumbnailUrl)
                 .likesCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)

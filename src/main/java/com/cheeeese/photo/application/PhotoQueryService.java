@@ -96,13 +96,16 @@ public class PhotoQueryService {
         Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
 
+        String resolveOriginalUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
+        String resolveThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getImageUrl());
+
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAtAfter(
                 user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
         );
 
-        return PhotoMapper.toPhotoDetailResponse(photo, isLiked, isDownloaded, isRecentlyDownloaded);
+        return PhotoMapper.toPhotoDetailResponse(photo, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded);
     }
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
