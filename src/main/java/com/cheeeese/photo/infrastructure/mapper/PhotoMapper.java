@@ -42,11 +42,15 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoDownloadResponse.DownloadFileInfo toDownloadPresignedUrlInfo(Photo photo, String downloadUrl) {
+    public static PhotoDownloadResponse.DownloadFileInfo toDownloadPresignedUrlInfo(
+            Photo photo,
+            String fileName,
+            String downloadUrl
+    ) {
         return PhotoDownloadResponse.DownloadFileInfo.builder()
                 .photoId(photo.getId())
                 .downloadUrl(downloadUrl)
-                .fileName(photo.getImageUrl())
+                .fileName(fileName)
                 .captureTime(photo.getCaptureTime())
                 .createdAt(photo.getCreatedAt())
                 .build();

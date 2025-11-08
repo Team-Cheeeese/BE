@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class S3Util {
+
     public static String extractObjectKey(String imageUrl) {
         if (imageUrl == null) {
             throw new NullPointerException("image url is null");
@@ -22,5 +23,24 @@ public class S3Util {
             return imageUrl;
         }
         return imageUrl;
+    }
+
+    public static String extractFileName(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return "unnamed.jpg";
+        }
+        String normalized = imageUrl.replace('\\', '/');
+
+        int lastSlashIdx = normalized.lastIndexOf('/');
+        String fileName = (lastSlashIdx >= 0)
+                ? normalized.substring(lastSlashIdx + 1)
+                : normalized;
+
+        int underscoreIdx = fileName.indexOf('_');
+        if (underscoreIdx >= 0 && underscoreIdx < fileName.length() - 1) {
+            fileName = fileName.substring(underscoreIdx + 1);
+        }
+
+        return fileName;
     }
 }

@@ -94,6 +94,7 @@ public class PhotoService {
                 .map(photo -> PhotoHistoryMapper.toEntity(user, photo))
                 .toList();
 
+        // TODO: 1시간 이내 다운로드 했을 시, presigned url 발급 방지 로직 추가
         photoHistoryRepository.saveAll(histories);
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
@@ -200,10 +201,11 @@ public class PhotoService {
         // TODO: 앨범 validate 수정
         albumValidator.validateAlbumCode(album.getCode());
 
+        String fileName = S3Util.extractFileName(photo.getImageUrl());
         String objectKey = S3Util.extractObjectKey(photo.getImageUrl());
         String url = presignedUrlService.generatePresignedGetUrl(objectKey);
 
-        return PhotoMapper.toDownloadPresignedUrlInfo(photo, url);
+        return PhotoMapper.toDownloadPresignedUrlInfo(photo, fileName, url);
     }
 
     private String sanitizeFileName(String raw) {
