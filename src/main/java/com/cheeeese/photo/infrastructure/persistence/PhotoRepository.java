@@ -31,7 +31,6 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         JOIN PhotoLikes pl ON pl.photo = p
         WHERE a.code = :albumCode
         AND pl.user.id = :userId
-        ORDER BY p.createdAt DESC
     """)
     Slice<Photo> findLikedPhotosByAlbumAndUser(
             @Param("albumCode") String albumCode,
