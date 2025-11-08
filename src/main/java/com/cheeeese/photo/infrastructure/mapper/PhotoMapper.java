@@ -41,9 +41,19 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoDownloadResponse toPhotoDownloadResponse(Photo photo) {
+    public static PhotoDownloadResponse.DownloadFileInfo toDownloadPresignedUrlInfo(Photo photo, String downloadUrl) {
+        return PhotoDownloadResponse.DownloadFileInfo.builder()
+                .photoId(photo.getId())
+                .downloadUrl(downloadUrl)
+                .fileName(photo.getImageUrl())
+                .captureTime(photo.getCaptureTime())
+                .createdAt(photo.getCreatedAt())
+                .build();
+    }
+
+    public static PhotoDownloadResponse toPhotoDownloadResponse(List<PhotoDownloadResponse.DownloadFileInfo> downloadFileInfos) {
         return PhotoDownloadResponse.builder()
-                .fileName()
+                .downloadFiles(downloadFileInfos)
                 .build();
     }
 

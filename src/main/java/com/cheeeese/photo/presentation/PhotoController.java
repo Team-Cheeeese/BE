@@ -3,8 +3,10 @@ package com.cheeeese.photo.presentation;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.photo.application.PhotoService;
+import com.cheeeese.photo.dto.request.PhotoDownloadRequest;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.dto.request.PhotoUploadReportRequest;
+import com.cheeeese.photo.dto.response.PhotoDownloadResponse;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.photo.presentation.swagger.PhotoSwagger;
 import com.cheeeese.user.domain.User;
@@ -29,6 +31,14 @@ public class PhotoController implements PhotoSwagger {
             @RequestBody @Valid PhotoPresignedUrlRequest request
     ) {
         return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS, photoService.createPresignedUrls(user, request));
+    }
+
+    @PostMapping("/download-url")
+    public CommonResponse<PhotoDownloadResponse> getDownloadPresignedUrls(
+            @CurrentUser User user,
+            @RequestBody @Valid PhotoDownloadRequest request
+    ) {
+        return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS, photoService.getDownloadPresignedUrls(user, request));
     }
 
     @Override

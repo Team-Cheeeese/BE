@@ -3,8 +3,10 @@ package com.cheeeese.photo.application;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.global.util.S3Util;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoHistory;
 import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoDownloadRequest;
@@ -14,6 +16,7 @@ import com.cheeeese.photo.dto.response.PhotoDownloadResponse;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
+import com.cheeeese.photo.infrastructure.mapper.PhotoHistoryMapper;
 import com.cheeeese.photo.infrastructure.mapper.PhotoLikesMapper;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
@@ -80,20 +83,20 @@ public class PhotoService {
     }
 
     @Transactional
-    public PhotoPresignedUrlResponse createDownloadPresignedUrls(User user, PhotoDownloadRequest request) {
-        // 1. 권한 검증
+    public PhotoDownloadResponse getDownloadPresignedUrls(User user, PhotoDownloadRequest request) {
         Album album = validateAlbumAndPermission(user, request.code());
 
-        // 2. 사진 목록 조회
         List<Photo> photos = photoRepository.findAllByIdIn(request.photoIds());
 
-        // 3. 다운로드용 url 생성
+        List<PhotoDownloadResponse.DownloadFileInfo> presignedUrls = generateDownloadPresignedUrls(user, album, photos);
 
+        List<PhotoHistory> histories = photos.stream()
+                .map(photo -> PhotoHistoryMapper.toEntity(user, photo))
+                .toList();
 
-        // 4. history 저장
+        photoHistoryRepository.saveAll(histories);
 
-
-        return PhotoMapper.toPresignedUrlResponse(null);
+        return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
 
     @Transactional
@@ -160,6 +163,16 @@ public class PhotoService {
                 .collect(Collectors.toList());
     }
 
+    private List<PhotoDownloadResponse.DownloadFileInfo> generateDownloadPresignedUrls(
+            User user,
+            Album album,
+            List<Photo> photos
+    ) {
+        return photos.stream()
+                .map(photo -> createPresignedUrlForDownload(user, album, photo))
+                .toList();
+    }
+
     private PhotoPresignedUrlResponse.PresignedUrlInfo createPresignedUrlForFile(
             User user,
             Album album,
@@ -183,11 +196,14 @@ public class PhotoService {
         return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
     }
 
-    private PhotoPresignedUrlResponse.PresignedUrlInfo createPresignedUrlForDownload(User user, Album album, Photo photo) {
-        String objectKey = String.format(ORIGINAL_PHOTO_PATH_FORMAT);
+    private PhotoDownloadResponse.DownloadFileInfo createPresignedUrlForDownload(User user, Album album, Photo photo) {
+        // TODO: 앨범 validate 수정
+        albumValidator.validateAlbumCode(album.getCode());
+
+        String objectKey = S3Util.extractObjectKey(photo.getImageUrl());
         String url = presignedUrlService.generatePresignedGetUrl(objectKey);
 
-        return PhotoMapper.toPresignedUrlInfo(photo.getId(), url);
+        return PhotoMapper.toDownloadPresignedUrlInfo(photo, url);
     }
 
     private String sanitizeFileName(String raw) {

@@ -1,6 +1,7 @@
 package com.cheeeese.album.application.validator;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.exception.AlbumException;
