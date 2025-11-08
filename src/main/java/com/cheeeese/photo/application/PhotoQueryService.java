@@ -34,7 +34,7 @@ public class PhotoQueryService {
     private final PhotoHistoryRepository photoHistoryRepository;
     private final RedisCacheUtil redisCacheUtil;
 
-    private static final String PHOTO_KEY = "album:%s:photos:sort:%s:page:%d:version:%d";
+    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:version:%d";
     private static final String VERSION_KEY = "cache:album:%s:version";
 
     public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
