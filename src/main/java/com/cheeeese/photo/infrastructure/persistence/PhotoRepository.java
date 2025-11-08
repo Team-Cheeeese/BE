@@ -21,7 +21,6 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         FROM Photo p
         JOIN p.album a
         WHERE a.code = :code
-        ORDER BY p.createdAt DESC
     """)
     Slice<Photo> findAllByAlbumCode(@Param("code") String code, Pageable pageable);
 

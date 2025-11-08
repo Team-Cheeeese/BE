@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,14 +34,14 @@ public class PhotoQueryService {
     private final PhotoHistoryRepository photoHistoryRepository;
     private final RedisCacheUtil redisCacheUtil;
 
-    private static final String PHOTO_KEY = "album:%s:photos:page:%d:version:%d";
-    private static final String VERSION_KEY = "album:%s:version";
+    private static final String PHOTO_KEY = "album:%s:photos:sort:%s:page:%d:version:%d";
+    private static final String VERSION_KEY = "cache:album:%s:version";
 
     public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
         String versionKey = String.format(VERSION_KEY, code);
         Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
-        String photoKey = String.format(PHOTO_KEY, code, page, curVersion);
+        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, curVersion);
         PhotoPageResponse cachedList = redisCacheUtil.getObject(photoKey, PhotoPageResponse.class);
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
