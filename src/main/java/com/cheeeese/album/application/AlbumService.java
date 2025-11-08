@@ -11,6 +11,7 @@ import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
@@ -22,6 +23,8 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -139,7 +142,10 @@ public class AlbumService {
         );
     }
 
-    public AlbumParticipantResponse getAlbumParticipantList(User currentUser, String code) {
+    public AlbumParticipantResponse getAlbumParticipantList(Authentication authentication, String code) {
+
+        User currentUser = extractUser(authentication);
+
         Album album = albumValidator.validateAlbumCode(code);
 
         boolean isExpired = album.isExpired();
@@ -166,6 +172,17 @@ public class AlbumService {
                 myRole,
                 participantInfos
         );
+    }
+
+    private User extractUser(Authentication authentication) {
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+        return null;
     }
 
     private int calculateRemainingUploadSlots(Album album) {
