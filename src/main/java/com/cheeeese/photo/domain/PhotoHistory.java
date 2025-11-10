@@ -37,4 +37,8 @@ public class PhotoHistory extends BaseEntity {
         this.user = user;
         this.photo = photo;
     }
+
+    public void touch() {
+        this.markUpdated();
+    }
 }

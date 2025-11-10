@@ -2,6 +2,7 @@ package com.cheeeese.photo.application;
 
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.util.RedisCacheUtil;
+import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.photo.exception.PhotoException;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -32,15 +34,16 @@ public class PhotoQueryService {
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
     private final RedisCacheUtil redisCacheUtil;
+    private final CdnUrlResolver cdnUrlResolver;
 
-    private static final String PHOTO_KEY = "album:%s:photos:page:%d:version:%d";
-    private static final String VERSION_KEY = "album:%s:version";
+    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:version:%d";
+    private static final String VERSION_KEY = "cache:album:%s:version";
 
     public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
         String versionKey = String.format(VERSION_KEY, code);
         Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
-        String photoKey = String.format(PHOTO_KEY, code, page, curVersion);
+        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, curVersion);
         PhotoPageResponse cachedList = redisCacheUtil.getObject(photoKey, PhotoPageResponse.class);
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
@@ -94,19 +97,22 @@ public class PhotoQueryService {
         Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
 
+        String resolveOriginalUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
+        String resolveThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAtAfter(
                 user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
         );
 
-        return PhotoMapper.toPhotoDetailResponse(photo, isLiked, isDownloaded, isRecentlyDownloaded);
+        return PhotoMapper.toPhotoDetailResponse(photo, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded);
     }
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
         PageRequest pageRequest = PageRequest.of(page, size, getPhotoSortingOption(albumSorting));
         Slice<Photo> photos = photoRepository.findAllByAlbumCode(code, pageRequest);
-        return PhotoMapper.toPhotoPageResponse(photos);
+        return PhotoMapper.toPhotoPageResponse(photos, cdnUrlResolver);
     }
 
     private PhotoPageResponse attachUserStatus(User user, PhotoPageResponse response) {
@@ -162,9 +168,10 @@ public class PhotoQueryService {
         return photos.stream()
                 .map(photo -> {
                     Long id = photo.getId();
+                    String resolvedThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
                     boolean isDownloaded = downloaded.contains(id);
                     boolean isRecentlyDownloaded = recent.contains(id);
-                    return PhotoMapper.toPhotoLikedResponse(photo, isDownloaded, isRecentlyDownloaded);
+                    return PhotoMapper.toPhotoLikedResponse(photo, resolvedThumbnailUrl, isDownloaded, isRecentlyDownloaded);
                 })
                 .toList();
     }

@@ -1,6 +1,7 @@
 package com.cheeeese.photo.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.*;
@@ -41,28 +42,61 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoListResponse toPhotoListResponse(Photo photo, boolean isLiked, boolean isDownloaded) {
+    public static PhotoDownloadResponse.DownloadFileInfo toDownloadPresignedUrlInfo(
+            Photo photo,
+            String fileName,
+            String downloadUrl
+    ) {
+        return PhotoDownloadResponse.DownloadFileInfo.builder()
+                .photoId(photo.getId())
+                .downloadUrl(downloadUrl)
+                .fileName(fileName)
+                .captureTime(photo.getCaptureTime())
+                .createdAt(photo.getCreatedAt())
+                .build();
+    }
+
+    public static PhotoDownloadResponse toPhotoDownloadResponse(List<PhotoDownloadResponse.DownloadFileInfo> downloadFileInfos) {
+        return PhotoDownloadResponse.builder()
+                .downloadFiles(downloadFileInfos)
+                .build();
+    }
+
+    public static PhotoListResponse toPhotoListResponse(
+            Photo photo,
+            String thumbnailUrl,
+            boolean isLiked,
+            boolean isDownloaded
+    ) {
         return PhotoListResponse.builder()
                 .photoId(photo.getId())
-                .thumbnailUrl(photo.getThumbnailUrl())
+                .thumbnailUrl(thumbnailUrl)
                 .likeCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
                 .build();
     }
 
-    public static PhotoLikedResponse toPhotoLikedResponse(Photo photo, boolean isDownloaded, boolean isRecentlyDownloaded) {
+    public static PhotoLikedResponse toPhotoLikedResponse(
+            Photo photo,
+            String thumbnailUrl,
+            boolean isDownloaded,
+            boolean isRecentlyDownloaded
+    ) {
         return PhotoLikedResponse.builder()
                 .photoId(photo.getId())
-                .thumbnailUrl(photo.getThumbnailUrl())
+                .thumbnailUrl(thumbnailUrl)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
     }
 
-    public static PhotoPageResponse toPhotoPageResponse(Slice<Photo> photos) {
+    public static PhotoPageResponse toPhotoPageResponse(Slice<Photo> photos, CdnUrlResolver cdnUrlResolver) {
         List<PhotoListResponse> responses = photos.getContent().stream()
-                .map(photo -> PhotoMapper.toPhotoListResponse(photo, false, false))
+                .map(photo -> {
+                    String resolvedUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    return PhotoMapper.toPhotoListResponse(photo, resolvedUrl, false, false);
+                })
                 .toList();
 
         return PhotoPageResponse.builder()
@@ -94,12 +128,19 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoDetailResponse toPhotoDetailResponse(Photo photo, boolean isLiked, boolean isDownloaded, boolean isRecentlyDownloaded) {
+    public static PhotoDetailResponse toPhotoDetailResponse(
+            Photo photo,
+            String imageUrl,
+            String thumbnailUrl,
+            boolean isLiked,
+            boolean isDownloaded,
+            boolean isRecentlyDownloaded
+    ) {
         return PhotoDetailResponse.builder()
                 .name(photo.getUser().getName())
                 .photoId(photo.getId())
-                .imageUrl(photo.getImageUrl())
-                .thumbnailUrl(photo.getThumbnailUrl())
+                .imageUrl(imageUrl)
+                .thumbnailUrl(thumbnailUrl)
                 .likesCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)

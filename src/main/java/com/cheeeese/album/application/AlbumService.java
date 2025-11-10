@@ -12,6 +12,7 @@ import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
+import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
@@ -23,6 +24,8 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,9 +55,9 @@ public class AlbumService {
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
         String code = UuidCreator.getTimeOrdered().toString();
 
-        long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
+        // long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
 
-        albumValidator.validateAlbumCreation(createdThisWeek, request);
+        albumValidator.validateAlbumCreation(request);
 
         Album album = AlbumMapper.toEntity(
                 user.getId(),
@@ -143,21 +146,29 @@ public class AlbumService {
         );
     }
 
-    public AlbumParticipantResponse getAlbumParticipantList(User currentUser, String code) {
+    public AlbumParticipantResponse getAlbumParticipantList(Authentication authentication, String code) {
+
+        User currentUser = extractUser(authentication);
+
         Album album = albumValidator.validateAlbumCode(code);
 
         boolean isExpired = album.isExpired();
 
-        // 참여 여부 검증
-        UserAlbum myUserAlbum = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId())
-                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+        Role myRole = null;
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
 
-        Role myRole = myUserAlbum.getRole();
+        if (currentUserId != null) {
+            Optional<UserAlbum> myUserAlbumOptional = userAlbumRepository.findByUserIdAndAlbumId(currentUserId, album.getId());
+
+            if (myUserAlbumOptional.isPresent()) {
+                myRole = myUserAlbumOptional.get().getRole();
+            }
+        }
 
         // 앨범의 전체 참여자 목록
         List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumId(album.getId());
 
-        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUser);
+        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUserId);
 
         return UserAlbumMapper.toAlbumParticipantResponse(
                 album,
@@ -165,6 +176,17 @@ public class AlbumService {
                 myRole,
                 participantInfos
         );
+    }
+
+    private User extractUser(Authentication authentication) {
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+        return null;
     }
 
     private int calculateRemainingUploadSlots(Album album) {
@@ -207,13 +229,13 @@ public class AlbumService {
 
     private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
             List<UserAlbum> userAlbums,
-            User currentUser
+            Long currentUserId
     ) {
         return userAlbums.stream()
                 .map(userAlbum -> {
                     User user = userAlbum.getUser();
                     Role role = userAlbum.getRole();
-                    boolean isMe = user.getId().equals(currentUser.getId());
+                    boolean isMe = currentUserId != null && user.getId().equals(currentUserId);
                     return UserAlbumMapper.toParticipantInfo(user, role, isMe);
                 })
                 .sorted(Comparator

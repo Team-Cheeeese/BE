@@ -21,7 +21,6 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         FROM Photo p
         JOIN p.album a
         WHERE a.code = :code
-        ORDER BY p.createdAt DESC
     """)
     Slice<Photo> findAllByAlbumCode(@Param("code") String code, Pageable pageable);
 
@@ -32,7 +31,6 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         JOIN PhotoLikes pl ON pl.photo = p
         WHERE a.code = :albumCode
         AND pl.user.id = :userId
-        ORDER BY p.createdAt DESC
     """)
     Slice<Photo> findLikedPhotosByAlbumAndUser(
             @Param("albumCode") String albumCode,
@@ -99,9 +97,11 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     AND p.isDeleted = FALSE
     AND p.status = com.cheeeese.photo.domain.PhotoStatus.COMPLETED
     ORDER BY p.likesCnt DESC, p.createdAt ASC
-""")
+    """)
     List<Long> findTop4CompletedPhotoIdsByLikes(
             @Param("albumId") Long albumId,
             Pageable pageable
     );
+
+    List<Photo> findAllByIdIn(List<Long> photoIds);
 }

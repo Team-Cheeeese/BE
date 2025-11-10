@@ -9,6 +9,7 @@ import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.*;
@@ -60,12 +61,12 @@ public class AlbumController implements AlbumSwagger {
     @Override
     @GetMapping("/{code}/participants")
     public CommonResponse<AlbumParticipantResponse> getAlbumParticipants(
-            @CurrentUser User user,
+            Authentication authentication,
             @PathVariable String code
     ) {
       return CommonResponse.success(
               ALBUM_PARTICIPANT_FETCH_SUCCESS,
-              albumService.getAlbumParticipantList(user,code)
+              albumService.getAlbumParticipantList(authentication, code)
       );
     }
 
