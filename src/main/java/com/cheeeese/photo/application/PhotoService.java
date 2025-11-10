@@ -90,6 +90,8 @@ public class PhotoService {
 
         List<Photo> photos = photoRepository.findAllByIdIn(request.photoIds());
 
+        albumValidator.validateDownloadPermission(album, user, photos);
+
         Set<Long> recentDownloadIds = photoHistoryRepository.findRecentlyDownloadedPhotoIds(
                 user.getId(),
                 request.photoIds(),
@@ -97,7 +99,7 @@ public class PhotoService {
         );
 
         List<PhotoDownloadResponse.DownloadFileInfo> presignedUrls = generateDownloadPresignedUrls(
-                user, album, photos, recentDownloadIds
+                photos, recentDownloadIds
         );
 
         photos.stream()
@@ -106,7 +108,8 @@ public class PhotoService {
                         .ifPresentOrElse(
                                 PhotoHistory::touch,
                                 () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
-                        ));
+                        )
+                );
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
@@ -176,13 +179,11 @@ public class PhotoService {
     }
 
     private List<PhotoDownloadResponse.DownloadFileInfo> generateDownloadPresignedUrls(
-            User user,
-            Album album,
             List<Photo> photos,
             Set<Long> recentDownloadedIds
     ) {
         return photos.stream()
-                .map(photo -> createPresignedUrlForDownload(user, album, photo, recentDownloadedIds))
+                .map(photo -> createPresignedUrlForDownload(photo, recentDownloadedIds))
                 .toList();
     }
 
@@ -209,15 +210,7 @@ public class PhotoService {
         return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
     }
 
-    private PhotoDownloadResponse.DownloadFileInfo createPresignedUrlForDownload(
-            User user,
-            Album album,
-            Photo photo,
-            Set<Long> recentDownloadedIds
-    ) {
-        // TODO: 앨범 validate 수정
-        albumValidator.validateAlbumCode(album.getCode());
-
+    private PhotoDownloadResponse.DownloadFileInfo createPresignedUrlForDownload(Photo photo, Set<Long> recentDownloadedIds) {
         String fileName = S3Util.extractFileName(photo.getImageUrl());
 
         // 1시간 이내 다운로드 O -> null 반환

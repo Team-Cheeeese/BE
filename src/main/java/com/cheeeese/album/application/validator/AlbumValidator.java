@@ -1,18 +1,21 @@
 package com.cheeeese.album.application.validator;
 
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
+import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.exception.PhotoException;
+import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -76,6 +79,16 @@ public class AlbumValidator {
 
         userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+    }
+
+    public void validateDownloadPermission(Album album, User user, List<Photo> photos) {
+        validateUploadPermission(album, user);
+
+        boolean existsPhotoInAlbum = photos.stream().allMatch(photo -> photo.getAlbum().getId().equals(album.getId()));
+
+        if (!existsPhotoInAlbum) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND_IN_ALBUM);
+        }
     }
 
     private void validateAlbumExpiration(Album album) {
