@@ -3,17 +3,23 @@ package com.cheeeese.photo.application;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.global.util.S3Util;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoHistory;
 import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.dto.request.PhotoDownloadRequest;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.dto.request.PhotoUploadReportRequest;
+import com.cheeeese.photo.dto.response.PhotoDownloadResponse;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
+import com.cheeeese.photo.infrastructure.mapper.PhotoHistoryMapper;
 import com.cheeeese.photo.infrastructure.mapper.PhotoLikesMapper;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
+import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
@@ -24,7 +30,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +43,7 @@ public class PhotoService {
     private final UserService userService;
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
+    private final PhotoHistoryRepository photoHistoryRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
@@ -73,6 +82,36 @@ public class PhotoService {
         photoQueryService.invalidatePhotoCache(album.getCode());
 
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
+    }
+
+    @Transactional
+    public PhotoDownloadResponse getDownloadPresignedUrls(User user, PhotoDownloadRequest request) {
+        Album album = validateAlbumAndPermission(user, request.code());
+
+        List<Photo> photos = photoRepository.findAllByIdIn(request.photoIds());
+
+        albumValidator.validateDownloadPermission(album, user, photos);
+
+        Set<Long> recentDownloadIds = photoHistoryRepository.findRecentlyDownloadedPhotoIds(
+                user.getId(),
+                request.photoIds(),
+                LocalDateTime.now().minusHours(1)
+        );
+
+        List<PhotoDownloadResponse.DownloadFileInfo> presignedUrls = generateDownloadPresignedUrls(
+                photos, recentDownloadIds
+        );
+
+        photos.stream()
+                .filter(photo -> !recentDownloadIds.contains(photo.getId()))
+                .forEach(photo -> photoHistoryRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
+                        .ifPresentOrElse(
+                                PhotoHistory::touch,
+                                () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
+                        )
+                );
+
+        return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
 
     @Transactional
@@ -139,6 +178,15 @@ public class PhotoService {
                 .collect(Collectors.toList());
     }
 
+    private List<PhotoDownloadResponse.DownloadFileInfo> generateDownloadPresignedUrls(
+            List<Photo> photos,
+            Set<Long> recentDownloadedIds
+    ) {
+        return photos.stream()
+                .map(photo -> createPresignedUrlForDownload(photo, recentDownloadedIds))
+                .toList();
+    }
+
     private PhotoPresignedUrlResponse.PresignedUrlInfo createPresignedUrlForFile(
             User user,
             Album album,
@@ -160,6 +208,20 @@ public class PhotoService {
         String uploadUrl = presignedUrlService.generatePresignedPutUrl(objectKey, file.contentType());
 
         return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
+    }
+
+    private PhotoDownloadResponse.DownloadFileInfo createPresignedUrlForDownload(Photo photo, Set<Long> recentDownloadedIds) {
+        String fileName = S3Util.extractFileName(photo.getImageUrl());
+
+        // 1시간 이내 다운로드 O -> null 반환
+        if (recentDownloadedIds.contains(photo.getId())) {
+            return PhotoMapper.toDownloadPresignedUrlInfo(photo, fileName, null);
+        }
+
+        String objectKey = S3Util.extractObjectKey(photo.getImageUrl());
+        String url = presignedUrlService.generatePresignedGetUrl(objectKey);
+
+        return PhotoMapper.toDownloadPresignedUrlInfo(photo, fileName, url);
     }
 
     private String sanitizeFileName(String raw) {

@@ -2,8 +2,10 @@ package com.cheeeese.photo.presentation.swagger;
 
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
+import com.cheeeese.photo.dto.request.PhotoDownloadRequest;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.dto.request.PhotoUploadReportRequest;
+import com.cheeeese.photo.dto.response.PhotoDownloadResponse;
 import com.cheeeese.photo.dto.response.PhotoPresignedUrlResponse;
 import com.cheeeese.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "[사진]", description = "사진 업로드 및 관리에 대한 API")
 public interface PhotoSwagger {
     @Operation(
-            summary = "Presigned URL 발급 API",
+            summary = "사진 업로드 Presigned URL 발급 API",
             description = """ 
                     ### RequestBody
                     ---
@@ -151,6 +153,26 @@ public interface PhotoSwagger {
     CommonResponse<Void> reportUploadResult(
             @CurrentUser User user,
             @RequestBody @Valid PhotoUploadReportRequest request
+    );
+
+    @Operation(
+            summary = "사진 다운로드 Presigned Url 발급 API",
+            description = """
+                    ### RequestBody
+                    ---
+                    `code`: 앨범 코드 (String) \n
+                    `photoIds`: 다운로드 받을 사진 ID (List<Long>)
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사진 다운로드 presigned url 발급이 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<PhotoDownloadResponse> getDownloadPresignedUrls(
+            @CurrentUser User user,
+            @RequestBody @Valid PhotoDownloadRequest request
     );
 
     @Operation(
