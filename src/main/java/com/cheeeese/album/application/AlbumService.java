@@ -11,6 +11,7 @@ import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
@@ -45,6 +46,7 @@ public class AlbumService {
     private final UserAlbumRepository userAlbumRepository;
     private final UserRepository userRepository;
     private final PhotoService photoService;
+    private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
@@ -71,6 +73,8 @@ public class AlbumService {
                 album,
                 Role.MAKER
         ));
+
+        albumExpirationRedisRepository.registerAlbum(album.getId());
 
         return AlbumMapper.toCreationResponse(album);
     }

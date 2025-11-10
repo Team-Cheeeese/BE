@@ -66,6 +66,10 @@ public class Album extends BaseEntity {
         return this.expiredAt.isBefore(LocalDateTime.now()) || this.status == AlbumStatus.EXPIRED;
     }
 
+    public void expire() {
+        this.status = AlbumStatus.EXPIRED;
+    }
+
     @Builder
     private Album(
             Long makerId,
