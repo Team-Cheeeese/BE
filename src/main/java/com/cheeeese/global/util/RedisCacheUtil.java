@@ -36,14 +36,9 @@ public class RedisCacheUtil {
     /**
      * 캐시 객체 조회
      */
+    @SuppressWarnings("unchecked")
     public <T> T getObject(String key, Class<T> clazz) {
-        Object value = cacheRedisTemplate.opsForValue().get(key);
-        if (!clazz.isInstance(value)) {
-            throw new IllegalStateException(
-                    "⚠️ Cached value type mismatch. Expected: " + clazz.getName() + " but found " + value.getClass().getName()
-            );
-        }
-        return clazz.cast(value);
+        return (T) cacheRedisTemplate.opsForValue().get(key);
     }
 
     /**
