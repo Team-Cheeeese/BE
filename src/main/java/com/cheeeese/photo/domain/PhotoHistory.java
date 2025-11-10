@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Table(
@@ -36,5 +38,9 @@ public class PhotoHistory extends BaseEntity {
     private PhotoHistory(User user, Photo photo) {
         this.user = user;
         this.photo = photo;
+    }
+
+    public void touch() {
+        this.markUpdated();
     }
 }

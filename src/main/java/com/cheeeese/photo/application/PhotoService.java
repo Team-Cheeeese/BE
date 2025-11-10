@@ -30,7 +30,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,14 +90,23 @@ public class PhotoService {
 
         List<Photo> photos = photoRepository.findAllByIdIn(request.photoIds());
 
-        List<PhotoDownloadResponse.DownloadFileInfo> presignedUrls = generateDownloadPresignedUrls(user, album, photos);
+        Set<Long> recentDownloadIds = photoHistoryRepository.findRecentlyDownloadedPhotoIds(
+                user.getId(),
+                request.photoIds(),
+                LocalDateTime.now().minusHours(1)
+        );
 
-        List<PhotoHistory> histories = photos.stream()
-                .map(photo -> PhotoHistoryMapper.toEntity(user, photo))
-                .toList();
+        List<PhotoDownloadResponse.DownloadFileInfo> presignedUrls = generateDownloadPresignedUrls(
+                user, album, photos, recentDownloadIds
+        );
 
-        // TODO: 1시간 이내 다운로드 했을 시, presigned url 발급 방지 로직 추가
-        photoHistoryRepository.saveAll(histories);
+        photos.stream()
+                .filter(photo -> !recentDownloadIds.contains(photo.getId()))
+                .forEach(photo -> photoHistoryRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
+                        .ifPresentOrElse(
+                                PhotoHistory::touch,
+                                () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
+                        ));
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
@@ -167,10 +178,11 @@ public class PhotoService {
     private List<PhotoDownloadResponse.DownloadFileInfo> generateDownloadPresignedUrls(
             User user,
             Album album,
-            List<Photo> photos
+            List<Photo> photos,
+            Set<Long> recentDownloadedIds
     ) {
         return photos.stream()
-                .map(photo -> createPresignedUrlForDownload(user, album, photo))
+                .map(photo -> createPresignedUrlForDownload(user, album, photo, recentDownloadedIds))
                 .toList();
     }
 
@@ -197,11 +209,22 @@ public class PhotoService {
         return PhotoMapper.toPresignedUrlInfo(photo.getId(), uploadUrl);
     }
 
-    private PhotoDownloadResponse.DownloadFileInfo createPresignedUrlForDownload(User user, Album album, Photo photo) {
+    private PhotoDownloadResponse.DownloadFileInfo createPresignedUrlForDownload(
+            User user,
+            Album album,
+            Photo photo,
+            Set<Long> recentDownloadedIds
+    ) {
         // TODO: 앨범 validate 수정
         albumValidator.validateAlbumCode(album.getCode());
 
         String fileName = S3Util.extractFileName(photo.getImageUrl());
+
+        // 1시간 이내 다운로드 O -> null 반환
+        if (recentDownloadedIds.contains(photo.getId())) {
+            return PhotoMapper.toDownloadPresignedUrlInfo(photo, fileName, null);
+        }
+
         String objectKey = S3Util.extractObjectKey(photo.getImageUrl());
         String url = presignedUrlService.generatePresignedGetUrl(objectKey);
 
