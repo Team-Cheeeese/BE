@@ -33,14 +33,6 @@ public class PhotoController implements PhotoSwagger {
         return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS, photoService.createPresignedUrls(user, request));
     }
 
-    @PostMapping("/download-url")
-    public CommonResponse<PhotoDownloadResponse> getDownloadPresignedUrls(
-            @CurrentUser User user,
-            @RequestBody @Valid PhotoDownloadRequest request
-    ) {
-        return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS, photoService.getDownloadPresignedUrls(user, request));
-    }
-
     @Override
     @PostMapping("/report")
     public CommonResponse<Void> reportUploadResult(
@@ -49,6 +41,15 @@ public class PhotoController implements PhotoSwagger {
     ) {
         photoService.reportUploadResult(user, request);
         return CommonResponse.success(PHOTO_UPLOAD_REPORT_SUCCESS);
+    }
+
+    @Override
+    @PostMapping("/download-url")
+    public CommonResponse<PhotoDownloadResponse> getDownloadPresignedUrls(
+            @CurrentUser User user,
+            @RequestBody @Valid PhotoDownloadRequest request
+    ) {
+        return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS, photoService.getDownloadPresignedUrls(user, request));
     }
 
     @Override
