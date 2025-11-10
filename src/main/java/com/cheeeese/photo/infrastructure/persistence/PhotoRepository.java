@@ -98,7 +98,7 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     WHERE p.album.id = :albumId
     AND p.isDeleted = FALSE
     AND p.status = com.cheeeese.photo.domain.PhotoStatus.COMPLETED
-    ORDER BY p.likesCnt DESC, p.createdAt DESC
+    ORDER BY p.likesCnt DESC, p.createdAt ASC
 """)
     List<Long> findTop4CompletedPhotoIdsByLikes(
             @Param("albumId") Long albumId,
