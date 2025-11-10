@@ -97,7 +97,7 @@ public class PhotoQueryService {
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
 
         String resolveOriginalUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
-        String resolveThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getImageUrl());
+        String resolveThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
 
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());

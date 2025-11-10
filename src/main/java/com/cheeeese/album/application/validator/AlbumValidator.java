@@ -73,22 +73,26 @@ public class AlbumValidator {
     }
 
     public void validateUploadPermission(Album album, User user) { // [NEW]
-        validateAlbumExpiration(album);
-
-        validateUserBlacklisted(album, user);
-
-        userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
-                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+        validateAlbumParticipant(album, user);
     }
 
     public void validateDownloadPermission(Album album, User user, List<Photo> photos) {
-        validateUploadPermission(album, user);
+        validateAlbumParticipant(album, user);
 
         boolean existsPhotoInAlbum = photos.stream().allMatch(photo -> photo.getAlbum().getId().equals(album.getId()));
 
         if (!existsPhotoInAlbum) {
             throw new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND_IN_ALBUM);
         }
+    }
+
+    private void validateAlbumParticipant(Album album, User user) {
+        validateAlbumExpiration(album);
+
+        validateUserBlacklisted(album, user);
+
+        userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
+                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
     }
 
     private void validateAlbumExpiration(Album album) {
