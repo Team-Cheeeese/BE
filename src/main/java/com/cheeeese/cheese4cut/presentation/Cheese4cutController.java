@@ -12,11 +12,13 @@ import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static com.cheeeese.global.common.code.SuccessCode.CHEESE4CUT_FINALIZE_SUCCESS;
 import static com.cheeeese.global.common.code.SuccessCode.PRESIGNED_URL_ISSUE_SUCCESS;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/cheese4cut/{code}")
