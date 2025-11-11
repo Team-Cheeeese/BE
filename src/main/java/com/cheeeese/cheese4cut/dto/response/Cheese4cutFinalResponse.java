@@ -7,10 +7,6 @@ import lombok.Builder;
 @Schema(description = "치즈네컷 확정 완료 응답 DTO (최종 프레임 이미지)")
 public record Cheese4cutFinalResponse(
         @Schema(description = "확정 여부 (항상 true)", example = "true")
-        boolean isFinalized,
-
-        @Schema(description = "최종 프레임 이미지 URL", example = "https://cdn.cheeeese.com/cheese4cut/final/1.png")
-        String finalFrameImageUrl
-
+        boolean isFinalized
 ) implements Cheese4cutResponse {
 }

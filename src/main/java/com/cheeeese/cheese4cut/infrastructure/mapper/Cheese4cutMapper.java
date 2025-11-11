@@ -18,10 +18,10 @@ public class Cheese4cutMapper {
     /**
      * 확정 후 응답 (Cheese4cut 엔티티 기반)
      */
-    public static Cheese4cutFinalResponse toFinalResponse(Cheese4cut cheese4cut) {
+    // TODO: 프레임 이미지 제거에 따른 응답 형식 수정하기
+    public static Cheese4cutFinalResponse toFinalResponse() {
         return Cheese4cutFinalResponse.builder()
                 .isFinalized(true)
-                .finalFrameImageUrl(cheese4cut.getFrameImageUrl())
                 .build();
     }
 
@@ -55,18 +55,16 @@ public class Cheese4cutMapper {
         return Cheese4cut.builder()
                 .album(album)
                 .photoIds(request.photoIds())
-                .frameImageUrl(request.frameImageUrl())
                 .build();
     }
 
     /**
      * 만료 자동 확정 시 (top4 사진 및 기본 프레임 기반)
      */
-    public static Cheese4cut toEntity(Album album, List<Long> photoIds, String frameImageUrl) {
+    public static Cheese4cut toEntity(Album album, List<Long> photoIds) {
         return Cheese4cut.builder()
                 .album(album)
                 .photoIds(photoIds)
-                .frameImageUrl(frameImageUrl)
                 .build();
     }
 

@@ -23,8 +23,7 @@ import java.util.List;
 public class AlbumExpirationService {
 
     private static final int CHEESE4CUT_PHOTO_COUNT = 4;
-    // TODO: 치즈네컷 생성 로직을 프론트에서 하면 스케줄러가 만료된 앨범에 대해서 만료되었다고 프론트에 알려서 치즈네컷 이미지 업로드(?)
-    private static final String DEFAULT_FRAME_IMAGE_URL = "";
+    // TODO: 최종 프레임 백엔드에서 저장안함에 따라 photo 4장만 저장
 
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
@@ -59,7 +58,7 @@ public class AlbumExpirationService {
             return;
         }
 
-        Cheese4cut cheese4cut = Cheese4cutMapper.toEntity(album, topPhotoIds, DEFAULT_FRAME_IMAGE_URL);
+        Cheese4cut cheese4cut = Cheese4cutMapper.toEntity(album, topPhotoIds);
 
         cheese4cutRepository.save(cheese4cut);
         log.info("[AlbumExpiration] Cheese4cut created automatically for album id={}", albumId);

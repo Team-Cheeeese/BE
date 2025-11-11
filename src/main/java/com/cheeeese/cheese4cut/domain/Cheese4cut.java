@@ -32,14 +32,11 @@ public class Cheese4cut extends BaseEntity {
     @Size(min = 4, max = 4)
     private List<Long> photoIds;
 
-    @Column(name = "frame_image_url", nullable = false)
-    private String frameImageUrl;
 
     @Builder
-    private Cheese4cut(Album album, List<Long> photoIds, String frameImageUrl) {
+    private Cheese4cut(Album album, List<Long> photoIds) {
         this.album = album;
         this.photoIds = photoIds;
-        this.frameImageUrl = frameImageUrl;
     }
 }
 

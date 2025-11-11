@@ -47,7 +47,7 @@ public class Cheese4cutController implements Cheese4cutSwagger {
     @PostMapping("/fixed")
     public CommonResponse<Void> finalizeCheese4cut(
             @CurrentUser User user,
-            @PathVariable String code,
+            @PathVariable @NotBlank String code,
             @RequestBody @Valid Cheese4cutFixedRequest request
     ) {
         cheese4cutService.finalizeCheese4cut(user, code, request);

@@ -14,10 +14,6 @@ public record Cheese4cutFixedRequest(
         @NotEmpty
         @Size(min = 4, max = 4, message = "4장의 사진 ID를 선택해야 합니다.")
         @Schema(description = "선택된 사진 ID 목록 (정확히 4개)", example = "[101, 105, 122, 140]")
-        List<Long> photoIds,
-
-        @NotBlank
-        @Schema(description = "최종 합성된 이미지의 Object Storage URL", example = "https://cheese4cut/album/1.png")
-        String frameImageUrl
+        List<Long> photoIds
 ) {
 }
