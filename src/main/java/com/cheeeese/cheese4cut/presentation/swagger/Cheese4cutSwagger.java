@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -32,7 +33,7 @@ public interface Cheese4cutSwagger {
                     이 API는 앨범의 **치즈네컷 확정 상태**에 따라 응답 형태가 달라지는 다형적(Polymorphic) 응답을 반환합니다.
                     
                     1. **확정 전 (isFinalized: false)**: 좋아요 TOP 4 사진의 원본 URL, 유니크 좋아요 수, 전체 참여자 수를 제공합니다.
-                    2. **확정 후 (isFinalized: true)**: 최종 프레임 이미지 URL만 제공합니다. (만료 이벤트 또는 수동 확정 완료)
+                    2. **확정 후 (isFinalized: true)**: 확정된 좋아요 TOP 4 사진의 원본 URL
                     """
     )
     @ApiResponses(value = {
@@ -74,7 +75,7 @@ public interface Cheese4cutSwagger {
             )
     })
     CommonResponse<Cheese4cutResponse> getCheese4cut(
-            @PathVariable String code
+            @PathVariable @NotBlank String code
     );
 
     @Operation(
@@ -94,7 +95,7 @@ public interface Cheese4cutSwagger {
     })
     CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
             @CurrentUser User user,
-            @PathVariable String code
+            @PathVariable @NotBlank String code
     );
 
     @Operation(
@@ -107,7 +108,6 @@ public interface Cheese4cutSwagger {
                     ### RequestBody
                     ---
                     `photoIds`: 사용자가 최종 선택한 4장의 사진 ID \n
-                    `frameImageUrl`: 전체 프레임 이미지 URL
                     
                     ### 로직 상세
                     ---
@@ -137,7 +137,7 @@ public interface Cheese4cutSwagger {
     })
     CommonResponse<Void> finalizeCheese4cut(
             @CurrentUser User user,
-            @PathVariable String code,
+            @PathVariable @NotBlank String code,
             @RequestBody @Valid Cheese4cutFixedRequest request
     );
 }

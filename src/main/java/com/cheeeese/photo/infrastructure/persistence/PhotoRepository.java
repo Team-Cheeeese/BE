@@ -56,8 +56,8 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     void decrementLikeCnt(@Param("photoId") Long photoId);
 
     @Query("""
-        SELECT p 
-        FROM Photo p 
+        SELECT p
+        FROM Photo p
         JOIN FETCH p.user
         WHERE p.album.id = :albumId 
         AND p.isDeleted = FALSE 

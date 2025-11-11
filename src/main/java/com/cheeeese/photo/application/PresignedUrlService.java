@@ -41,7 +41,7 @@ public class PresignedUrlService {
     }
 
     public String generateCheese4cutPresignedPutUrl(String albumCode) {
-        String uniqueFileName = String.format("%s.png", UUID.randomUUID().toString());
+        String uniqueFileName = String.format("%s.png", UUID.randomUUID());
         String objectKey = String.format("album/%s/%s", albumCode, uniqueFileName);
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()

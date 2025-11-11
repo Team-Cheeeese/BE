@@ -51,8 +51,9 @@ public class Cheese4cutService {
 
         Optional<Cheese4cut> cheese4cutOptional = cheese4cutRepository.findByAlbumId(album.getId());
 
+        // TODO: 최종 확정된 4장의 photo 제공으로 변경
         if (cheese4cutOptional.isPresent()) {
-            return Cheese4cutMapper.toFinalResponse(cheese4cutOptional.get());
+            return Cheese4cutMapper.toFinalResponse();
         }
 
         return getPreviewResponse(album.getId(), album.getParticipant());
