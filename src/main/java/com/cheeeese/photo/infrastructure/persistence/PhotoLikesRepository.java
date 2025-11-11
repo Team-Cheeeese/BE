@@ -21,4 +21,11 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
     boolean existsByUserIdAndPhotoId(Long userId, Long photoId);
 
     Optional<PhotoLikes> findByUserIdAndPhotoId(Long userId, Long photoId);
+
+    @Query("""
+        SELECT COUNT(DISTINCT pl.user.id)
+        FROM PhotoLikes pl
+        WHERE pl.photo.id IN :photoIds
+    """)
+    long countDistinctUserIdsByPhotoIds(@Param("photoIds") List<Long> photoIds);
 }

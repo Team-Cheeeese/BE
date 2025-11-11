@@ -56,8 +56,8 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     void decrementLikeCnt(@Param("photoId") Long photoId);
 
     @Query("""
-        SELECT p 
-        FROM Photo p 
+        SELECT p
+        FROM Photo p
         JOIN FETCH p.user
         WHERE p.album.id = :albumId 
         AND p.isDeleted = FALSE 
@@ -89,6 +89,20 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     @Query("update Photo p set p.status = :newStatus, p.thumbnailUrl = :thumbnailUrl " +
             "where p.id = :photoId and p.status = :expectedStatus")
     int updateStatusAndUrl(Long photoId, PhotoStatus expectedStatus, PhotoStatus newStatus, String thumbnailUrl);
+
+    @Query("""
+    SELECT p.id
+    FROM Photo p
+    WHERE p.album.id = :albumId
+    AND p.isDeleted = FALSE
+    AND p.status = :status
+    ORDER BY p.likesCnt DESC, p.createdAt ASC
+    """)
+    List<Long> findTop4CompletedPhotoIdsByLikes(
+            @Param("albumId") Long albumId,
+            @Param("status") PhotoStatus status,
+            Pageable pageable
+    );
 
     List<Photo> findAllByIdIn(List<Long> photoIds);
 }
