@@ -10,6 +10,7 @@ import com.cheeeese.global.common.code.SuccessCode;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,9 @@ public class Cheese4cutController implements Cheese4cutSwagger {
 
     @Override
     @GetMapping("/preview")
-    public CommonResponse<Cheese4cutResponse> getCheese4cut(@PathVariable String code) {
+    public CommonResponse<Cheese4cutResponse> getCheese4cut(
+            @PathVariable @NotBlank String code
+    ) {
         return CommonResponse.success(SuccessCode.CHEESE4CUT_GET_SUCCESS,
                 cheese4cutService.getCheese4cutByAlbumCode(code));
     }
@@ -34,7 +37,7 @@ public class Cheese4cutController implements Cheese4cutSwagger {
     @PostMapping("/presigned-url")
     public CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
             @CurrentUser User user,
-            @PathVariable String code
+            @PathVariable @NotBlank String code
     ) {
         return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS,
                 cheese4cutService.createCheese4cutPresignedUrl(user, code));

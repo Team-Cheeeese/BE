@@ -95,11 +95,12 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     FROM Photo p
     WHERE p.album.id = :albumId
     AND p.isDeleted = FALSE
-    AND p.status = com.cheeeese.photo.domain.PhotoStatus.COMPLETED
+    AND p.status = :status
     ORDER BY p.likesCnt DESC, p.createdAt ASC
     """)
     List<Long> findTop4CompletedPhotoIdsByLikes(
             @Param("albumId") Long albumId,
+            @Param("status") PhotoStatus status,
             Pageable pageable
     );
 

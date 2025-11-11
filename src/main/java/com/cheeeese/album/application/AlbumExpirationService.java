@@ -7,6 +7,7 @@ import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
+import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ public class AlbumExpirationService {
 
         List<Long> topPhotoIds = photoRepository.findTop4CompletedPhotoIdsByLikes(
                 albumId,
+                PhotoStatus.COMPLETED,
                 PageRequest.of(0, CHEESE4CUT_PHOTO_COUNT)
         );
 

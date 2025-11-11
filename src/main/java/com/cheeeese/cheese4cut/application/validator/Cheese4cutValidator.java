@@ -29,7 +29,7 @@ public class Cheese4cutValidator {
     public void validateUserIsMaker(Album album, User user) {
         boolean isMaker = userAlbumRepository.findByAlbumIdAndUserIdAndRole(album.getId(), user.getId(), Role.MAKER).isPresent();
         if (!isMaker) {
-            throw new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT);
+            throw new AlbumException(AlbumErrorCode.USER_NOT_MAKER);
         }
     }
 

@@ -16,6 +16,7 @@ import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
 import com.cheeeese.photo.application.PresignedUrlService;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
@@ -60,6 +61,7 @@ public class Cheese4cutService {
     private Cheese4cutResponse getPreviewResponse(Long albumId, int participant) {
         List<Long> topPhotoIds = photoRepository.findTop4CompletedPhotoIdsByLikes(
                 albumId,
+                PhotoStatus.COMPLETED,
                 PageRequest.of(0, 4)
         );
 
@@ -73,7 +75,13 @@ public class Cheese4cutService {
                 .collect(Collectors.toMap(Photo::getId, Function.identity()));
 
         List<Photo> orderedPhotos = topPhotoIds.stream()
-                .map(photoMap::get)
+                .map(photoId -> {
+                    Photo photo = photoMap.get(photoId);
+                    if (photo == null) {
+                        throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
+                    }
+                    return photo;
+                })
                 .toList();
 
         long uniqueLikesCount = photoLikesRepository.countDistinctUserIdsByPhotoIds(topPhotoIds);

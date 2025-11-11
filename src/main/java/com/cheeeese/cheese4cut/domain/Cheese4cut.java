@@ -3,6 +3,7 @@ package com.cheeeese.cheese4cut.domain;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.global.domain.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class Cheese4cut extends BaseEntity {
     @ElementCollection
     @CollectionTable(name = "cheese4cut_photos", joinColumns = @JoinColumn(name = "cheese4cut_id"))
     @Column(name = "photo_id", nullable = false)
+    @Size(min = 4, max = 4)
     private List<Long> photoIds;
 
     @Column(name = "frame_image_url", nullable = false)

@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.time.Duration;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class PresignedUrlService {
     }
 
     public String generateCheese4cutPresignedPutUrl(String albumCode) {
-        String uniqueFileName = String.format("%s.png", System.currentTimeMillis());
+        String uniqueFileName = String.format("%s.png", UUID.randomUUID().toString());
         String objectKey = String.format("album/%s/%s", albumCode, uniqueFileName);
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
