@@ -5,61 +5,62 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class AlbumExpirationRedisRepository {
 
-    private static final String TRACKING_KEY = "expired:album:tracking";
-    private static final Duration ALBUM_TTL = Duration.ofDays(7);
+    private static final String EXPIRATION_ZSET_KEY = "expired:album:zset";
+    private static final ZoneOffset KST_ZONE = ZoneOffset.of("+09:00");
 
     @Qualifier("cacheRedisTemplate")
     private final RedisTemplate<String, Object> cacheRedisTemplate;
 
-    public void registerAlbum(Long albumId) {
-        String key = buildAlbumKey(albumId);
-        cacheRedisTemplate.opsForValue().set(key, albumId.toString(), ALBUM_TTL);
-        cacheRedisTemplate.opsForSet().add(TRACKING_KEY, albumId.toString());
+    /**
+     * ZSET에 앨범 ID와 만료 시간을 Score로 등록
+     * Score는 Unix Timestamp(밀리초)로 사용
+     * @param albumId 앨범 고유 ID
+     * @param expiredAt 앨범 만료 시각 (LocalDateTime)
+     */
+    public void registerAlbum(Long albumId, LocalDateTime expiredAt) {
+        // LocalDateTime을 Unix Timestamp (ms)로 변환
+        long expirationMillis = expiredAt.toInstant(KST_ZONE).toEpochMilli();
+
+        // ZADD key score member
+        cacheRedisTemplate.opsForZSet().add(EXPIRATION_ZSET_KEY, albumId.toString(), (double) expirationMillis);
     }
 
-    public Set<Long> getTrackedAlbumIds() {
-        Set<Object> members = cacheRedisTemplate.opsForSet().members(TRACKING_KEY);
+    /**
+     * 현재 시각을 기준으로 만료된 앨범 ID 목록만 ZSET에서 조회 (O(log N + k))
+     * @return 만료된 앨범 ID Set
+     */
+    public Set<Long> getExpiredAlbumIds() {
+        // 현재 시각의 Unix Timestamp (밀리초)
+        long currentTimestamp = LocalDateTime.now().toInstant(KST_ZONE).toEpochMilli();
+
+        // ZRANGEBYSCORE key min max: Score가 0부터 현재 시각까지인 모든 Member를 조회
+        Set<Object> members = cacheRedisTemplate.opsForZSet().rangeByScore(EXPIRATION_ZSET_KEY, 0, currentTimestamp);
+
         if (members == null || members.isEmpty()) {
             return Collections.emptySet();
         }
+
         return members.stream()
                 .map(Object::toString)
                 .map(Long::valueOf)
                 .collect(Collectors.toSet());
     }
 
-    public boolean isExpired(Long albumId) {
-        Long ttl = cacheRedisTemplate.getExpire(buildAlbumKey(albumId), TimeUnit.SECONDS);
-        if (ttl == null) {
-            return true;
-        }
-
-        if (ttl == -2) {
-            return true;
-        }
-
-        if (ttl == -1) {
-            return false;
-        }
-
-        return ttl <= 0;
-    }
-
+    /**
+     * ZSET에서 만료 처리된 앨범을 제거 (O(log N))
+     * @param albumId 앨범 고유 ID
+     */
     public void unregister(Long albumId) {
-        cacheRedisTemplate.opsForSet().remove(TRACKING_KEY, albumId.toString());
-    }
-
-    private String buildAlbumKey(Long albumId) {
-        return "expired:album:" + albumId;
+        cacheRedisTemplate.opsForZSet().remove(EXPIRATION_ZSET_KEY, albumId.toString());
     }
 }
