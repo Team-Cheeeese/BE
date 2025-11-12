@@ -51,9 +51,8 @@ public class Cheese4cutService {
 
         Optional<Cheese4cut> cheese4cutOptional = cheese4cutRepository.findByAlbumId(album.getId());
 
-        // TODO: 최종 확정된 4장의 photo 제공으로 변경
         if (cheese4cutOptional.isPresent()) {
-            return Cheese4cutMapper.toFinalResponse();
+            return Cheese4cutMapper.toFinalResponse(cheese4cutOptional.get());
         }
 
         return getPreviewResponse(album.getId(), album.getParticipant());
@@ -70,20 +69,7 @@ public class Cheese4cutService {
             throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
         }
 
-        List<Photo> topPhotos = photoRepository.findAllById(topPhotoIds);
-
-        Map<Long, Photo> photoMap = topPhotos.stream()
-                .collect(Collectors.toMap(Photo::getId, Function.identity()));
-
-        List<Photo> orderedPhotos = topPhotoIds.stream()
-                .map(photoId -> {
-                    Photo photo = photoMap.get(photoId);
-                    if (photo == null) {
-                        throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
-                    }
-                    return photo;
-                })
-                .toList();
+        List<Photo> orderedPhotos = getOrderedPhotos(topPhotoIds);
 
         long uniqueLikesCount = photoLikesRepository.countDistinctUserIdsByPhotoIds(topPhotoIds);
 
@@ -115,8 +101,34 @@ public class Cheese4cutService {
 
         cheese4cutValidator.validateFinalizePhotos(album, request.photoIds());
 
-        Cheese4cut cheese4cut = Cheese4cutMapper.toEntity(album, request);
+        List<Photo> orderedPhotos =
+                photoRepository.findAllByIdInOrderByLikesDescCreatedDesc(request.photoIds());
 
-        cheese4cutRepository.save(cheese4cut);
+        if (orderedPhotos.size() != request.photoIds().size())
+            throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
+
+        cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
+    }
+
+    private List<Photo> getOrderedPhotos(List<Long> photoIds) {
+        List<Photo> photos = photoRepository.findAllByIdIn(photoIds);
+
+        Map<Long, Photo> photoMap = photos.stream()
+                .collect(Collectors.toMap(Photo::getId, Function.identity()));
+
+        List<Photo> orderedPhotos = photoIds.stream()
+                .map(photoId -> {
+                    Photo photo = photoMap.get(photoId);
+                    if (photo == null) {
+                        throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
+                    }
+                    return photo;
+                })
+                .toList();
+
+        if (orderedPhotos.size() != photoIds.size()) {
+            throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
+        }
+        return orderedPhotos;
     }
 }
