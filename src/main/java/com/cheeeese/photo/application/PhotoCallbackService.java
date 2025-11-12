@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class PhotoCallbackService {
 
     private final PhotoRepository photoRepository;
+    private final PhotoQueryService photoQueryService;
 
     public void markUploadCompleted(PhotoCompleteRequest request) {
         int updated = photoRepository.updateStatusAndUrl(
@@ -27,5 +28,8 @@ public class PhotoCallbackService {
         if (updated == 0) {
             throw new PhotoException(PhotoErrorCode.THUMBNAIL_UPDATE_FAILED);
         }
+
+        String albumCode = photoRepository.findAlbumCodeByPhotoId(request.photoId());
+        photoQueryService.invalidatePhotoCache(albumCode);
     }
 }

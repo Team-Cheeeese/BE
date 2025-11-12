@@ -135,7 +135,7 @@ public class PhotoQueryService {
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
         PageRequest pageRequest = PageRequest.of(page, size, getPhotoSortingOption(albumSorting));
-        Slice<Photo> photos = photoRepository.findAllByAlbumCode(code, pageRequest);
+        Slice<Photo> photos = photoRepository.findAllByAlbumCodeAndStatus(code, PhotoStatus.COMPLETED, pageRequest);
         return PhotoMapper.toPhotoPageResponse(photos, cdnUrlResolver);
     }
 

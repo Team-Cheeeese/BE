@@ -21,8 +21,14 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         FROM Photo p
         JOIN p.album a
         WHERE a.code = :code
+        AND p.isDeleted = FALSE
+        AND p.status = :status
     """)
-    Slice<Photo> findAllByAlbumCode(@Param("code") String code, Pageable pageable);
+    Slice<Photo> findAllByAlbumCodeAndStatus(
+            @Param("code") String code,
+            @Param("status") PhotoStatus status,
+            Pageable pageable
+    );
 
     @Query("""
         SELECT p
@@ -119,4 +125,11 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     );
 
     List<Photo> findAllByIdIn(List<Long> photoIds);
+
+    @Query("""
+        SELECT p.album.code
+        FROM Photo p
+        WHERE p.id = :photoId
+    """)
+    String findAlbumCodeByPhotoId(@Param("photoId") Long photoId);
 }

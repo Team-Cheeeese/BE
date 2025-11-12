@@ -79,8 +79,6 @@ public class PhotoService {
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
 
-        photoQueryService.invalidatePhotoCache(album.getCode());
-
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
     }
 
