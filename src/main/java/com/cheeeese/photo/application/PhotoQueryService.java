@@ -1,9 +1,14 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.application.validator.AlbumValidator;
+import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumSorting;
+import com.cheeeese.photo.dto.response.PhotoBest4CutResponse;
+import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
@@ -20,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,6 +37,7 @@ public class PhotoQueryService {
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
+    private final AlbumValidator albumValidator;
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
 
@@ -107,6 +112,25 @@ public class PhotoQueryService {
         );
 
         return PhotoMapper.toPhotoDetailResponse(photo, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded);
+    }
+
+    public List<PhotoBest4CutResponse> getAlbumBest4Cut(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+
+        albumValidator.validateAlbumParticipant(album, user);
+
+        List<Photo> topPhotos = photoRepository.findTop4CompletedPhotosByLikes(
+                album.getId(),
+                PhotoStatus.COMPLETED,
+                PageRequest.of(0, 4)
+        );
+
+        return topPhotos.stream()
+                .map(photo -> {
+                    boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
+                    return AlbumMapper.toBest4CutResponse(photo, isLiked);
+                })
+                .toList();
     }
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {

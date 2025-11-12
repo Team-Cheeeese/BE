@@ -4,6 +4,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.dto.response.*;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.dto.response.PhotoBest4CutResponse;
 import com.cheeeese.user.domain.User;
 
 import java.time.LocalDate;
@@ -142,6 +143,14 @@ public class AlbumMapper {
                 .availableCount(availableCount)
                 .maxPhotoCount(maxCount)
                 .currentPhotoCount(currentCount)
+                .build();
+    }
+
+    public static PhotoBest4CutResponse toBest4CutResponse(Photo photo, boolean isLiked) {
+        return PhotoBest4CutResponse.builder()
+                .thumbnailUrl(photo.getThumbnailUrl())
+                .likeCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
                 .build();
     }
 }

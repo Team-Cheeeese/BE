@@ -69,5 +69,4 @@ public class AlbumController implements AlbumSwagger {
               albumService.getAlbumParticipantList(authentication, code)
       );
     }
-
 }

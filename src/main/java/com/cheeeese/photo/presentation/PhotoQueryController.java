@@ -1,6 +1,7 @@
 package com.cheeeese.photo.presentation;
 
 import com.cheeeese.album.domain.type.AlbumSorting;
+import com.cheeeese.photo.dto.response.PhotoBest4CutResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.photo.application.PhotoInfoService;
@@ -10,6 +11,8 @@ import com.cheeeese.photo.presentation.swagger.PhotoQuerySwagger;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.cheeeese.global.common.code.SuccessCode.*;
 
@@ -84,6 +87,17 @@ public class PhotoQueryController implements PhotoQuerySwagger {
         return CommonResponse.success(
                 PHOTO_LIKERS_GET_SUCCESS,
                 photoInfoService.getPhotoLikers(user, code, photoId)
+        );
+    }
+
+    @GetMapping("/{code}/best-4cut")
+    public CommonResponse<List<PhotoBest4CutResponse>> getAlbumBest4Cut(
+            @CurrentUser User user,
+            @PathVariable String code
+    ) {
+        return CommonResponse.success(
+                PHOTO_BEST4CUT_GET_SUCCESS,
+                photoQueryService.getAlbumBest4Cut(user, code)
         );
     }
 }
