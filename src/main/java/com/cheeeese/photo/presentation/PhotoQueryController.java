@@ -3,8 +3,10 @@ package com.cheeeese.photo.presentation;
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
+import com.cheeeese.photo.application.PhotoInfoService;
 import com.cheeeese.photo.application.PhotoQueryService;
 import com.cheeeese.photo.dto.response.PhotoDetailResponse;
+import com.cheeeese.photo.dto.response.PhotoInfoResponse;
 import com.cheeeese.photo.dto.response.PhotoLikedPageResponse;
 import com.cheeeese.photo.dto.response.PhotoPageResponse;
 import com.cheeeese.photo.presentation.swagger.PhotoQuerySwagger;
@@ -20,6 +22,7 @@ import static com.cheeeese.global.common.code.SuccessCode.*;
 public class PhotoQueryController implements PhotoQuerySwagger {
 
     private final PhotoQueryService photoQueryService;
+    private final PhotoInfoService photoInfoService;
 
     @Override
     @GetMapping("/{code}/photos")
@@ -60,6 +63,18 @@ public class PhotoQueryController implements PhotoQuerySwagger {
         return CommonResponse.success(
                 PHOTO_DETAIL_GET_SUCCESS,
                 photoQueryService.getPhotoDetail(user, code, photoId)
+        );
+    }
+
+    @GetMapping("/{code}/photos/{photoId}/info")
+    public CommonResponse<PhotoInfoResponse> getPhotoInfo(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @PathVariable Long photoId
+    ) {
+        return CommonResponse.success(
+                PHOTO_INFO_GET_SUCCESS,
+                photoInfoService.getPhotoInfo(user, code, photoId)
         );
     }
 }

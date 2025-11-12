@@ -147,4 +147,12 @@ public class PhotoMapper {
                 .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
     }
+
+    public static PhotoInfoResponse toPhotoInfoResponse(Photo photo) {
+        return PhotoInfoResponse.builder()
+                .name(photo.getUser().getName())
+                .captureTime(photo.getCaptureTime())
+                .createdAt(photo.getCreatedAt())
+                .build();
+    }
 }
