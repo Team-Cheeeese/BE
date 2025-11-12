@@ -3,12 +3,12 @@ package com.cheeeese.cheese4cut.domain;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.global.domain.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,17 +26,22 @@ public class Cheese4cut extends BaseEntity {
     @JoinColumn(name = "album_id", nullable = false, unique = true)
     private Album album;
 
-    @ElementCollection
-    @CollectionTable(name = "cheese4cut_photos", joinColumns = @JoinColumn(name = "cheese4cut_id"))
-    @Column(name = "photo_id", nullable = false)
-    @Size(min = 4, max = 4)
-    private List<Long> photoIds;
+    @OneToMany(mappedBy = "cheese4cut", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("photoRank ASC")
+    private List<Cheese4cutPhoto> photos = new ArrayList<>();
 
 
     @Builder
-    private Cheese4cut(Album album, List<Long> photoIds) {
+    private Cheese4cut(Album album, List<Cheese4cutPhoto> photos) {
         this.album = album;
-        this.photoIds = photoIds;
+        if (photos != null) {
+            photos.forEach(this::addPhoto);
+        }
+    }
+
+    private void addPhoto(Cheese4cutPhoto photo) {
+        photo.assignToCheese4cut(this);
+        this.photos.add(photo);
     }
 }
 
