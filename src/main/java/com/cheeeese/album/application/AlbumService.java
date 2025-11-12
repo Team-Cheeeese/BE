@@ -76,6 +76,7 @@ public class AlbumService {
                 album,
                 Role.MAKER
         ));
+        userRepository.incrementAlbumCnt(user.getId());
 
         albumExpirationRedisRepository.registerAlbum(album.getId());
 
@@ -125,6 +126,7 @@ public class AlbumService {
         if (updated == 0) {
             throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
         }
+        userRepository.incrementAlbumCnt(currentUser.getId());
 
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
