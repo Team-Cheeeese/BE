@@ -37,6 +37,7 @@ public enum SuccessCode implements BaseCode {
     PHOTO_LIKES_CREATE_SUCCESS(HttpStatus.OK, "사진 좋아요 생성이 완료되었습니다."),
     PHOTO_LIKES_DELETE_SUCCESS(HttpStatus.OK, "사진 좋아요 삭제가 완료되었습니다."),
     PHOTO_INFO_GET_SUCCESS(HttpStatus.OK, "사진 정보 조회가 성공적으로 완료되었습니다."),
+    PHOTO_LIKERS_GET_SUCCESS(HttpStatus.OK, "띱한 사람 목록 조회가 성공적으로 완료되었습니다."),
 
     // cheese4cut
     CHEESE4CUT_GET_SUCCESS(HttpStatus.OK, "치즈네컷 조회가 성공적으로 완료되었습니다."),

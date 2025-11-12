@@ -5,10 +5,7 @@ import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.photo.application.PhotoInfoService;
 import com.cheeeese.photo.application.PhotoQueryService;
-import com.cheeeese.photo.dto.response.PhotoDetailResponse;
-import com.cheeeese.photo.dto.response.PhotoInfoResponse;
-import com.cheeeese.photo.dto.response.PhotoLikedPageResponse;
-import com.cheeeese.photo.dto.response.PhotoPageResponse;
+import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.photo.presentation.swagger.PhotoQuerySwagger;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +72,18 @@ public class PhotoQueryController implements PhotoQuerySwagger {
         return CommonResponse.success(
                 PHOTO_INFO_GET_SUCCESS,
                 photoInfoService.getPhotoInfo(user, code, photoId)
+        );
+    }
+
+    @GetMapping("/{code}/photos/{photoId}/liker")
+    public CommonResponse<PhotoLikerResponse> getPhotoLikers(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @PathVariable Long photoId
+    ) {
+        return CommonResponse.success(
+                PHOTO_LIKERS_GET_SUCCESS,
+                photoInfoService.getPhotoLikers(user, code, photoId)
         );
     }
 }

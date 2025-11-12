@@ -1,6 +1,7 @@
 package com.cheeeese.photo.infrastructure.persistence;
 
 import com.cheeeese.photo.domain.PhotoLikes;
+import com.cheeeese.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +29,11 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
         WHERE pl.photo.id IN :photoIds
     """)
     long countDistinctUserIdsByPhotoIds(@Param("photoIds") List<Long> photoIds);
+
+    @Query("""
+        SELECT pl.user
+        FROM PhotoLikes pl
+        WHERE pl.photo.id = :photoId
+    """)
+    List<User> findLikersByPhotoId(@Param("photoId") Long photoId);
 }

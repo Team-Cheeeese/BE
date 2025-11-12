@@ -1,6 +1,7 @@
 package com.cheeeese.photo.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
@@ -153,6 +154,25 @@ public class PhotoMapper {
                 .name(photo.getUser().getName())
                 .captureTime(photo.getCaptureTime())
                 .createdAt(photo.getCreatedAt())
+                .build();
+    }
+
+    public static PhotoLikerResponse.PhotoLiker toPhotoLiker(User user, boolean isMe, Role role) {
+        return PhotoLikerResponse.PhotoLiker.builder()
+                .name(user.getName())
+                .profileImageUrl(user.getProfileImage())
+                .isMe(isMe)
+                .role(role)
+                .build();
+    }
+
+    public static PhotoLikerResponse toPhotoLikerResponse(
+            Photo photo,
+            List<PhotoLikerResponse.PhotoLiker> likers
+    ) {
+        return PhotoLikerResponse.builder()
+                .likeCnt(photo.getLikesCnt())
+                .photoLikers(likers)
                 .build();
     }
 }
