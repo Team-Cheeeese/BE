@@ -43,6 +43,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -209,10 +210,16 @@ public class AlbumService {
                 PageRequest.of(0, 4)
         );
 
+        List<Long> photoIds = topPhotos.stream()
+                .map(Photo::getId)
+                .toList();
+
+        Set<Long> likedPhotoIds = photoLikesRepository.findAllLikedPhotoIds(user.getId(), photoIds);
+
         return topPhotos.stream()
                 .map(photo -> {
                     String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
-                    boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
+                    boolean isLiked = likedPhotoIds.contains(photo.getId());
                     return AlbumMapper.toBest4CutResponse(photo, thumbnailUrl, isLiked);
                 })
                 .toList();
