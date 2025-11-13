@@ -77,7 +77,7 @@ public class AlbumController implements AlbumSwagger {
             @PathVariable String code
     ) {
         return CommonResponse.success(
-                PHOTO_INFO_GET_SUCCESS,
+                ALBUM_INFO_GET_SUCCESS,
                 albumService.getAlbumInfo(user, code)
         );
     }
