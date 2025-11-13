@@ -13,11 +13,16 @@ import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
 import com.cheeeese.global.security.CustomUserDetails;
+import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
+import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
+import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
@@ -25,6 +30,7 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -49,8 +55,11 @@ public class AlbumService {
     private final AlbumRepository albumRepository;
     private final UserAlbumRepository userAlbumRepository;
     private final UserRepository userRepository;
+    private final PhotoRepository photoRepository;
+    private final PhotoLikesRepository photoLikesRepository;
     private final PhotoService photoService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
+    private final CdnUrlResolver cdnUrlResolver;
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
@@ -187,6 +196,26 @@ public class AlbumService {
         albumValidator.validateAlbumParticipant(album, user);
 
         return PhotoMapper.toAlbumInfoResponse(album);
+    }
+
+    public List<AlbumBest4CutResponse> getAlbumBest4Cut(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+
+        albumValidator.validateAlbumParticipant(album, user);
+
+        List<Photo> topPhotos = photoRepository.findTop4CompletedPhotosByLikes(
+                album.getId(),
+                PhotoStatus.COMPLETED,
+                PageRequest.of(0, 4)
+        );
+
+        return topPhotos.stream()
+                .map(photo -> {
+                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
+                    return AlbumMapper.toBest4CutResponse(photo, thumbnailUrl, isLiked);
+                })
+                .toList();
     }
 
     private User extractUser(Authentication authentication) {

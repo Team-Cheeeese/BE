@@ -1,11 +1,11 @@
-package com.cheeeese.photo.dto.response;
+package com.cheeeese.album.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
 @Schema(description = "베스트 앨범컷 조회 API")
-public record PhotoBest4CutResponse(
+public record AlbumBest4CutResponse(
         @Schema(description = "썸네일 이미지 url", example = "https://cdn.say-cheese.me/...")
         String thumbnailUrl,
 

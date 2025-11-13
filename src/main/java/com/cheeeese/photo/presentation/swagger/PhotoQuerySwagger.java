@@ -12,8 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
 @Tag(name = "[사진 조회]", description = "사진 조회 관련 API")
 public interface PhotoQuerySwagger {
     @Operation(
@@ -110,24 +108,5 @@ public interface PhotoQuerySwagger {
             @CurrentUser User user,
             @PathVariable String code,
             @PathVariable Long photoId
-    );
-
-    @Operation(
-            summary = "앨범 내 베스트컷 (좋아요순 사진 4개) 조회 API",
-            description = """
-                    ### PathVariable
-                    ---
-                    `code`: 앨범 코드 (String)
-                    """
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "앨범 내 베스트컷 조회가 성공적으로 실행되었습니다."
-            )
-    })
-    CommonResponse<List<PhotoBest4CutResponse>> getAlbumBest4Cut(
-            @CurrentUser User user,
-            @PathVariable String code
     );
 }

@@ -6,11 +6,14 @@ import com.cheeeese.album.dto.response.*;
 import com.cheeeese.album.presentation.swagger.AlbumSwagger;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
+import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.cheeeese.global.common.code.SuccessCode.*;
 
@@ -79,6 +82,18 @@ public class AlbumController implements AlbumSwagger {
         return CommonResponse.success(
                 ALBUM_INFO_GET_SUCCESS,
                 albumService.getAlbumInfo(user, code)
+        );
+    }
+
+    @Override
+    @GetMapping("/{code}/best-4cut")
+    public CommonResponse<List<AlbumBest4CutResponse>> getAlbumBest4Cut(
+            @CurrentUser User user,
+            @PathVariable String code
+    ) {
+        return CommonResponse.success(
+                ALBUM_BEST4CUT_GET_SUCCESS,
+                albumService.getAlbumBest4Cut(user, code)
         );
     }
 }

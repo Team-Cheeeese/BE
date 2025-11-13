@@ -4,6 +4,7 @@ import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.dto.response.*;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
+import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +16,8 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 @Tag(name = "[앨범]", description = "앨범 관련 API")
 public interface AlbumSwagger {
@@ -270,6 +273,25 @@ public interface AlbumSwagger {
             )
     })
     CommonResponse<AlbumInfoResponse> getAlbumInfo(
+            @CurrentUser User user,
+            @PathVariable String code
+    );
+
+    @Operation(
+            summary = "앨범 내 베스트컷 (좋아요순 사진 4개) 조회 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드 (String)
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "앨범 내 베스트컷 조회가 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<List<AlbumBest4CutResponse>> getAlbumBest4Cut(
             @CurrentUser User user,
             @PathVariable String code
     );

@@ -4,7 +4,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.dto.response.*;
 import com.cheeeese.photo.domain.Photo;
-import com.cheeeese.photo.dto.response.PhotoBest4CutResponse;
+import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.user.domain.User;
 
 import java.time.LocalDate;
@@ -146,9 +146,9 @@ public class AlbumMapper {
                 .build();
     }
 
-    public static PhotoBest4CutResponse toBest4CutResponse(Photo photo, boolean isLiked) {
-        return PhotoBest4CutResponse.builder()
-                .thumbnailUrl(photo.getThumbnailUrl())
+    public static AlbumBest4CutResponse toBest4CutResponse(Photo photo, String thumbnailUrl, boolean isLiked) {
+        return AlbumBest4CutResponse.builder()
+                .thumbnailUrl(thumbnailUrl)
                 .likeCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
                 .build();
