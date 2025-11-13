@@ -3,9 +3,7 @@ package com.cheeeese.photo.presentation.swagger;
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
-import com.cheeeese.photo.dto.response.PhotoDetailResponse;
-import com.cheeeese.photo.dto.response.PhotoLikedPageResponse;
-import com.cheeeese.photo.dto.response.PhotoPageResponse;
+import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Tag(name = "[사진 조회]", description = "사진 조회 관련 API")
 public interface PhotoQuerySwagger {
@@ -89,5 +89,45 @@ public interface PhotoQuerySwagger {
             @CurrentUser User user,
             @PathVariable String code,
             @PathVariable Long photoId
+    );
+
+    @Operation(
+            summary = "띱한 사용자 목록 조회 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드 (String) \n
+                    `photoId`: 사진 고유 ID (Long)
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "띱한 사용자 목록 조회가 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<PhotoLikerResponse> getPhotoLikers(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @PathVariable Long photoId
+    );
+
+    @Operation(
+            summary = "앨범 내 베스트컷 (좋아요순 사진 4개) 조회 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드 (String)
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "앨범 내 베스트컷 조회가 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<List<PhotoBest4CutResponse>> getAlbumBest4Cut(
+            @CurrentUser User user,
+            @PathVariable String code
     );
 }

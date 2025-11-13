@@ -67,6 +67,7 @@ public class PhotoQueryController implements PhotoQuerySwagger {
         );
     }
 
+    @Override
     @GetMapping("/{code}/photos/{photoId}/liker")
     public CommonResponse<PhotoLikerResponse> getPhotoLikers(
             @CurrentUser User user,
@@ -79,6 +80,7 @@ public class PhotoQueryController implements PhotoQuerySwagger {
         );
     }
 
+    @Override
     @GetMapping("/{code}/best-4cut")
     public CommonResponse<List<PhotoBest4CutResponse>> getAlbumBest4Cut(
             @CurrentUser User user,
