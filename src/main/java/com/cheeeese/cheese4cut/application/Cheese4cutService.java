@@ -8,12 +8,15 @@ import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.cheese4cut.application.validator.Cheese4cutValidator;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.cheese4cut.exception.Cheese4cutException;
 import com.cheeeese.cheese4cut.exception.code.Cheese4cutErrorCode;
 import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
+import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.PresignedUrlService;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
@@ -30,6 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +47,7 @@ public class Cheese4cutService {
     private final AlbumValidator albumValidator;
     private final PresignedUrlService presignedUrlService;
     private final Cheese4cutValidator cheese4cutValidator;
+    private final CdnUrlResolver cdnUrlResolver;
 
     @Transactional(readOnly = true)
     public Cheese4cutResponse getCheese4cutByAlbumCode(String code) {
@@ -52,7 +57,17 @@ public class Cheese4cutService {
         Optional<Cheese4cut> cheese4cutOptional = cheese4cutRepository.findByAlbumId(album.getId());
 
         if (cheese4cutOptional.isPresent()) {
-            return Cheese4cutMapper.toFinalResponse(cheese4cutOptional.get());
+            Cheese4cut cheese4cut = cheese4cutOptional.get();
+
+            List<Cheese4cutFinalResponse.FinalPhotoInfo> photos = cheese4cut.getPhotos().stream()
+                    .map(p -> Cheese4cutMapper.toFinalPhotoInfo(
+                            p.getPhotoId(),
+                            cdnUrlResolver.resolveOriginal(p.getImageUrl()),
+                            p.getPhotoRank()
+                    ))
+                    .toList();
+
+            return Cheese4cutMapper.toFinalResponse(photos);
         }
 
         return getPreviewResponse(album.getId(), album.getParticipant());
@@ -73,7 +88,17 @@ public class Cheese4cutService {
 
         long uniqueLikesCount = photoLikesRepository.countDistinctUserIdsByPhotoIds(topPhotoIds);
 
-        return Cheese4cutMapper.toPreviewResponse(orderedPhotos, uniqueLikesCount, participant);
+        List<Cheese4cutPreviewResponse.PreviewPhotoInfo> resolvedPhotoInfos =
+                IntStream.range(0, orderedPhotos.size())
+                        .mapToObj(index -> {
+                            Photo p = orderedPhotos.get(index);
+                            return Cheese4cutMapper.toPreviewPhotoInfo(
+                                    p.getId(), cdnUrlResolver.resolveOriginal(p.getImageUrl()), index+1
+                            );
+                        })
+                        .toList();
+
+        return Cheese4cutMapper.toPreviewResponse(resolvedPhotoInfos, uniqueLikesCount, participant);
     }
 
     @Transactional(readOnly = true)

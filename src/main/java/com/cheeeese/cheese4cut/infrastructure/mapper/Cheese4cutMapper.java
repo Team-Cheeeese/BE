@@ -19,17 +19,10 @@ public class Cheese4cutMapper {
     /**
      * 확정 후 응답 (Cheese4cut 엔티티 기반)
      */
-    public static Cheese4cutFinalResponse toFinalResponse(Cheese4cut cheese4cut) {
+    public static Cheese4cutFinalResponse toFinalResponse(List<Cheese4cutFinalResponse.FinalPhotoInfo> photos) {
         return Cheese4cutFinalResponse.builder()
                 .isFinalized(true)
-                .photos(cheese4cut.getPhotos().stream()
-                        .map(photo -> Cheese4cutFinalResponse.FinalPhotoInfo.builder()
-                                .photoId(photo.getPhotoId())
-                                .imageUrl(photo.getImageUrl())
-                                .thumbnailImageUrl(photo.getThumbnailImageUrl())
-                                .photoRank(photo.getPhotoRank())
-                                .build())
-                        .collect(Collectors.toList()))
+                .photos(photos)
                 .build();
     }
 
@@ -37,17 +30,10 @@ public class Cheese4cutMapper {
      * 확정 전 응답 (좋아요 TOP 4 사진 목록 기반)
      */
     public static Cheese4cutPreviewResponse toPreviewResponse(
-            List<Photo> topPhotos,
+            List<Cheese4cutPreviewResponse.PreviewPhotoInfo> photoInfos,
             long uniqueLikesCount,
             int participant
     ) {
-        List<Cheese4cutPreviewResponse.PreviewPhotoInfo> photoInfos = topPhotos.stream()
-                .map(photo -> Cheese4cutPreviewResponse.PreviewPhotoInfo.builder()
-                        .photoId(photo.getId())
-                        .imageUrl(photo.getImageUrl())
-                        .build())
-                .collect(Collectors.toList());
-
         return Cheese4cutPreviewResponse.builder()
                 .isFinalized(false)
                 .previewPhotos(photoInfos)
@@ -80,4 +66,24 @@ public class Cheese4cutMapper {
         return Cheese4cutPresignedUrlResponse.builder()
                 .uploadUrl(uploadUrl).build();
     }
+
+    public static Cheese4cutFinalResponse.FinalPhotoInfo toFinalPhotoInfo(
+            Long photoId, String imageUrl, int rank) {
+
+        return Cheese4cutFinalResponse.FinalPhotoInfo.builder()
+                .photoId(photoId)
+                .imageUrl(imageUrl)
+                .photoRank(rank)
+                .build();
+    }
+
+    public static Cheese4cutPreviewResponse.PreviewPhotoInfo toPreviewPhotoInfo(
+            Long photoId, String imageUrl, int rank) {
+        return Cheese4cutPreviewResponse.PreviewPhotoInfo.builder()
+                .photoId(photoId)
+                .imageUrl(imageUrl)
+                .photoRank(rank)
+                .build();
+    }
+
 }
