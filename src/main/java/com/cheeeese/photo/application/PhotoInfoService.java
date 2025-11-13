@@ -5,7 +5,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.global.security.CurrentUserProvider;
 import com.cheeeese.photo.domain.Photo;
-import com.cheeeese.photo.dto.response.PhotoInfoResponse;
+import com.cheeeese.album.dto.response.AlbumInfoResponse;
 import com.cheeeese.photo.dto.response.PhotoLikerResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
@@ -28,17 +28,6 @@ public class PhotoInfoService {
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final AlbumValidator albumValidator;
-
-    public PhotoInfoResponse getPhotoInfo(User user, String code, Long photoId) {
-        Album album = albumValidator.validateAlbumCode(code);
-
-        albumValidator.validateAlbumParticipant(album, user);
-
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
-
-        return PhotoMapper.toPhotoInfoResponse(photo);
-    }
 
     public PhotoLikerResponse getPhotoLikers(User user, String code, Long photoId) {
         Album album = albumValidator.validateAlbumCode(code);

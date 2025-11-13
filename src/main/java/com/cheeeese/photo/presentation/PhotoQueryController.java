@@ -1,6 +1,7 @@
 package com.cheeeese.photo.presentation;
 
 import com.cheeeese.album.domain.type.AlbumSorting;
+import com.cheeeese.album.dto.response.AlbumInfoResponse;
 import com.cheeeese.photo.dto.response.PhotoBest4CutResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
@@ -63,18 +64,6 @@ public class PhotoQueryController implements PhotoQuerySwagger {
         return CommonResponse.success(
                 PHOTO_DETAIL_GET_SUCCESS,
                 photoQueryService.getPhotoDetail(user, code, photoId)
-        );
-    }
-
-    @GetMapping("/{code}/photos/{photoId}/info")
-    public CommonResponse<PhotoInfoResponse> getPhotoInfo(
-            @CurrentUser User user,
-            @PathVariable String code,
-            @PathVariable Long photoId
-    ) {
-        return CommonResponse.success(
-                PHOTO_INFO_GET_SUCCESS,
-                photoInfoService.getPhotoInfo(user, code, photoId)
         );
     }
 

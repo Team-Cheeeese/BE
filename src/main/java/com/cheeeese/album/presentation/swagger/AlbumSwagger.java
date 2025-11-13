@@ -254,4 +254,23 @@ public interface AlbumSwagger {
             Authentication authentication,
             @PathVariable String code
     );
+
+    @Operation(
+            summary = "앨범 정보 조회 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    - `code`: 앨범 코드
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "앨범 정보 조회가 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<AlbumInfoResponse> getAlbumInfo(
+            @CurrentUser User user,
+            @PathVariable String code
+    );
 }

@@ -69,4 +69,16 @@ public class AlbumController implements AlbumSwagger {
               albumService.getAlbumParticipantList(authentication, code)
       );
     }
+
+    @Override
+    @GetMapping("/{code}/info")
+    public CommonResponse<AlbumInfoResponse> getAlbumInfo(
+            @CurrentUser User user,
+            @PathVariable String code
+    ) {
+        return CommonResponse.success(
+                PHOTO_INFO_GET_SUCCESS,
+                albumService.getAlbumInfo(user, code)
+        );
+    }
 }

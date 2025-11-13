@@ -2,6 +2,7 @@ package com.cheeeese.photo.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
+import com.cheeeese.album.dto.response.AlbumInfoResponse;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
@@ -153,11 +154,15 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoInfoResponse toPhotoInfoResponse(Photo photo) {
-        return PhotoInfoResponse.builder()
-                .name(photo.getUser().getName())
-                .captureTime(photo.getCaptureTime())
-                .createdAt(photo.getCreatedAt())
+    public static AlbumInfoResponse toAlbumInfoResponse(Album album) {
+        return AlbumInfoResponse.builder()
+                .title(album.getTitle())
+                .makerId(album.getMakerId())
+                .themeEmoji(album.getThemeEmoji())
+                .participant(album.getParticipant())
+                .currentParticipant(album.getCurrentParticipant())
+                .eventDate(album.getEventDate())
+                .currentPhotoCnt(album.getCurrentPhotoCount())
                 .build();
     }
 
