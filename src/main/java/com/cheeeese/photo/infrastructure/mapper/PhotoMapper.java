@@ -151,6 +151,8 @@ public class PhotoMapper {
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
+                .captureTime(photo.getCaptureTime())
+                .createdAt(photo.getCreatedAt())
                 .build();
     }
 
