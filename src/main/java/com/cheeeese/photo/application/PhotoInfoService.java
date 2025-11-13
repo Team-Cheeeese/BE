@@ -39,10 +39,10 @@ public class PhotoInfoService {
         List<User> users = photoLikesRepository.findLikersByPhotoId(photo.getId());
 
         List<PhotoLikedUserResponse.PhotoLiker> likers = users.stream()
-                .map(userList -> {
-                    boolean isMe = user.getId().equals(currentUserProvider.getCurrentUser().getId());
-                    Role role = user.getId().equals(album.getMakerId()) ? Role.MAKER : Role.GUEST;
-                    return PhotoMapper.toPhotoLiker(user, isMe, role);
+                .map(liker -> {
+                    boolean isMe = liker.getId().equals(user.getId());
+                    Role role = liker.getId().equals(album.getMakerId()) ? Role.MAKER : Role.GUEST;
+                    return PhotoMapper.toPhotoLiker(liker, isMe, role);
                 })
                 .toList();
 

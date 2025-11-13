@@ -30,6 +30,8 @@ public class PhotoCallbackService {
         }
 
         String albumCode = photoRepository.findAlbumCodeByPhotoId(request.photoId());
-        photoQueryService.invalidatePhotoCache(albumCode);
+        if (albumCode != null) {
+            photoQueryService.invalidatePhotoCache(albumCode);
+        }
     }
 }
