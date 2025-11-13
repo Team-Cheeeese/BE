@@ -111,7 +111,7 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     );
 
     @Query("""
-        SELECT p.id
+        SELECT p
         FROM Photo p
         WHERE p.album.id = :albumId
         AND p.isDeleted = FALSE

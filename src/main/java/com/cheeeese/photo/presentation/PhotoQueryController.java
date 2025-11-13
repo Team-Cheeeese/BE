@@ -1,7 +1,6 @@
 package com.cheeeese.photo.presentation;
 
 import com.cheeeese.album.domain.type.AlbumSorting;
-import com.cheeeese.album.dto.response.AlbumInfoResponse;
 import com.cheeeese.photo.dto.response.PhotoBest4CutResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
@@ -68,15 +67,15 @@ public class PhotoQueryController implements PhotoQuerySwagger {
     }
 
     @Override
-    @GetMapping("/{code}/photos/{photoId}/liker")
-    public CommonResponse<PhotoLikerResponse> getPhotoLikers(
+    @GetMapping("/{code}/photos/{photoId}/likers")
+    public CommonResponse<PhotoLikedUserResponse> getPhotoLikedUsers(
             @CurrentUser User user,
             @PathVariable String code,
             @PathVariable Long photoId
     ) {
         return CommonResponse.success(
                 PHOTO_LIKERS_GET_SUCCESS,
-                photoInfoService.getPhotoLikers(user, code, photoId)
+                photoInfoService.getPhotoLikedUsers(user, code, photoId)
         );
     }
 

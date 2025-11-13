@@ -106,7 +106,7 @@ public interface PhotoQuerySwagger {
                     description = "띱한 사용자 목록 조회가 성공적으로 실행되었습니다."
             )
     })
-    CommonResponse<PhotoLikerResponse> getPhotoLikers(
+    CommonResponse<PhotoLikedUserResponse> getPhotoLikedUsers(
             @CurrentUser User user,
             @PathVariable String code,
             @PathVariable Long photoId

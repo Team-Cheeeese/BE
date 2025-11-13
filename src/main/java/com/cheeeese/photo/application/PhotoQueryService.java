@@ -136,7 +136,16 @@ public class PhotoQueryService {
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
         PageRequest pageRequest = PageRequest.of(page, size, getPhotoSortingOption(albumSorting));
         Slice<Photo> photos = photoRepository.findAllByAlbumCodeAndStatus(code, PhotoStatus.COMPLETED, pageRequest);
-        return PhotoMapper.toPhotoPageResponse(photos, cdnUrlResolver);
+
+        List<PhotoListResponse> responses = photos.getContent().stream()
+                .map(photo -> {
+                    String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
+                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    return PhotoMapper.toPhotoListResponse(photo, imageUrl, thumbnailUrl, false, false);
+                })
+                .toList();
+
+        return PhotoMapper.toPhotoPageResponse(photos, responses);
     }
 
     private PhotoPageResponse attachUserStatus(User user, PhotoPageResponse response) {
@@ -192,10 +201,11 @@ public class PhotoQueryService {
         return photos.stream()
                 .map(photo -> {
                     Long id = photo.getId();
-                    String resolvedThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
+                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
                     boolean isDownloaded = downloaded.contains(id);
                     boolean isRecentlyDownloaded = recent.contains(id);
-                    return PhotoMapper.toPhotoLikedResponse(photo, resolvedThumbnailUrl, isDownloaded, isRecentlyDownloaded);
+                    return PhotoMapper.toPhotoLikedResponse(photo, imageUrl, thumbnailUrl, isDownloaded, isRecentlyDownloaded);
                 })
                 .toList();
     }

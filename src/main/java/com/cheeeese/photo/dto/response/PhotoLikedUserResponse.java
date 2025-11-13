@@ -8,7 +8,7 @@ import java.util.List;
 
 @Builder
 @Schema(description = "띱한 사람 목록 API")
-public record PhotoLikerResponse(
+public record PhotoLikedUserResponse(
         @Schema(description = "사진 좋아요 총 개수", example = "12")
         int likeCnt,
 

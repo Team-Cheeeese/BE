@@ -5,7 +5,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.global.security.CurrentUserProvider;
 import com.cheeeese.photo.domain.Photo;
-import com.cheeeese.photo.dto.response.PhotoLikerResponse;
+import com.cheeeese.photo.dto.response.PhotoLikedUserResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
@@ -28,17 +28,17 @@ public class PhotoInfoService {
     private final PhotoLikesRepository photoLikesRepository;
     private final AlbumValidator albumValidator;
 
-    public PhotoLikerResponse getPhotoLikers(User user, String code, Long photoId) {
+    public PhotoLikedUserResponse getPhotoLikedUsers(User user, String code, Long photoId) {
         Album album = albumValidator.validateAlbumCode(code);
 
         albumValidator.validateAlbumParticipant(album, user);
 
-        Photo photo = photoRepository.findById(photoId)
+        Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
 
         List<User> users = photoLikesRepository.findLikersByPhotoId(photo.getId());
 
-        List<PhotoLikerResponse.PhotoLiker> likers = users.stream()
+        List<PhotoLikedUserResponse.PhotoLiker> likers = users.stream()
                 .map(userList -> {
                     boolean isMe = user.getId().equals(currentUserProvider.getCurrentUser().getId());
                     Role role = user.getId().equals(album.getMakerId()) ? Role.MAKER : Role.GUEST;
