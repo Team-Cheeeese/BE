@@ -38,7 +38,7 @@ public class AlbumExpirationService {
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.ALBUM_NOT_FOUND));
 
         if (album.getStatus() != Album.AlbumStatus.EXPIRED) {
-            album.expire();
+            albumRepository.updateStatus(albumId, Album.AlbumStatus.EXPIRED);
             log.info("[AlbumExpiration] Album id={} status updated to EXPIRED", albumId);
         }
 
