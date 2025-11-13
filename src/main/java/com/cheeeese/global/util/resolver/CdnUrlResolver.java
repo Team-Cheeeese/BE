@@ -30,6 +30,9 @@ public class CdnUrlResolver {
     private String resolve(String domain, String path) {
         if (path == null || path.isBlank()) return null;
         if (path.startsWith("http")) return path;
+        if (path.startsWith("say-cheeeese/")) {
+            path = path.substring("say-cheeeese/".length());
+        }
         if (path.startsWith("/")) path = path.substring(1);
         return domain + "/" + path;
     }
