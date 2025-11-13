@@ -6,8 +6,14 @@ import lombok.Builder;
 @Builder
 @Schema(description = "내가 띱한 사진 목록 조회 API")
 public record PhotoLikedResponse(
+        @Schema(description = "사진 업로더 이름", example = "주정빈")
+        String name,
+
         @Schema(description = "사진 ID", example = "1")
         Long photoId,
+
+        @Schema(description = "사진 원본 url", example = "example.jpg")
+        String imageUrl,
 
         @Schema(description = "사진 썸네일 url", example = "example.jpg")
         String thumbnailUrl,

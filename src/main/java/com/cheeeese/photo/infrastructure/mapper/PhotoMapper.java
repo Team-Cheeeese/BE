@@ -70,7 +70,9 @@ public class PhotoMapper {
             boolean isDownloaded
     ) {
         return PhotoListResponse.builder()
+                .name(photo.getUser().getName())
                 .photoId(photo.getId())
+                .imageUrl(photo.getImageUrl())
                 .thumbnailUrl(thumbnailUrl)
                 .likeCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
@@ -85,7 +87,9 @@ public class PhotoMapper {
             boolean isRecentlyDownloaded
     ) {
         return PhotoLikedResponse.builder()
+                .name(photo.getUser().getName())
                 .photoId(photo.getId())
+                .imageUrl(photo.getImageUrl())
                 .thumbnailUrl(thumbnailUrl)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
@@ -95,7 +99,7 @@ public class PhotoMapper {
     public static PhotoPageResponse toPhotoPageResponse(Slice<Photo> photos, CdnUrlResolver cdnUrlResolver) {
         List<PhotoListResponse> responses = photos.getContent().stream()
                 .map(photo -> {
-                    String resolvedUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    String resolvedUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl()); // TODO: SRP 위반
                     return PhotoMapper.toPhotoListResponse(photo, resolvedUrl, false, false);
                 })
                 .toList();
