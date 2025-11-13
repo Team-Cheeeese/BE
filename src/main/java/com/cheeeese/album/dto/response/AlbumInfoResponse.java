@@ -14,7 +14,7 @@ public record AlbumInfoResponse(
         @Schema(description = "앨범 제목", example = "김수한무거북이")
         String title,
 
-        @Schema(description = "테마 이모지", example = "이모이모")
+        @Schema(description = "테마 이모지", example = "U+1F9C0")
         String themeEmoji,
 
         @Schema(description = "참여 가능 인원 수", example = "64")
