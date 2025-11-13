@@ -24,9 +24,6 @@ public record Cheese4cutFinalResponse(
                 @Schema(description = "사진 원본 URL", example = "https://cdn.cheeeese.com/album/1/original/101.jpg")
                 String imageUrl,
 
-                @Schema(description = "사진 썸네일 URL", example = "https://cdn.cheeeese.com/album/1/thumbnail/101.jpg")
-                String thumbnailImageUrl,
-
                 @Schema(description = "선정 순위 (1~4)", example = "1")
                 int photoRank
         ) {}
