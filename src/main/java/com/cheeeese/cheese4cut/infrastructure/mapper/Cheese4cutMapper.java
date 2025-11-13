@@ -1,6 +1,7 @@
 package com.cheeeese.cheese4cut.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.domain.Cheese4cutPhoto;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
@@ -32,13 +33,15 @@ public class Cheese4cutMapper {
     public static Cheese4cutPreviewResponse toPreviewResponse(
             List<Cheese4cutPreviewResponse.PreviewPhotoInfo> photoInfos,
             long uniqueLikesCount,
-            int participant
+            int participant,
+            Role myRole
     ) {
         return Cheese4cutPreviewResponse.builder()
                 .isFinalized(false)
                 .previewPhotos(photoInfos)
                 .uniqueLikesCount((int) uniqueLikesCount)
                 .participant(participant)
+                .myRole(myRole)
                 .build();
     }
 
