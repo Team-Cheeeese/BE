@@ -5,7 +5,6 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.global.security.CurrentUserProvider;
 import com.cheeeese.photo.domain.Photo;
-import com.cheeeese.album.dto.response.AlbumInfoResponse;
 import com.cheeeese.photo.dto.response.PhotoLikerResponse;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
