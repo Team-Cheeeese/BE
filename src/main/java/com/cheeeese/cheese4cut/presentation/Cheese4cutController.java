@@ -12,6 +12,7 @@ import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,10 +30,11 @@ public class Cheese4cutController implements Cheese4cutSwagger {
     @Override
     @GetMapping("/preview")
     public CommonResponse<Cheese4cutResponse> getCheese4cut(
+            Authentication authentication,
             @PathVariable @NotBlank String code
     ) {
         return CommonResponse.success(SuccessCode.CHEESE4CUT_GET_SUCCESS,
-                cheese4cutService.getCheese4cutByAlbumCode(code));
+                cheese4cutService.getCheese4cutByAlbumCode(authentication, code));
     }
 
     @Override
