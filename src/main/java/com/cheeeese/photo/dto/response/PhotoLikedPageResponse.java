@@ -13,7 +13,9 @@ public record PhotoLikedPageResponse(
                 example = """
                         [
                           {
+                            "name": "주정빈",
                             "photoId": 1,
+                            "imageUrl": "https://cdn.cheeeese.me/original.jpg",
                             "thumbnailUrl": "https://cdn.cheeeese.me/thumb1.jpg",
                             "isDownloaded": false,
                             "isRecentlyDownloaded": false

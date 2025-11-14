@@ -4,6 +4,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.dto.response.*;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.user.domain.User;
 
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class AlbumMapper {
                 .participant(participant)
                 .currentParticipant(1)
                 .eventDate(eventDate)
-                .maxPhotoCount(10)
+                .maxPhotoCount(100)
                 .currentPhotoCount(0)
                 .isInfoAvailable(isInfoAvailable)
                 .expiredAt(expiredAt)
@@ -142,6 +143,14 @@ public class AlbumMapper {
                 .availableCount(availableCount)
                 .maxPhotoCount(maxCount)
                 .currentPhotoCount(currentCount)
+                .build();
+    }
+
+    public static AlbumBest4CutResponse toBest4CutResponse(Photo photo, String thumbnailUrl, boolean isLiked) {
+        return AlbumBest4CutResponse.builder()
+                .thumbnailUrl(thumbnailUrl)
+                .likeCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
                 .build();
     }
 }
