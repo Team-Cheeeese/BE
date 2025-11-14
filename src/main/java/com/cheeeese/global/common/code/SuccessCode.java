@@ -17,10 +17,14 @@ public enum SuccessCode implements BaseCode {
     LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃이 성공적으로 완료되었습니다."),
 
     // user
+    USER_INFO_FETCH_SUCCESS(HttpStatus.OK, "사용자 정보 조회가 성공적으로 완료되었습니다."),
     USER_PROFILE_UPDATE_SUCCESS(HttpStatus.OK, "사용자 프로필 업데이트가 성공적으로 완료되었습니다."),
     USER_AGREEMENT_ACCEPT_SUCCESS(HttpStatus.OK, "사용자 이용 약관 동의가 성공적으로 완료되었습니다."),
 
     // album
+    ALBUM_OPEN_LIST_FETCH_SUCCESS(HttpStatus.OK, "열린 앨범 목록 조회가 성공적으로 완료되었습니다."),
+    ALBUM_MY_OPEN_LIST_FETCH_SUCCESS(HttpStatus.OK, "내가 만든 열린 앨범 목록 조회가 성공적으로 완료되었습니다."),
+    ALBUM_CLOSED_LIST_FETCH_SUCCESS(HttpStatus.OK, "닫힌 앨범 목록 조회가 성공적으로 완료되었습니다."),
     ALBUM_INVITATION_FETCH_SUCCESS(HttpStatus.OK, "앨범 초대장 정보 조회가 성공적으로 완료되었습니다."),
     ALBUM_ENTER_SUCCESS(HttpStatus.OK, "앨범 입장이 성공적으로 완료되었습니다."),
     ALBUM_CREATE_SUCCESS(HttpStatus.OK, "앨범 생성이 성공적으로 완료되었습니다."),
