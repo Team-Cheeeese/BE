@@ -15,13 +15,13 @@ public class UserMapper {
                 .build();
     }
 
-    public static UserInfoResponse toUserInfoResponse(User user, long albumCount, long likesCount) {
+    public static UserInfoResponse toUserInfoResponse(User user) {
         return UserInfoResponse.builder()
                 .profileImage(user.getProfileImage())
                 .name(user.getName())
-                .albumCount(albumCount)
+                .albumCount(user.getAlbumCnt())
                 .photoCount(user.getPhotoCnt())
-                .likesCount(likesCount)
+                .likesCount(user.getLikesCnt())
                 .build();
     }
 }

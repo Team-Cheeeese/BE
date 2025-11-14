@@ -50,16 +50,7 @@ public class UserService {
     }
 
     public UserInfoResponse getUserInfo(User user) {
-        long albumCount = userAlbumRepository.countByUserIdAndAlbumStatusIn(
-                user.getId(),
-                List.of(Album.AlbumStatus.ACTIVE, Album.AlbumStatus.EXPIRED)
-        );
-
-        long likesCount = Optional.ofNullable(
-                photoRepository.sumLikesByUserIdAndStatus(user.getId(), PhotoStatus.COMPLETED)
-        ).orElse(0L);
-
-        return UserMapper.toUserInfoResponse(user, albumCount, likesCount);
+        return UserMapper.toUserInfoResponse(user);
     }
 
     @Transactional
