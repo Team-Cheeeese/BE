@@ -6,13 +6,13 @@ import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
+import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.presentation.swagger.UserSwagger;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static com.cheeeese.global.common.code.SuccessCode.USER_AGREEMENT_ACCEPT_SUCCESS;
-import static com.cheeeese.global.common.code.SuccessCode.USER_PROFILE_UPDATE_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +20,12 @@ import static com.cheeeese.global.common.code.SuccessCode.USER_PROFILE_UPDATE_SU
 public class UserController implements UserSwagger {
 
     private final UserService userService;
+
+    @Override
+    @GetMapping("/me")
+    public CommonResponse<UserInfoResponse> getUserInfo(@CurrentUser User user) {
+        return CommonResponse.success(USER_INFO_FETCH_SUCCESS, userService.getUserInfo(user));
+    }
 
     @Override
     @PatchMapping("/me/profile")
