@@ -10,8 +10,8 @@ import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
-import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
+import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.PhotoService;
@@ -70,6 +70,8 @@ public class AlbumService {
 
         albumValidator.validateAlbumCreation(request);
 
+        LocalDateTime expiredAt = LocalDateTime.now().plusDays(7);
+
         Album album = AlbumMapper.toEntity(
                 user.getId(),
                 request.title(),
@@ -78,7 +80,7 @@ public class AlbumService {
                 request.participant(),
                 request.eventDate(),
                 true,
-                LocalDateTime.now().plusDays(7)
+                expiredAt
         );
         albumRepository.save(album);
 
@@ -89,7 +91,7 @@ public class AlbumService {
         ));
         userRepository.incrementAlbumCnt(user.getId());
 
-        albumExpirationRedisRepository.registerAlbum(album.getId());
+        albumExpirationRedisRepository.registerAlbum(album.getId(), expiredAt);
 
         return AlbumMapper.toCreationResponse(album);
     }

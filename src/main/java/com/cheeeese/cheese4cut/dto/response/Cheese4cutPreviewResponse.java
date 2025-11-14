@@ -1,5 +1,6 @@
 package com.cheeeese.cheese4cut.dto.response;
 
+import com.cheeeese.album.domain.type.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -18,7 +19,10 @@ public record Cheese4cutPreviewResponse(
         int uniqueLikesCount,
 
         @Schema(description = "전체 참여자 수", example = "6")
-        int participant
+        int participant,
+
+        @Schema(description = "사용자 역할", example = "MAKER")
+        Role myRole
 
 ) implements Cheese4cutResponse {
     @Builder
@@ -28,6 +32,9 @@ public record Cheese4cutPreviewResponse(
             Long photoId,
 
             @Schema(description = "사진 원본 URL", example = "https://cdn.cheeeese.com/album/1/original/101.jpg")
-            String imageUrl
+            String imageUrl,
+
+            @Schema(description = "선정 순위 (1~4)", example = "1")
+            int photoRank
     ) {}
 }

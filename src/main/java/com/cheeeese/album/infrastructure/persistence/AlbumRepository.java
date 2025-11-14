@@ -38,4 +38,9 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Album a SET a.currentPhotoCount = a.currentPhotoCount - :count WHERE a.id = :albumId AND a.currentPhotoCount >= :count")
     int decrementPhotoCount(@Param("albumId") Long albumId, @Param("count") int count);
+
+    @Modifying
+    @Query("UPDATE Album a SET a.status = :status WHERE a.id = :id AND a.status <> :status")
+    void updateStatus(Long id, Album.AlbumStatus status);
+
 }

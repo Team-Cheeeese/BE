@@ -16,19 +16,15 @@ public class AlbumExpirationScheduler {
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final AlbumExpirationService albumExpirationService;
 
-    @Scheduled(fixedDelay = 1000L)
+    @Scheduled(fixedDelay = 10000L)
     public void handleAlbumExpirations() {
-        Set<Long> trackedAlbumIds = albumExpirationRedisRepository.getTrackedAlbumIds();
+        Set<Long> expiredAlbumIds = albumExpirationRedisRepository.getExpiredAlbumIds();
 
-        if (trackedAlbumIds.isEmpty()) {
+        if (expiredAlbumIds.isEmpty()) {
             return;
         }
 
-        for (Long albumId : trackedAlbumIds) {
-            if (!albumExpirationRedisRepository.isExpired(albumId)) {
-                continue;
-            }
-
+        for (Long albumId : expiredAlbumIds) {
             try {
                 albumExpirationService.expireAlbum(albumId);
                 albumExpirationRedisRepository.unregister(albumId);

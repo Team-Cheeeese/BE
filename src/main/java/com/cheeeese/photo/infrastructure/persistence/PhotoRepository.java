@@ -127,6 +127,15 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     List<Photo> findAllByIdIn(List<Long> photoIds);
 
     @Query("""
+    SELECT p
+    FROM Photo p
+    WHERE p.id IN :photoIds
+      AND p.isDeleted = FALSE
+    ORDER BY p.likesCnt DESC, p.createdAt DESC, p.id DESC
+    """)
+    List<Photo> findAllByIdInOrderByLikesDescCreatedDesc(@Param("photoIds") List<Long> photoIds);
+
+    @Query("""
         SELECT p.album.code
         FROM Photo p
         WHERE p.id = :photoId
