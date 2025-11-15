@@ -16,6 +16,7 @@ import java.util.List;
                 "themeEmoji",
                 "title",
                 "eventDate",
+                "makerName",
                 "currentParticipant",
                 "participant",
                 "expiredAt"
