@@ -13,7 +13,6 @@ import java.util.List;
         requiredProperties = {
                 "code",
                 "title",
-                "makerName",
                 "eventDate"
         }
 )

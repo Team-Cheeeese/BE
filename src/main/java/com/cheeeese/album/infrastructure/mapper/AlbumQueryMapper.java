@@ -48,7 +48,7 @@ public class AlbumQueryMapper {
                 .themeEmoji(album.getThemeEmoji())
                 .title(album.getTitle())
                 .eventDate(album.getEventDate())
-                .makerName(maker.getName())
+                .makerName(maker != null ? maker.getName() : null)
                 .currentParticipant(album.getCurrentParticipant())
                 .participant(album.getParticipant())
                 .expiredAt(album.getExpiredAt())
@@ -64,7 +64,7 @@ public class AlbumQueryMapper {
         return ClosedAlbumSummaryResponse.builder()
                 .code(album.getCode())
                 .title(album.getTitle())
-                .makerName(maker.getName())
+                .makerName(maker != null ? maker.getName() : null)
                 .eventDate(album.getEventDate())
                 .thumbnails(thumbnails.isEmpty() ? null : thumbnails)
                 .build();
