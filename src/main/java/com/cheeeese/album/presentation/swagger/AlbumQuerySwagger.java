@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,9 +32,9 @@ public interface AlbumQuerySwagger {
     CommonResponse<OpenAlbumPageResponse> getOpenAlbums(
             @CurrentUser User user,
             @Parameter(description = "페이지 번호", schema = @Schema(defaultValue = "0"))
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
             @Parameter(description = "페이지 크기", schema = @Schema(defaultValue = "2"))
-            @RequestParam(defaultValue = "2") int size
+            @RequestParam(defaultValue = "2") @Min(1) @Max(10) int size
     );
 
     @Operation(
@@ -46,9 +48,9 @@ public interface AlbumQuerySwagger {
     CommonResponse<OpenAlbumPageResponse> getMyOpenAlbums(
             @CurrentUser User user,
             @Parameter(description = "페이지 번호", schema = @Schema(defaultValue = "0"))
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
             @Parameter(description = "페이지 크기", schema = @Schema(defaultValue = "2"))
-            @RequestParam(defaultValue = "2") int size
+            @RequestParam(defaultValue = "2") @Min(1) @Max(10) int size
     );
 
     @Operation(
@@ -62,8 +64,8 @@ public interface AlbumQuerySwagger {
     CommonResponse<ClosedAlbumPageResponse> getClosedAlbums(
             @CurrentUser User user,
             @Parameter(description = "페이지 번호", schema = @Schema(defaultValue = "0"))
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
             @Parameter(description = "페이지 크기", schema = @Schema(defaultValue = "6"))
-            @RequestParam(defaultValue = "6") int size
+            @RequestParam(defaultValue = "6") @Min(1) @Max(20) int size
     );
 }
