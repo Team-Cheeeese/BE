@@ -22,12 +22,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -90,6 +90,8 @@ public class AlbumQueryService {
             return AlbumQueryMapper.toClosedAlbumPageResponse(List.of(), expiredAlbums);
         }
 
+        Map<Long, User> makerMap = getMakers(expiredAlbums.getContent());
+
         List<Cheese4cutPhoto> allCheese4cutPhotos = cheese4cutPhotoRepository.findAllCheese4cutPhotosByAlbumIds(albumIds);
 
         Map<Long, List<Cheese4cutPhoto>> cheese4cutPhotoMap = allCheese4cutPhotos.stream()
@@ -102,7 +104,8 @@ public class AlbumQueryService {
                 .map(album -> {
                     List<Cheese4cutPhoto> c4pList = cheese4cutPhotoMap.getOrDefault(album.getId(), List.of());
 
-                    User maker = getMaker(album.getMakerId());
+                    User maker = Optional.ofNullable(makerMap.get(album.getMakerId()))
+                            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
                     List<String> thumbnails = c4pList.stream()
                             .sorted(Comparator.comparingInt(Cheese4cutPhoto::getPhotoRank)) // photoRank 순으로 정렬
@@ -118,37 +121,67 @@ public class AlbumQueryService {
     }
 
     private List<OpenAlbumSummaryResponse> buildOpenAlbumResponses(List<Album> albums) {
+        if (albums.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, User> makerMap = getMakers(albums);
+        Map<Long, List<String>> recentThumbnailsMap = getRecentThumbnailsMap(albums);
+
         return albums.stream()
                 .map(album -> {
-                    User maker = getMaker(album.getMakerId());
-                    List<String> recentThumbnails = getRecentThumbnails(album.getId());
+                    User maker = Optional.ofNullable(makerMap.get(album.getMakerId()))
+                            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+                    List<String> recentThumbnails = recentThumbnailsMap.getOrDefault(album.getId(), List.of());
                     return AlbumQueryMapper.toOpenAlbumSummaryResponse(album, maker, recentThumbnails);
                 })
                 .toList();
     }
 
-    private User getMaker(Long makerId) {
-        return userRepository.findById(makerId)
-                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    private Map<Long, User> getMakers(List<Album> albums) {
+        List<Long> makerIds = albums.stream()
+                .map(Album::getMakerId)
+                .distinct()
+                .toList();
+        Map<Long, User> makers = userRepository.findAllById(makerIds).stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+        if (makers.size() != makerIds.size()) {
+            throw new UserException(UserErrorCode.USER_NOT_FOUND);
+        }
+        return makers;
     }
 
-    private List<String> getRecentThumbnails(Long albumId) {
-        Pageable pageable = PageRequest.of(0, RECENT_THUMBNAIL_COUNT, Sort.by(Sort.Direction.DESC, "createdAt"));
+    private Map<Long, List<String>> getRecentThumbnailsMap(List<Album> albums) {
+        List<Long> albumIds = albums.stream()
+                .map(Album::getId)
+                .toList();
 
-        List<Photo> photos = photoRepository.findRecentPhotosByAlbumIdAndStatus(
-                albumId,
-                PhotoStatus.COMPLETED,
-                pageable
-        );
-
-        // 3개 미만이면 아예 제공 안 함
-        if (photos.size() < RECENT_THUMBNAIL_COUNT) {
-            return List.of();
+        if (albumIds.isEmpty()) {
+            return Map.of();
         }
 
-        return photos.stream()
-                .map(Photo::getThumbnailUrl)
-                .map(cdnUrlResolver::resolveThumbnail)
-                .toList();
+        List<Photo> photos = photoRepository.findRecentPhotosByAlbumIdsAndStatus(
+                albumIds,
+                PhotoStatus.COMPLETED
+        );
+
+        Map<Long, List<String>> thumbnailsMap = new HashMap<>();
+
+        for (Photo photo : photos) {
+            Long albumId = photo.getAlbum().getId();
+            List<String> thumbnails = thumbnailsMap.computeIfAbsent(albumId, key -> new ArrayList<>());
+
+            if (thumbnails.size() < RECENT_THUMBNAIL_COUNT) {
+                thumbnails.add(cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl()));
+            }
+        }
+
+        return thumbnailsMap.entrySet().stream()
+                .filter(entry -> entry.getValue().size() == RECENT_THUMBNAIL_COUNT)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> List.copyOf(entry.getValue())
+                ));
     }
 }
