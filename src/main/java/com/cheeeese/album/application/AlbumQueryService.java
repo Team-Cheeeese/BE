@@ -161,7 +161,7 @@ public class AlbumQueryService {
             return Map.of();
         }
 
-        List<Photo> photos = photoRepository.findRecentPhotosByAlbumIdsAndStatus(
+        List<Photo> photos = photoRepository.findTop3RecentPhotosInEachAlbum(
                 albumIds,
                 PhotoStatus.COMPLETED
         );

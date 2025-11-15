@@ -70,15 +70,24 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
             Pageable pageable
     );
 
-    @Query("""
-        SELECT p
-        FROM Photo p
-        WHERE p.album.id IN :albumIds
-          AND p.isDeleted = FALSE
-          AND p.status = :status
-        ORDER BY p.album.id ASC, p.createdAt DESC, p.id DESC
-    """)
-    List<Photo> findRecentPhotosByAlbumIdsAndStatus(
+    @Query(value = """
+        SELECT *
+        FROM (
+            SELECT p.*,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY p.album_id
+                       ORDER BY p.created_at DESC, p.photo_id DESC
+                   ) AS rn
+            FROM photo p
+            WHERE p.album_id IN (:albumIds)
+              AND p.is_deleted = FALSE
+              AND p.status = :status
+        ) t
+        WHERE t.rn <= 3
+        ORDER BY t.album_id ASC, t.rn ASC
+        """,
+            nativeQuery = true)
+    List<Photo> findTop3RecentPhotosInEachAlbum(
             @Param("albumIds") List<Long> albumIds,
             @Param("status") PhotoStatus status
     );
