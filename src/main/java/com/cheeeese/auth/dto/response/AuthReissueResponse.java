@@ -4,7 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "token 재발급")
+@Schema(
+        description = "token 재발급",
+        requiredProperties = {
+                "accessToken",
+                "refreshToken"
+        }
+)
 public record AuthReissueResponse(
         @Schema(
                 description = "새로 발급된 accessToken",

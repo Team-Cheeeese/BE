@@ -4,6 +4,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
+@Schema(
+        description = "token 교환 응답",
+        requiredProperties = {
+                "accessToken",
+                "refreshToken",
+                "isOnboarded",
+                "userId",
+                "name",
+                "email"
+        }
+)
+
 public record AuthExchangeResponse(
         @Schema(
                 description = "accessToken",
