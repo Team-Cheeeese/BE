@@ -24,7 +24,7 @@ public class UserController implements UserSwagger {
     private final UserService userService;
 
     @Override
-    @PatchMapping("/me/profile")
+    @PatchMapping("/me/name")
     public CommonResponse<Void> updateUserName(
             @CurrentUser User user,
             @RequestBody @Valid UserProfileRequest request
