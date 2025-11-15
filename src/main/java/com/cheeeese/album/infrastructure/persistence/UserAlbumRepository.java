@@ -23,8 +23,6 @@ public interface UserAlbumRepository extends JpaRepository<UserAlbum, Long> {
     @Query("SELECT ua FROM UserAlbum ua WHERE ua.album.id = :albumId AND ua.user.id = :userId AND ua.role = :role")
     Optional<UserAlbum> findByAlbumIdAndUserIdAndRole(@Param("albumId") Long albumId, @Param("userId") Long userId, @Param("role") Role role);
 
-    long countByUserIdAndAlbumStatusIn(Long userId, List<Album.AlbumStatus> statuses);
-
     @Query("""
         SELECT a
         FROM UserAlbum ua
