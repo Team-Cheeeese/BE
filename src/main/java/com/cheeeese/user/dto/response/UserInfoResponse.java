@@ -4,8 +4,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "사용자 기본 정보 응답")
-public record UserInfoResponse(
+@Schema(
+        description = "사용자 기본 정보 응답",
+        requiredProperties = {
+                "profileImage",
+                "name",
+                "albumCount",
+                "photoCount",
+                "likesCount"
+        }
+)public record UserInfoResponse(
         @Schema(description = "사용자 프로필 이미지 URL", example = "https://cdn.cheeeese.me/profile.png")
         String profileImage,
 
