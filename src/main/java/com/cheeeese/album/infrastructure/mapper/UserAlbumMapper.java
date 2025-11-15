@@ -20,11 +20,11 @@ public class UserAlbumMapper {
                 .build();
     }
 
-    public static AlbumParticipantListResponse.ParticipantInfo toParticipantInfo(User user, Role role, boolean isMe) {
+    public static AlbumParticipantListResponse.ParticipantInfo toParticipantInfo(User user, String profileImage, Role role, boolean isMe) {
         return AlbumParticipantListResponse.ParticipantInfo.builder()
                 .name(user.getName())
                 .role(role)
-                .profileImage(user.getProfileImage())
+                .profileImage(profileImage)
                 .isMe(isMe)
                 .build();
     }

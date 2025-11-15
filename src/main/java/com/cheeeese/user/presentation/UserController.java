@@ -5,14 +5,16 @@ import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
+import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
+import com.cheeeese.user.dto.response.UserProfileImageResponse;
 import com.cheeeese.user.presentation.swagger.UserSwagger;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import static com.cheeeese.global.common.code.SuccessCode.USER_AGREEMENT_ACCEPT_SUCCESS;
-import static com.cheeeese.global.common.code.SuccessCode.USER_PROFILE_UPDATE_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,13 +24,29 @@ public class UserController implements UserSwagger {
     private final UserService userService;
 
     @Override
-    @PatchMapping("/me/profile")
-    public CommonResponse<Void> updateUserProfile(
+    @PatchMapping("/me/name")
+    public CommonResponse<Void> updateUserName(
             @CurrentUser User user,
             @RequestBody @Valid UserProfileRequest request
     ) {
-        userService.updateUserProfile(user, request);
-        return CommonResponse.success(USER_PROFILE_UPDATE_SUCCESS);
+        userService.updateUserName(user, request);
+        return CommonResponse.success(USER_NAME_UPDATE_SUCCESS);
+    }
+
+    @Override
+    @GetMapping("/profile-images")
+    public CommonResponse<UserProfileImageResponse> getUserProfileImage() {
+        return CommonResponse.success(USER_PROFILE_IMAGE_OPT_GET_SUCCESS, userService.getUserProfileImageOpt());
+    }
+
+    @Override
+    @PatchMapping("/me/profile-image")
+    public CommonResponse<Void> updateUserProfileImage(
+            @CurrentUser User user,
+            @RequestBody @Valid UserProfileImageRequest request
+    ) {
+        userService.updateUserProfileImage(user, request);
+        return CommonResponse.success(USER_PROFILE_IMAGE_UPDATE_SUCCESS);
     }
 
     @Override

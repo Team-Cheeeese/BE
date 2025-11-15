@@ -26,4 +26,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
         WHERE u.id = :userId
     """)
     void incrementAlbumCnt(@Param("userId") Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+        UPDATE User u
+        SET u.likesCnt = u.likesCnt + 1
+        WHERE u.id = :userId
+    """)
+    void incrementLikeCnt(@Param("userId") Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+        UPDATE User u
+        SET u.likesCnt = u.likesCnt - 1
+        WHERE u.id = :userId
+        AND u.likesCnt > 0
+    """)
+    void decrementLikeCnt(@Param("userId") Long userId);
 }

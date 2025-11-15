@@ -13,6 +13,7 @@ import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.security.CustomUserDetails;
+import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
@@ -24,6 +25,7 @@ import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.domain.type.ProfileImageType;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
@@ -103,8 +105,9 @@ public class AlbumService {
             return AlbumMapper.toExpiredInvitationResponse(album);
         }
         User maker = getMaker(album.getMakerId());
+        String makerProfileUrl = ProfileImageUtil.resolveProfileImage(maker, cdnUrlResolver);
 
-        return AlbumMapper.toInvitationResponse(album, maker);
+        return AlbumMapper.toInvitationResponse(album, maker, makerProfileUrl);
     }
 
     @Transactional
@@ -113,7 +116,10 @@ public class AlbumService {
         albumValidator.validateAlbumEntry(album, currentUser);
 
         Optional<UserAlbum> existing = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId());
-        AlbumMakerInfo makerInfo = AlbumMapper.toMakerInfo(getMaker(album.getMakerId()));
+
+        User maker = getMaker(album.getMakerId());
+        String makerProfileUrl = ProfileImageUtil.resolveProfileImage(maker, cdnUrlResolver);
+        AlbumMakerInfo makerInfo = AlbumMapper.toMakerInfo(maker, makerProfileUrl);
 
         // Case 1: 기존 참여 이력 존재
         if (existing.isPresent()) {
@@ -267,13 +273,20 @@ public class AlbumService {
         // 1~4개인 경우, 1개만 반환하는 비즈니스 로직 적용
         if (photos.size() < 5) {
             Photo photo = photos.get(0);
-            return List.of(AlbumMapper.toRecentPhotoResponse(photo));
+            String profileUrl = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
+            return List.of(AlbumMapper.toRecentPhotoResponse(photo, profileUrl));
         }
 
         // 5개인 경우, 5개 모두 반환
         return photos.stream()
-                .map(AlbumMapper::toRecentPhotoResponse)
-                .collect(Collectors.toList());
+                .map(photo -> {
+                    String profileUrl = ProfileImageUtil.resolveProfileImage(
+                            photo.getUser(),
+                            cdnUrlResolver
+                    );
+                    return AlbumMapper.toRecentPhotoResponse(photo, profileUrl);
+                })
+                .toList();
     }
 
     private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
@@ -284,8 +297,11 @@ public class AlbumService {
                 .map(userAlbum -> {
                     User user = userAlbum.getUser();
                     Role role = userAlbum.getRole();
+                    ProfileImageType type = ProfileImageType.fromName(user.getProfileImage());
+                    String profileImageUrl = cdnUrlResolver.resolveProfile(type.getPath());
                     boolean isMe = currentUserId != null && user.getId().equals(currentUserId);
-                    return UserAlbumMapper.toParticipantInfo(user, role, isMe);
+
+                    return UserAlbumMapper.toParticipantInfo(user, profileImageUrl, role, isMe);
                 })
                 .sorted(Comparator
                         .comparing(AlbumParticipantListResponse.ParticipantInfo::isMe, Comparator.reverseOrder())

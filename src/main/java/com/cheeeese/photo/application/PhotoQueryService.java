@@ -36,14 +36,14 @@ public class PhotoQueryService {
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
 
-    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:version:%d";
+    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:version:%d";
     private static final String VERSION_KEY = "cache:album:%s:version";
 
     public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
         String versionKey = String.format(VERSION_KEY, code);
         Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
-        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, curVersion);
+        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, size, curVersion);
         PhotoPageResponse cachedList = redisCacheUtil.getObject(photoKey, PhotoPageResponse.class);
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
