@@ -5,7 +5,9 @@ import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
+import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
+import com.cheeeese.user.dto.response.UserProfileImageResponse;
 import com.cheeeese.user.presentation.swagger.UserSwagger;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,21 @@ public class UserController implements UserSwagger {
             @CurrentUser User user,
             @RequestBody @Valid UserProfileRequest request
     ) {
-        userService.updateUserProfile(user, request);
+        userService.updateUserName(user, request);
+        return CommonResponse.success(USER_PROFILE_UPDATE_SUCCESS);
+    }
+
+    @GetMapping("/profile-images")
+    public CommonResponse<UserProfileImageResponse> getUserProfileImage() {
+        return CommonResponse.success(USER_PROFILE_UPDATE_SUCCESS, userService.getUserProfileImageOpt());
+    }
+
+    @PatchMapping("/me/profile-image")
+    public CommonResponse<Void> updateUserProfileImage(
+            @CurrentUser User user,
+            @RequestBody @Valid UserProfileImageRequest request
+    ) {
+        userService.updateUserProfileImage(user, request);
         return CommonResponse.success(USER_PROFILE_UPDATE_SUCCESS);
     }
 

@@ -162,10 +162,10 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static PhotoLikedUserResponse.PhotoLiker toPhotoLiker(User user, boolean isMe, Role role) {
+    public static PhotoLikedUserResponse.PhotoLiker toPhotoLiker(User user, String profileImageUrl, boolean isMe, Role role) {
         return PhotoLikedUserResponse.PhotoLiker.builder()
                 .name(user.getName())
-                .profileImageUrl(user.getProfileImage())
+                .profileImageUrl(profileImageUrl)
                 .isMe(isMe)
                 .role(role)
                 .build();
