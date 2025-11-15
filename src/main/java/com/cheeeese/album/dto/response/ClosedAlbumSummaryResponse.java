@@ -30,7 +30,6 @@ public record ClosedAlbumSummaryResponse(
         @Schema(description = "이벤트 날짜", example = "2025-05-01")
         LocalDate eventDate,
 
-        @JsonInclude(JsonInclude.Include.ALWAYS)
-        @Schema(description = "치즈네컷 썸네일 목록 (4개)")
+        @Schema(description = "치즈네컷 썸네일 목록 (4개)", nullable = true)
         List<String> thumbnails
 ) {}

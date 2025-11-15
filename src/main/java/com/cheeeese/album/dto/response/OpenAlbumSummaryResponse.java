@@ -47,8 +47,7 @@ public record OpenAlbumSummaryResponse(
         @Schema(description = "앨범 만료 예정 일시", example = "2025-05-05T12:00:00")
         LocalDateTime expiredAt,
 
-        @JsonInclude(JsonInclude.Include.ALWAYS)
-        @Schema(description = "최근 업로드된 사진 썸네일 3장")
+        @Schema(description = "최근 업로드된 사진 썸네일 3장", nullable = true)
         List<String> recentPhotoThumbnails
 ) {
 }
