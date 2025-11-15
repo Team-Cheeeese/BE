@@ -7,6 +7,8 @@ import com.cheeeese.album.presentation.swagger.AlbumQuerySwagger;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,8 +30,8 @@ public class AlbumQueryController implements AlbumQuerySwagger {
     @GetMapping("/open")
     public CommonResponse<OpenAlbumPageResponse> getOpenAlbums(
             @CurrentUser User user,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "2") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "2") @Min(1) @Max(10) int size
     ) {
         return CommonResponse.success(
                 ALBUM_OPEN_LIST_FETCH_SUCCESS,
@@ -41,8 +43,8 @@ public class AlbumQueryController implements AlbumQuerySwagger {
     @GetMapping("/open/me")
     public CommonResponse<OpenAlbumPageResponse> getMyOpenAlbums(
             @CurrentUser User user,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "2") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "2") @Min(1) @Max(10) int size
     ) {
         return CommonResponse.success(
                 ALBUM_MY_OPEN_LIST_FETCH_SUCCESS,
@@ -54,8 +56,8 @@ public class AlbumQueryController implements AlbumQuerySwagger {
     @GetMapping("/closed")
     public CommonResponse<ClosedAlbumPageResponse> getClosedAlbums(
             @CurrentUser User user,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "6") @Min(1) @Max(20) int size
     ) {
         return CommonResponse.success(
                 ALBUM_CLOSED_LIST_FETCH_SUCCESS,

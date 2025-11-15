@@ -1,9 +1,5 @@
 package com.cheeeese.user.application;
 
-import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
-import com.cheeeese.photo.domain.PhotoStatus;
-import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.validator.UserValidator;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
@@ -17,9 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,8 +20,6 @@ public class UserService {
 
     private final UserValidator userValidator;
     private final UserRepository userRepository;
-    private final UserAlbumRepository userAlbumRepository;
-    private final PhotoRepository photoRepository;
 
     @Transactional
     public void updateUserProfile(User user, UserProfileRequest request) {

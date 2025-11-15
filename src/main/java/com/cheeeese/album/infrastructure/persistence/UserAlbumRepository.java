@@ -49,6 +49,7 @@ public interface UserAlbumRepository extends JpaRepository<UserAlbum, Long> {
           AND ua.isVisible = TRUE
           AND a.status = :status
           AND a.expiredAt > :now
+        ORDER BY a.expiredAt ASC
     """)
     Slice<Album> findOpenAlbumsByUserIdAndRole(
             @Param("userId") Long userId,
