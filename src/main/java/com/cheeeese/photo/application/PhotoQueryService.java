@@ -4,6 +4,7 @@ import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,14 +36,14 @@ public class PhotoQueryService {
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
 
-    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:version:%d";
+    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:version:%d";
     private static final String VERSION_KEY = "cache:album:%s:version";
 
     public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
         String versionKey = String.format(VERSION_KEY, code);
         Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
-        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, curVersion);
+        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, size, curVersion);
         PhotoPageResponse cachedList = redisCacheUtil.getObject(photoKey, PhotoPageResponse.class);
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
@@ -111,8 +111,17 @@ public class PhotoQueryService {
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
         PageRequest pageRequest = PageRequest.of(page, size, getPhotoSortingOption(albumSorting));
-        Slice<Photo> photos = photoRepository.findAllByAlbumCode(code, pageRequest);
-        return PhotoMapper.toPhotoPageResponse(photos, cdnUrlResolver);
+        Slice<Photo> photos = photoRepository.findAllByAlbumCodeAndStatus(code, PhotoStatus.COMPLETED, pageRequest);
+
+        List<PhotoListResponse> responses = photos.getContent().stream()
+                .map(photo -> {
+                    String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
+                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    return PhotoMapper.toPhotoListResponse(photo, imageUrl, thumbnailUrl, false, false);
+                })
+                .toList();
+
+        return PhotoMapper.toPhotoPageResponse(photos, responses);
     }
 
     private PhotoPageResponse attachUserStatus(User user, PhotoPageResponse response) {
@@ -168,10 +177,11 @@ public class PhotoQueryService {
         return photos.stream()
                 .map(photo -> {
                     Long id = photo.getId();
-                    String resolvedThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
+                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
                     boolean isDownloaded = downloaded.contains(id);
                     boolean isRecentlyDownloaded = recent.contains(id);
-                    return PhotoMapper.toPhotoLikedResponse(photo, resolvedThumbnailUrl, isDownloaded, isRecentlyDownloaded);
+                    return PhotoMapper.toPhotoLikedResponse(photo, imageUrl, thumbnailUrl, isDownloaded, isRecentlyDownloaded);
                 })
                 .toList();
     }

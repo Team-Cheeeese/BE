@@ -24,6 +24,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 public class PhotoService {
 
     private final UserService userService;
+    private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
@@ -78,8 +80,6 @@ public class PhotoService {
         userService.incrementPhotoCount(user.getId(), uploadCount);
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
-
-        photoQueryService.invalidatePhotoCache(album.getCode());
 
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
     }
@@ -136,6 +136,8 @@ public class PhotoService {
         photoRepository.incrementLikeCnt(photo.getId());
         photoLikesRepository.save(photoLikes);
 
+        userRepository.incrementLikeCnt(photo.getUser().getId());
+
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 
@@ -149,6 +151,8 @@ public class PhotoService {
 
         photoRepository.decrementLikeCnt(photo.getId());
         photoLikesRepository.delete(photoLikes);
+
+        userRepository.decrementLikeCnt(photo.getUser().getId());
 
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }

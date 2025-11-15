@@ -13,17 +13,26 @@ import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.security.CustomUserDetails;
+import com.cheeeese.global.util.ProfileImageUtil;
+import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
+import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
+import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
+import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.domain.type.ProfileImageType;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -36,6 +45,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,8 +58,11 @@ public class AlbumService {
     private final AlbumRepository albumRepository;
     private final UserAlbumRepository userAlbumRepository;
     private final UserRepository userRepository;
+    private final PhotoRepository photoRepository;
+    private final PhotoLikesRepository photoLikesRepository;
     private final PhotoService photoService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
+    private final CdnUrlResolver cdnUrlResolver;
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
@@ -78,6 +91,7 @@ public class AlbumService {
                 album,
                 Role.MAKER
         ));
+        userRepository.incrementAlbumCnt(user.getId());
 
         albumExpirationRedisRepository.registerAlbum(album.getId(), expiredAt);
 
@@ -91,8 +105,9 @@ public class AlbumService {
             return AlbumMapper.toExpiredInvitationResponse(album);
         }
         User maker = getMaker(album.getMakerId());
+        String makerProfileUrl = ProfileImageUtil.resolveProfileImage(maker, cdnUrlResolver);
 
-        return AlbumMapper.toInvitationResponse(album, maker);
+        return AlbumMapper.toInvitationResponse(album, maker, makerProfileUrl);
     }
 
     @Transactional
@@ -101,7 +116,10 @@ public class AlbumService {
         albumValidator.validateAlbumEntry(album, currentUser);
 
         Optional<UserAlbum> existing = userAlbumRepository.findByUserIdAndAlbumId(currentUser.getId(), album.getId());
-        AlbumMakerInfo makerInfo = AlbumMapper.toMakerInfo(getMaker(album.getMakerId()));
+
+        User maker = getMaker(album.getMakerId());
+        String makerProfileUrl = ProfileImageUtil.resolveProfileImage(maker, cdnUrlResolver);
+        AlbumMakerInfo makerInfo = AlbumMapper.toMakerInfo(maker, makerProfileUrl);
 
         // Case 1: 기존 참여 이력 존재
         if (existing.isPresent()) {
@@ -127,6 +145,7 @@ public class AlbumService {
         if (updated == 0) {
             throw new AlbumException(AlbumErrorCode.ALBUM_MAX_PARTICIPANT_REACHED);
         }
+        userRepository.incrementAlbumCnt(currentUser.getId());
 
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
@@ -180,6 +199,40 @@ public class AlbumService {
         );
     }
 
+    public AlbumInfoResponse getAlbumInfo(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+
+        albumValidator.validateAlbumParticipant(album, user);
+
+        return PhotoMapper.toAlbumInfoResponse(album);
+    }
+
+    public List<AlbumBest4CutResponse> getAlbumBest4Cut(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+
+        albumValidator.validateAlbumParticipant(album, user);
+
+        List<Photo> topPhotos = photoRepository.findTop4CompletedPhotosByLikes(
+                album.getId(),
+                PhotoStatus.COMPLETED,
+                PageRequest.of(0, 4)
+        );
+
+        List<Long> photoIds = topPhotos.stream()
+                .map(Photo::getId)
+                .toList();
+
+        Set<Long> likedPhotoIds = photoLikesRepository.findAllLikedPhotoIds(user.getId(), photoIds);
+
+        return topPhotos.stream()
+                .map(photo -> {
+                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    boolean isLiked = likedPhotoIds.contains(photo.getId());
+                    return AlbumMapper.toBest4CutResponse(photo, thumbnailUrl, isLiked);
+                })
+                .toList();
+    }
+
     private User extractUser(Authentication authentication) {
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
             return null;
@@ -220,13 +273,20 @@ public class AlbumService {
         // 1~4개인 경우, 1개만 반환하는 비즈니스 로직 적용
         if (photos.size() < 5) {
             Photo photo = photos.get(0);
-            return List.of(AlbumMapper.toRecentPhotoResponse(photo));
+            String profileUrl = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
+            return List.of(AlbumMapper.toRecentPhotoResponse(photo, profileUrl));
         }
 
         // 5개인 경우, 5개 모두 반환
         return photos.stream()
-                .map(AlbumMapper::toRecentPhotoResponse)
-                .collect(Collectors.toList());
+                .map(photo -> {
+                    String profileUrl = ProfileImageUtil.resolveProfileImage(
+                            photo.getUser(),
+                            cdnUrlResolver
+                    );
+                    return AlbumMapper.toRecentPhotoResponse(photo, profileUrl);
+                })
+                .toList();
     }
 
     private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
@@ -237,8 +297,11 @@ public class AlbumService {
                 .map(userAlbum -> {
                     User user = userAlbum.getUser();
                     Role role = userAlbum.getRole();
+                    ProfileImageType type = ProfileImageType.fromName(user.getProfileImage());
+                    String profileImageUrl = cdnUrlResolver.resolveProfile(type.getPath());
                     boolean isMe = currentUserId != null && user.getId().equals(currentUserId);
-                    return UserAlbumMapper.toParticipantInfo(user, role, isMe);
+
+                    return UserAlbumMapper.toParticipantInfo(user, profileImageUrl, role, isMe);
                 })
                 .sorted(Comparator
                         .comparing(AlbumParticipantListResponse.ParticipantInfo::isMe, Comparator.reverseOrder())
@@ -247,9 +310,4 @@ public class AlbumService {
                 )
                 .toList();
     }
-
-
-
-
-
 }

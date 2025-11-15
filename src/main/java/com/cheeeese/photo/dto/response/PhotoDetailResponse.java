@@ -3,6 +3,8 @@ package com.cheeeese.photo.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Schema(
         description = "사진 상세 조회 API",
@@ -18,7 +20,7 @@ import lombok.Builder;
         }
 )
 public record PhotoDetailResponse(
-        @Schema(description = "사용자 이름", example = "주정빈")
+        @Schema(description = "업로더 이름", example = "주정빈")
         String name,
 
         @Schema(description = "사진 ID", example = "1")
@@ -40,6 +42,12 @@ public record PhotoDetailResponse(
         boolean isDownloaded,
 
         @Schema(description = "1시간 이내 다운로드 여부", example = "false")
-        boolean isRecentlyDownloaded
+        boolean isRecentlyDownloaded,
+
+        @Schema(description = "촬영 시각", example = "2025-01-13T14:23:45")
+        LocalDateTime captureTime,
+
+        @Schema(description = "업로드 시각", example = "2025-01-13T14:23:45")
+        LocalDateTime createdAt
 ) {
 }

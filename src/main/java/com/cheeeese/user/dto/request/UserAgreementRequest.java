@@ -27,6 +27,7 @@ public record UserAgreementRequest(
         )
         boolean isMarketingAgreement,
 
+        @NotNull
         @Schema(
                 description = "제3자 제공 동의",
                 example = "false"
