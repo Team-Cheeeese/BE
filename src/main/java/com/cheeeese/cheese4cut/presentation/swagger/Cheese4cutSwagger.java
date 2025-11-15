@@ -80,26 +80,6 @@ public interface Cheese4cutSwagger {
     );
 
     @Operation(
-            summary = "치즈네컷 최종 이미지 업로드용 Presigned URL 발급 API",
-            description = """ 
-                    ### 로직 상세
-                    ---
-                    1. 사용자 권한 확인 (MAKER 혹은 참여자만 가능)
-                    2. **치즈네컷 전용 버킷**에 저장할 Presigned URL을 발급하여 반환
-                    """
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Presigned URL 발급이 성공적으로 완료되었습니다."
-            )
-    })
-    CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
-            @CurrentUser User user,
-            @PathVariable @NotBlank String code
-    );
-
-    @Operation(
             summary = "치즈네컷 수동 확정 API",
             description = """
                     ### PathVariable

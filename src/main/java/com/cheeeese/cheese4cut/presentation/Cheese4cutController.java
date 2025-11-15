@@ -38,16 +38,6 @@ public class Cheese4cutController implements Cheese4cutSwagger {
     }
 
     @Override
-    @PostMapping("/presigned-url")
-    public CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
-            @CurrentUser User user,
-            @PathVariable @NotBlank String code
-    ) {
-        return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS,
-                cheese4cutService.createCheese4cutPresignedUrl(user, code));
-    }
-
-    @Override
     @PostMapping("/fixed")
     public CommonResponse<Void> finalizeCheese4cut(
             @CurrentUser User user,
