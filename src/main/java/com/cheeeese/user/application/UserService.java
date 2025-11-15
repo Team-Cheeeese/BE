@@ -26,7 +26,7 @@ public class UserService {
 
     private final UserValidator userValidator;
     private final UserRepository userRepository;
-    private final CdnUrlResolver cdnUrlResolver;;
+    private final CdnUrlResolver cdnUrlResolver;
 
     @Transactional
     public void updateUserName(User user, UserProfileRequest request) {
