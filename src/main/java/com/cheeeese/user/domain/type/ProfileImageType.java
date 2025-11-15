@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum ProfileImageType {
-
     P1("profile/signup_profile_1.jpg"),
     P2("profile/signup_profile_2.jpg"),
     P3("profile/signup_profile_3.jpg"),
@@ -23,6 +22,12 @@ public enum ProfileImageType {
     }
 
     public static ProfileImageType fromName(String name) {
-        return ProfileImageType.valueOf(name);
+        if (name == null || name.isBlank()) return null;
+
+        try {
+            return ProfileImageType.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

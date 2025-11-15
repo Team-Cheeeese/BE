@@ -8,6 +8,7 @@ public class ProfileImageUtil {
 
     public static String resolveProfileImage(User user, CdnUrlResolver resolver) {
         ProfileImageType type = ProfileImageType.fromName(user.getProfileImage());
+        if (type == null) return null;
         return resolver.resolveProfile(type.getPath());
     }
 }

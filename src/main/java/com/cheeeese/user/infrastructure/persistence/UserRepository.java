@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     """)
     void incrementAlbumCnt(@Param("userId") Long userId);
 
-    @Modifying
+    @Modifying(flushAutomatically = true)
     @Query("""
         UPDATE User u
         SET u.likesCnt = u.likesCnt + 1
@@ -35,7 +35,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     """)
     void incrementLikeCnt(@Param("userId") Long userId);
 
-    @Modifying
+    @Modifying(flushAutomatically = true)
     @Query("""
         UPDATE User u
         SET u.likesCnt = u.likesCnt - 1
