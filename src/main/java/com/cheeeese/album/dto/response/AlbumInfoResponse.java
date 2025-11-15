@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @Schema(description = "앨범 정보 API")
@@ -27,6 +28,9 @@ public record AlbumInfoResponse(
         LocalDate eventDate,
 
         @Schema(description = "현재 사진 수", example = "1212")
-        int currentPhotoCnt
+        int currentPhotoCnt,
+
+        @Schema(description = "앨범 만료일자", example = "2025-11-17 16:53:35.430336")
+        LocalDateTime expiredAt
 ) {
 }

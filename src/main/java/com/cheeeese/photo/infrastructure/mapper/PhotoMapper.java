@@ -159,6 +159,7 @@ public class PhotoMapper {
                 .currentParticipant(album.getCurrentParticipant())
                 .eventDate(album.getEventDate())
                 .currentPhotoCnt(album.getCurrentPhotoCount())
+                .expiredAt(album.getExpiredAt())
                 .build();
     }
 
