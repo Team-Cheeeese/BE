@@ -6,7 +6,16 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-@Schema(description = "내가 띱한 사진 조회 페이지네이션")
+@Schema(
+        description = "내가 좋아요한 사진 조회 페이지네이션",
+        requiredProperties = {
+                "responses",
+                "listSize",
+                "isFirst",
+                "isLast",
+                "hasNext"
+        }
+)
 public record PhotoLikedPageResponse(
         @Schema(
                 description = "사진 목록",

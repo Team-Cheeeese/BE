@@ -7,7 +7,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-@Schema(description = "")
+@Schema(
+        description = "사진 다운로드 응답 DTO",
+        requiredProperties = {
+                "downloadFiles"
+        }
+)
 public record PhotoDownloadResponse(
         @Schema(
                 description = "다운로드 가능한 사진 파일 정보 목록",
@@ -33,6 +38,16 @@ public record PhotoDownloadResponse(
         List<DownloadFileInfo> downloadFiles
 ) {
     @Builder
+    @Schema(
+            description = "다운로드 가능한 사진 파일 정보",
+            requiredProperties = {
+                    "photoId",
+                    "downloadUrl",
+                    "fileName",
+                    "captureTime",
+                    "createdAt"
+            }
+    )
     public record DownloadFileInfo(
             @Schema(description = "사진 고유 ID", example = "1")
             Long photoId,

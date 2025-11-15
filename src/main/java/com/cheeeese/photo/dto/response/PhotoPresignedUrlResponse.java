@@ -6,13 +6,24 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-@Schema(description = "Presigned URL 발급 응답")
+@Schema(
+        description = "Presigned URL 발급 응답",
+        requiredProperties = {
+                "presignedUrlInfos"
+        }
+)
 public record PhotoPresignedUrlResponse(
         @Schema(description = "발급된 Presigned URL 목록")
         List<PresignedUrlInfo> presignedUrlInfos
 ) {
     @Builder
-    @Schema(description = "Presigned URL 정보")
+    @Schema(
+            description = "Presigned URL 정보",
+            requiredProperties = {
+                    "photoId",
+                    "uploadUrl"
+            }
+    )
     public record PresignedUrlInfo(
             @Schema(description = "저장된 사진 ID", example = "100")
             Long photoId,

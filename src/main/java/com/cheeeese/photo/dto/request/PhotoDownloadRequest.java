@@ -6,7 +6,13 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-@Schema(description = "사진 다운로드 presigned url 발급 API")
+@Schema(
+        description = "사진 다운로드 presigned url 발급 API",
+        requiredProperties = {
+                "code",
+                "photoIds"
+        }
+)
 public record PhotoDownloadRequest(
         @Schema(description = "앨범 코드", example = "1f0b7ea8-fab6-6581-95e3-0720bc07603e")
         String code,
