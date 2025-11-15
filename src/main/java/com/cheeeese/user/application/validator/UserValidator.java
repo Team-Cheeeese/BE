@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class UserValidator {
 
     public void validateUserAgreement(UserAgreementRequest request) {
-        if (!request.isServiceAgreement() || !request.isUserInfoAgreement()) {
+        if (!request.isServiceAgreement() || !request.isUserInfoAgreement() || !request.isThirdPartyAgreement()) {
             throw new UserException(UserErrorCode.REQUIRED_TERMS_NOT_AGREED);
         }
     }
