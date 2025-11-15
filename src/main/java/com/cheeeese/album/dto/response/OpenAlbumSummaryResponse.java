@@ -9,7 +9,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-@Schema(description = "열린 앨범 요약 정보")
+@Schema(
+        description = "열린 앨범 요약 정보",
+        requiredProperties = {
+                "code",
+                "themeEmoji",
+                "title",
+                "eventDate",
+                "makerName",
+                "currentParticipant",
+                "participant",
+                "expiredAt"
+        }
+)
 public record OpenAlbumSummaryResponse(
         @Schema(description = "앨범 코드", example = "1f0ba577-39f3-69b6-abab-455897f404fe")
         String code,

@@ -8,7 +8,15 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Builder
-@Schema(description = "닫힌 앨범 요약 정보")
+@Schema(
+        description = "닫힌 앨범 요약 정보",
+        requiredProperties = {
+                "code",
+                "title",
+                "makerName",
+                "eventDate"
+        }
+)
 public record ClosedAlbumSummaryResponse(
         @Schema(description = "앨범 코드", example = "786ccd09-...")
         String code,

@@ -9,7 +9,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-@Schema(description = "앨범 참여자 목록 응답 DTO (활성/만료 공용)")
+@Schema(
+        description = "앨범 참여자 목록 응답 DTO (활성/만료 공용)",
+        requiredProperties = {
+                "isExpired",
+                "title",
+                "themeEmoji",
+                "eventDate",
+                "expiredAt",
+                "maxParticipantCount",
+                "currentParticipantCount",
+                "participants"
+        }
+)
 public record AlbumParticipantResponse(
 
         @Schema(description = "만료 여부", example = "false")

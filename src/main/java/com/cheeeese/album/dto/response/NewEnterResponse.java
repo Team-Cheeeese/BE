@@ -8,7 +8,19 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Schema(description = "앨범 첫 입장(신규 참여자) 응답 DTO")
+@Schema(
+        description = "앨범 첫 입장(신규 참여자) 응답 DTO",
+        requiredProperties = {
+                "joinStatus",
+                "title",
+                "themeEmoji",
+                "eventDate",
+                "expiredAt",
+                "makerInfo",
+                "remainingUploadSlots",
+                "recentPhotos"
+        }
+)
 @Builder
 public record NewEnterResponse(
         @Schema(description = "참여 상태 (항상 NEW)", example = "NEW")
@@ -36,7 +48,14 @@ public record NewEnterResponse(
         List<RecentPhotoResponse> recentPhotos
 ) implements AlbumEnterResponse {
         @Builder
-        @Schema(description = "최근 업로드 사진 정보 DTO")
+        @Schema(
+                description = "최근 업로드 사진 정보 DTO",
+                requiredProperties = {
+                        "thumbnailUrl",
+                        "uploaderName",
+                        "uploaderProfileImage"
+                }
+        )
         public record RecentPhotoResponse(
                 @NotNull
                 @Schema(description = "사진 썸네일 URL", example = "https://cdn.cheeeese.com/album/1/thumb1.jpg")

@@ -6,8 +6,16 @@ import lombok.Builder;
 import java.time.LocalDate;
 
 @Builder
-@Schema(description = "앨범 생성 API")
-public record AlbumCreationResponse(
+@Schema(
+        description = "앨범 생성 응답",
+        requiredProperties = {
+                "themeEmoji",
+                "title",
+                "eventDate",
+                "currentPhotoCnt",
+                "code"
+        }
+)public record AlbumCreationResponse(
         @Schema(description = "앨범 테마 이모지", example = "U+1F9C0")
         String themeEmoji,
 

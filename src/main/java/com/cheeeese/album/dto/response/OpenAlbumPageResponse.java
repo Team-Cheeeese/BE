@@ -6,7 +6,16 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-@Schema(description = "열린 앨범 목록 페이지 응답")
+@Schema(
+        description = "열린 앨범 목록 페이지 응답",
+        requiredProperties = {
+                "responses",
+                "listSize",
+                "isFirst",
+                "isLast",
+                "hasNext"
+        }
+)
 public record OpenAlbumPageResponse(
         @Schema(description = "열린 앨범 목록")
         List<OpenAlbumSummaryResponse> responses,
