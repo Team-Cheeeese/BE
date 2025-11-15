@@ -1,7 +1,6 @@
 package com.cheeeese.cheese4cut.presentation.swagger;
 
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
-import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.global.util.CurrentUser;
