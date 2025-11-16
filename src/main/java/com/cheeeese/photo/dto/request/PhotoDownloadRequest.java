@@ -8,6 +8,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
+@Schema(description = "사진 다운로드 presigned url 발급 API")
 public record PhotoDownloadRequest(
         @Schema(description = "앨범 코드", example = "1f0b7ea8-fab6-6581-95e3-0720bc07603e")
         @NotBlank(message = "앨범 코드는 필수입니다")
