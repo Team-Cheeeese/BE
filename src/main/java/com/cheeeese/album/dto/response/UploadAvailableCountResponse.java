@@ -4,7 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "앨범 업로드 가능 사진 수 응답 DTO")
+@Schema(
+        description = "앨범 업로드 가능 사진 수 응답 DTO",
+        requiredProperties = {
+                "availableCount",
+                "maxPhotoCount",
+                "currentPhotoCount"
+        }
+)
 public record UploadAvailableCountResponse(
         @Schema(description = "현재 앨범에 업로드 가능한 최대 사진 수", example = "850")
         int availableCount,

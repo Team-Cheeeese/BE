@@ -6,6 +6,7 @@ import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
 import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
+import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.dto.response.UserProfileImageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "[사용자]", description = "사용자 관련 API")
 public interface UserSwagger {
+    @Operation(
+            summary = "사용자 기본 정보 조회 API",
+            description = "사용자의 프로필 이미지, 이름, 참여 앨범 수, 업로드한 사진 수, 받은 좋아요 수를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사용자 정보 조회가 성공적으로 완료되었습니다."
+            )
+    })
+    CommonResponse<UserInfoResponse> getUserInfo(@CurrentUser User user);
+
+  
     @Operation(
             summary = "사용자 이름 수정 API",
             description = """

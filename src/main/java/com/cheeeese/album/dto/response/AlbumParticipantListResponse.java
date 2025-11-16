@@ -7,13 +7,26 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-@Schema(description = "앨범 참여자 공통 정보 구조")
+@Schema(
+        description = "앨범 참여자 공통 정보 구조",
+        requiredProperties = {
+                "participants"
+        }
+)
 public record AlbumParticipantListResponse(
         @Schema(description = "참가자 목록 (정렬 포함)")
         List<ParticipantInfo> participants
 ) {
     @Builder
-    @Schema(description = "참가자 개별 정보")
+    @Schema(
+            description = "참가자 개별 정보",
+            requiredProperties = {
+                    "name",
+                    "profileImage",
+                    "role",
+                    "isMe"
+            }
+    )
     public record ParticipantInfo(
             @Schema(description = "이름", example = "우다현")
             String name,

@@ -2,7 +2,6 @@ package com.cheeeese.cheese4cut.presentation;
 
 import com.cheeeese.cheese4cut.application.Cheese4cutService;
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
-import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.cheese4cut.presentation.swagger.Cheese4cutSwagger;
 import com.cheeeese.global.common.CommonResponse;
@@ -33,16 +32,6 @@ public class Cheese4cutController implements Cheese4cutSwagger {
     ) {
         return CommonResponse.success(CHEESE4CUT_GET_SUCCESS,
                 cheese4cutService.getCheese4cutByAlbumCode(authentication, code));
-    }
-
-    @Override
-    @PostMapping("/presigned-url")
-    public CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
-            @CurrentUser User user,
-            @PathVariable @NotBlank String code
-    ) {
-        return CommonResponse.success(PRESIGNED_URL_ISSUE_SUCCESS,
-                cheese4cutService.createCheese4cutPresignedUrl(user, code));
     }
 
     @Override

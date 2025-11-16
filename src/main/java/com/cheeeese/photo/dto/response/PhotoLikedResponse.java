@@ -4,7 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "내가 띱한 사진 목록 조회 API")
+@Schema(
+        description = "내가 띱한 사진 목록 조회 API",
+        requiredProperties = {
+                "photoId",
+                "thumbnailUrl",
+                "isDownloaded",
+                "isRecentlyDownloaded"
+        }
+)
 public record PhotoLikedResponse(
         @Schema(description = "사진 업로더 이름", example = "주정빈")
         String name,

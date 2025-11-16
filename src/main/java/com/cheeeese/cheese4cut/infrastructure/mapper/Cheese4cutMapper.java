@@ -5,7 +5,6 @@ import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.domain.Cheese4cutPhoto;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
-import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
 import com.cheeeese.photo.domain.Photo;
 
@@ -63,11 +62,6 @@ public class Cheese4cutMapper {
                         })
                         .collect(Collectors.toList()))
                 .build();
-    }
-
-    public static Cheese4cutPresignedUrlResponse toPresignedUrlResponse(String uploadUrl) {
-        return Cheese4cutPresignedUrlResponse.builder()
-                .uploadUrl(uploadUrl).build();
     }
 
     public static Cheese4cutFinalResponse.FinalPhotoInfo toFinalPhotoInfo(

@@ -12,7 +12,6 @@ import com.cheeeese.cheese4cut.application.validator.Cheese4cutValidator;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
-import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.cheese4cut.exception.Cheese4cutException;
@@ -21,7 +20,6 @@ import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
 import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
-import com.cheeeese.photo.application.PresignedUrlService;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
@@ -52,7 +50,6 @@ public class Cheese4cutService {
     private final PhotoLikesRepository photoLikesRepository;
     private final UserAlbumRepository userAlbumRepository;
     private final AlbumValidator albumValidator;
-    private final PresignedUrlService presignedUrlService;
     private final Cheese4cutValidator cheese4cutValidator;
     private final CdnUrlResolver cdnUrlResolver;
 
@@ -119,16 +116,6 @@ public class Cheese4cutService {
                         .toList();
 
         return Cheese4cutMapper.toPreviewResponse(resolvedPhotoInfos, uniqueLikesCount, participant, myRole);
-    }
-
-    @Transactional(readOnly = true)
-    public Cheese4cutPresignedUrlResponse createCheese4cutPresignedUrl(User user, String code) {
-        Album album = albumValidator.validateAlbumCode(code);
-        albumValidator.validateUploadPermission(album, user);
-
-        String uploadUrl = presignedUrlService.generateCheese4cutPresignedPutUrl(code);
-
-        return Cheese4cutMapper.toPresignedUrlResponse(uploadUrl);
     }
 
     public void finalizeCheese4cut(User user, String code, Cheese4cutFixedRequest request) {

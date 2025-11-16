@@ -7,7 +7,15 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-@Schema(description = "치즈네컷 확정 전 미리보기 응답 DTO (좋아요 TOP 4)")
+@Schema(
+        description = "치즈네컷 확정 전 미리보기 응답 DTO (좋아요 TOP 4)",
+        requiredProperties = {
+                "isFinalized",
+                "previewPhotos",
+                "uniqueLikesCount",
+                "participant"
+        }
+)
 public record Cheese4cutPreviewResponse(
         @Schema(description = "확정 여부 (항상 false)", example = "false")
         boolean isFinalized,
@@ -26,7 +34,14 @@ public record Cheese4cutPreviewResponse(
 
 ) implements Cheese4cutResponse {
     @Builder
-    @Schema(description = "미리보기 사진 정보 DTO")
+    @Schema(
+            description = "미리보기 사진 정보 DTO",
+            requiredProperties = {
+                    "photoId",
+                    "imageUrl",
+                    "photoRank"
+            }
+    )
     public record PreviewPhotoInfo(
             @Schema(description = "사진 ID", example = "101")
             Long photoId,

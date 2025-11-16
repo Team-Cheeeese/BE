@@ -7,6 +7,7 @@ import com.cheeeese.user.domain.type.ProfileImageType;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
 import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
+import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.dto.response.UserProfileImageResponse;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
@@ -62,6 +63,10 @@ public class UserService {
                 request.isMarketingAgreement(),
                 request.isThirdPartyAgreement()
         );
+    }
+
+    public UserInfoResponse getUserInfo(User user) {
+        return UserMapper.toUserInfoResponse(user);
     }
 
     @Transactional

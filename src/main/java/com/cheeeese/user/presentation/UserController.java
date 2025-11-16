@@ -7,6 +7,7 @@ import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserAgreementRequest;
 import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
+import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.dto.response.UserProfileImageResponse;
 import com.cheeeese.user.presentation.swagger.UserSwagger;
 import jakarta.validation.Valid;
@@ -23,6 +24,12 @@ public class UserController implements UserSwagger {
 
     private final UserService userService;
 
+    @Override
+    @GetMapping("/me")
+    public CommonResponse<UserInfoResponse> getUserInfo(@CurrentUser User user) {
+        return CommonResponse.success(USER_INFO_FETCH_SUCCESS, userService.getUserInfo(user));
+    }
+  
     @Override
     @PatchMapping("/me/name")
     public CommonResponse<Void> updateUserName(

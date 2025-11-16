@@ -2,6 +2,7 @@ package com.cheeeese.user.infrastructure.mapper;
 
 import com.cheeeese.oauth2.domain.OAuth2UserInfo;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.domain.type.ProfileImageType;
 import com.cheeeese.user.dto.response.UserProfileImageResponse;
 
@@ -17,6 +18,16 @@ public class UserMapper {
                 .name(oAuth2UserInfo.getName())
                 .profileImage(DEFAULT_PROFILE_IMAGE)
                 .providerId(oAuth2UserInfo.getProviderId())
+                .build();
+    }
+
+    public static UserInfoResponse toUserInfoResponse(User user) {
+        return UserInfoResponse.builder()
+                .profileImage(user.getProfileImage())
+                .name(user.getName())
+                .albumCount(user.getAlbumCnt())
+                .photoCount(user.getPhotoCnt())
+                .likesCount(user.getLikesCnt())
                 .build();
     }
 

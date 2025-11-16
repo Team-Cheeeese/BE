@@ -1,7 +1,6 @@
 package com.cheeeese.cheese4cut.presentation.swagger;
 
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
-import com.cheeeese.cheese4cut.dto.response.Cheese4cutPresignedUrlResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.global.util.CurrentUser;
@@ -76,26 +75,6 @@ public interface Cheese4cutSwagger {
     })
     CommonResponse<Cheese4cutResponse> getCheese4cut(
             Authentication authentication,
-            @PathVariable @NotBlank String code
-    );
-
-    @Operation(
-            summary = "치즈네컷 최종 이미지 업로드용 Presigned URL 발급 API",
-            description = """ 
-                    ### 로직 상세
-                    ---
-                    1. 사용자 권한 확인 (MAKER 혹은 참여자만 가능)
-                    2. **치즈네컷 전용 버킷**에 저장할 Presigned URL을 발급하여 반환
-                    """
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Presigned URL 발급이 성공적으로 완료되었습니다."
-            )
-    })
-    CommonResponse<Cheese4cutPresignedUrlResponse> createCheese4cutPresignedUrl(
-            @CurrentUser User user,
             @PathVariable @NotBlank String code
     );
 

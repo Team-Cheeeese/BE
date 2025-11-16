@@ -6,8 +6,18 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-@Schema(description = "앨범 초대장 확인 응답 DTO")
-public record AlbumInvitationResponse(
+@Schema(
+        description = "앨범 초대장 확인 응답 DTO",
+        requiredProperties = {
+                "title",
+                "themeEmoji",
+                "eventDate",
+                "expiredAt",
+                "makerName",
+                "makerProfileImage",
+                "isExpired"
+        }
+)public record AlbumInvitationResponse(
         @Schema(description = "앨범 제목", example = "경영학부 졸업식")
         String title,
 
