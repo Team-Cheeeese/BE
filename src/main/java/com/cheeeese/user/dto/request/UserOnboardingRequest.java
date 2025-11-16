@@ -9,9 +9,11 @@ import lombok.Builder;
 @Schema(description = "사용자 온보딩 API")
 public record UserOnboardingRequest(
         @NotBlank
+        @Schema(description = "사용자 이름", example = "주")
         String name,
 
         @NotBlank
+        @Schema(description = "프로필 이미지 코드", example = "P2")
         String imageCode,
 
         @NotNull
@@ -37,7 +39,7 @@ public record UserOnboardingRequest(
         @NotNull
         @Schema(
                 description = "제3자 제공 동의",
-                example = "false"
+                example = "true"
         )
         boolean isThirdPartyAgreement
 ) {

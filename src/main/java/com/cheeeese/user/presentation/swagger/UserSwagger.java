@@ -81,10 +81,12 @@ public interface UserSwagger {
     );
 
     @Operation(
-            summary = "사용자 이용 약관 동의 API",
+            summary = "사용자 온보딩 API",
             description = """
                           ### RequestBody
                           ---
+                          `name`: 사용자 이름 (String) \n
+                          `imageCode`: 프로필 이미지 코드 (String) \n
                           `isServiceAgreement`: 서비스 이용 약관 동의 (boolean) \n
                           `isUserInfoAgreement`: 사용자 정보 수집 동의 (boolean) \n
                           `isMarketingAgreement`: 마케팅 수신 동의 (boolean) \n
