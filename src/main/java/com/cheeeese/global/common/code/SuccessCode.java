@@ -22,7 +22,7 @@ public enum SuccessCode implements BaseCode {
     USER_NAME_UPDATE_SUCCESS(HttpStatus.OK, "사용자 이름 업데이트가 성공적으로 완료되었습니다."),
     USER_PROFILE_IMAGE_OPT_GET_SUCCESS(HttpStatus.OK, "사용자 프로필 이미지 선택 옵션 목록 조회가 성공적으로 완료되었습니다."),
     USER_PROFILE_IMAGE_UPDATE_SUCCESS(HttpStatus.OK, "사용자 프로필 이미지 업데이트가 성공적으로 완료되었습니다."),
-    USER_AGREEMENT_ACCEPT_SUCCESS(HttpStatus.OK, "사용자 이용 약관 동의가 성공적으로 완료되었습니다."),
+    USER_ONBOARDING_SUCCESS(HttpStatus.OK, "사용자 온보딩이 성공적으로 완료되었습니다."),
 
     // album
     ALBUM_OPEN_LIST_FETCH_SUCCESS(HttpStatus.OK, "열린 앨범 목록 조회가 성공적으로 완료되었습니다."),

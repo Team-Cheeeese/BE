@@ -90,13 +90,17 @@ public class User extends BaseEntity {
         this.profileImage = profileImage;
     }
 
-    public void saveUserAgreement(
+    public void saveUserOnboarding(
+            String name,
+            String profileImage,
             boolean isOnboarded,
             boolean isServiceAgreement,
             boolean isUserInfoAgreement,
             boolean isMarketingAgreement,
             boolean isThirdPartyAgreement
     ) {
+        this.name = name;
+        this.profileImage = profileImage;
         this.isOnboarded = isOnboarded;
         this.isServiceAgreement = isServiceAgreement;
         this.isUserInfoAgreement = isUserInfoAgreement;

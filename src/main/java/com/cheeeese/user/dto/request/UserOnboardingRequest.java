@@ -1,12 +1,19 @@
 package com.cheeeese.user.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "사용자 이용 약관 API")
-public record UserAgreementRequest(
+@Schema(description = "사용자 온보딩 API")
+public record UserOnboardingRequest(
+        @NotBlank
+        String name,
+
+        @NotBlank
+        String imageCode,
+
         @NotNull
         @Schema(
                 description = "서비스 이용 약관 동의",

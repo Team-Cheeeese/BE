@@ -3,7 +3,7 @@ package com.cheeeese.user.presentation.swagger;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
-import com.cheeeese.user.dto.request.UserAgreementRequest;
+import com.cheeeese.user.dto.request.UserOnboardingRequest;
 import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
 import com.cheeeese.user.dto.response.UserInfoResponse;
@@ -97,8 +97,8 @@ public interface UserSwagger {
                     description = "사용자 이용 약관 동의가 성공적으로 실행되었습니다."
             )
     })
-    CommonResponse<Void> saveUserAgreement(
+    CommonResponse<Void> saveUserOnboarding(
             @CurrentUser User user,
-            @RequestBody @Valid UserAgreementRequest request
+            @RequestBody @Valid UserOnboardingRequest request
     );
 }
