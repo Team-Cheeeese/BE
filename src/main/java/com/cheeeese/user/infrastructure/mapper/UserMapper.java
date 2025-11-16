@@ -9,11 +9,13 @@ import java.util.List;
 
 public class UserMapper {
 
+    private static final String DEFAULT_PROFILE_IMAGE = "P1";
+
     public static User toEntity(OAuth2UserInfo oAuth2UserInfo) {
         return User.builder()
                 .email(oAuth2UserInfo.getEmail())
                 .name(oAuth2UserInfo.getName())
-                .profileImage(oAuth2UserInfo.getProfileImage())
+                .profileImage(DEFAULT_PROFILE_IMAGE)
                 .providerId(oAuth2UserInfo.getProviderId())
                 .build();
     }
