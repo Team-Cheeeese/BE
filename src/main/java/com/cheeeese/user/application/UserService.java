@@ -54,8 +54,8 @@ public class UserService {
 
     @Transactional
     public void saveUserOnboarding(User user, UserOnboardingRequest request) {
-        ProfileImageType type = ProfileImageType.fromName(request.imageCode());
         userValidator.validateUserOnboarding(request);
+        ProfileImageType type = ProfileImageType.fromName(request.imageCode());
 
         user.saveUserOnboarding(
                 request.name(),
