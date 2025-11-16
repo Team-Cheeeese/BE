@@ -4,6 +4,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.dto.response.*;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.user.domain.User;
 
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class AlbumMapper {
                 .participant(participant)
                 .currentParticipant(1)
                 .eventDate(eventDate)
-                .maxPhotoCount(10)
+                .maxPhotoCount(100)
                 .currentPhotoCount(0)
                 .isInfoAvailable(isInfoAvailable)
                 .expiredAt(expiredAt)
@@ -57,14 +58,14 @@ public class AlbumMapper {
     /**
      * Album 엔티티와 Maker User 정보를 초대장 응답 DTO로 변환합니다.
      */
-    public static AlbumInvitationResponse toInvitationResponse(Album album, User user) {
+    public static AlbumInvitationResponse toInvitationResponse(Album album, User user, String profileImage) {
         return AlbumInvitationResponse.builder()
                 .title(album.getTitle())
                 .themeEmoji(album.getThemeEmoji())
                 .eventDate(album.getEventDate().toString())
                 .expiredAt(album.getExpiredAt())
                 .makerName(user.getName())
-                .makerProfileImage(user.getProfileImage())
+                .makerProfileImage(profileImage)
                 .isExpired(false)
                 .build();
     }
@@ -113,23 +114,23 @@ public class AlbumMapper {
                 .build();
     }
 
-    public static NewEnterResponse.RecentPhotoResponse toRecentPhotoResponse(Photo photo) {
+    public static NewEnterResponse.RecentPhotoResponse toRecentPhotoResponse(Photo photo, String profileImage) {
         User uploader = photo.getUser();
 
         return NewEnterResponse.RecentPhotoResponse.builder()
                 .thumbnailUrl(photo.getThumbnailUrl())
                 .uploaderName(uploader.getName())
-                .uploaderProfileImage(uploader.getProfileImage())
+                .uploaderProfileImage(profileImage)
                 .build();
     }
 
     /**
      * 메이커 User 엔티티를 호스트 정보 응답 DTO로 변환합니다.
      */
-    public static AlbumMakerInfo toMakerInfo(User user) {
+    public static AlbumMakerInfo toMakerInfo(User user, String profileImage) {
         return AlbumMakerInfo.builder()
                 .makerName(user.getName())
-                .makerProfileImage(user.getProfileImage())
+                .makerProfileImage(profileImage)
                 .build();
     }
 
@@ -142,6 +143,14 @@ public class AlbumMapper {
                 .availableCount(availableCount)
                 .maxPhotoCount(maxCount)
                 .currentPhotoCount(currentCount)
+                .build();
+    }
+
+    public static AlbumBest4CutResponse toBest4CutResponse(Photo photo, String thumbnailUrl, boolean isLiked) {
+        return AlbumBest4CutResponse.builder()
+                .thumbnailUrl(thumbnailUrl)
+                .likeCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
                 .build();
     }
 }

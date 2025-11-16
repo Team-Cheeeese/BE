@@ -18,4 +18,29 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE User u SET u.photoCnt = u.photoCnt - :count WHERE u.id = :userId AND u.photoCnt >= :count")
     int decrementPhotoCount(@Param("userId") Long userId, @Param("count") int count);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        UPDATE User u
+        SET u.albumCnt = u.albumCnt + 1
+        WHERE u.id = :userId
+    """)
+    void incrementAlbumCnt(@Param("userId") Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+        UPDATE User u
+        SET u.likesCnt = u.likesCnt + 1
+        WHERE u.id = :userId
+    """)
+    void incrementLikeCnt(@Param("userId") Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+        UPDATE User u
+        SET u.likesCnt = u.likesCnt - 1
+        WHERE u.id = :userId
+        AND u.likesCnt > 0
+    """)
+    void decrementLikeCnt(@Param("userId") Long userId);
 }

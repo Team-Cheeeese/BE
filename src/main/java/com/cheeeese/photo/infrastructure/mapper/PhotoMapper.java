@@ -1,7 +1,8 @@
 package com.cheeeese.photo.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.global.util.resolver.CdnUrlResolver;
+import com.cheeeese.album.domain.type.Role;
+import com.cheeeese.album.dto.response.AlbumInfoResponse;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.*;
@@ -64,12 +65,15 @@ public class PhotoMapper {
 
     public static PhotoListResponse toPhotoListResponse(
             Photo photo,
+            String imageUrl,
             String thumbnailUrl,
             boolean isLiked,
             boolean isDownloaded
     ) {
         return PhotoListResponse.builder()
+                .name(photo.getUser().getName())
                 .photoId(photo.getId())
+                .imageUrl(imageUrl)
                 .thumbnailUrl(thumbnailUrl)
                 .likeCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
@@ -79,26 +83,22 @@ public class PhotoMapper {
 
     public static PhotoLikedResponse toPhotoLikedResponse(
             Photo photo,
+            String imageUrl,
             String thumbnailUrl,
             boolean isDownloaded,
             boolean isRecentlyDownloaded
     ) {
         return PhotoLikedResponse.builder()
+                .name(photo.getUser().getName())
                 .photoId(photo.getId())
+                .imageUrl(imageUrl)
                 .thumbnailUrl(thumbnailUrl)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
     }
 
-    public static PhotoPageResponse toPhotoPageResponse(Slice<Photo> photos, CdnUrlResolver cdnUrlResolver) {
-        List<PhotoListResponse> responses = photos.getContent().stream()
-                .map(photo -> {
-                    String resolvedUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
-                    return PhotoMapper.toPhotoListResponse(photo, resolvedUrl, false, false);
-                })
-                .toList();
-
+    public static PhotoPageResponse toPhotoPageResponse(Slice<Photo> photos, List<PhotoListResponse> responses) {
         return PhotoPageResponse.builder()
                 .responses(responses)
                 .listSize(responses.size())
@@ -145,6 +145,40 @@ public class PhotoMapper {
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
+                .captureTime(photo.getCaptureTime())
+                .createdAt(photo.getCreatedAt())
+                .build();
+    }
+
+    public static AlbumInfoResponse toAlbumInfoResponse(Album album) {
+        return AlbumInfoResponse.builder()
+                .title(album.getTitle())
+                .makerId(album.getMakerId())
+                .themeEmoji(album.getThemeEmoji())
+                .participant(album.getParticipant())
+                .currentParticipant(album.getCurrentParticipant())
+                .eventDate(album.getEventDate())
+                .currentPhotoCnt(album.getCurrentPhotoCount())
+                .expiredAt(album.getExpiredAt())
+                .build();
+    }
+
+    public static PhotoLikedUserResponse.PhotoLiker toPhotoLiker(User user, String profileImageUrl, boolean isMe, Role role) {
+        return PhotoLikedUserResponse.PhotoLiker.builder()
+                .name(user.getName())
+                .profileImageUrl(profileImageUrl)
+                .isMe(isMe)
+                .role(role)
+                .build();
+    }
+
+    public static PhotoLikedUserResponse toPhotoLikerResponse(
+            Photo photo,
+            List<PhotoLikedUserResponse.PhotoLiker> likers
+    ) {
+        return PhotoLikedUserResponse.builder()
+                .likeCnt(photo.getLikesCnt())
+                .photoLikers(likers)
                 .build();
     }
 }

@@ -12,8 +12,8 @@ public class CdnUrlResolver {
     @Value("${cdn.thumbnail-domain}")
     private String thumbnailDomain;
 
-    @Value("${cdn.4cut-domain}")
-    private String cutDomain;
+    @Value("${cdn.profile-domain}")
+    private String profileDomain;
 
     public String resolveOriginal(String path) {
         return resolve(originalDomain, path);
@@ -23,13 +23,16 @@ public class CdnUrlResolver {
         return resolve(thumbnailDomain, path);
     }
 
-    public String resolveCut(String path) {
-        return resolve(cutDomain, path);
+    public String resolveProfile(String path) {
+        return resolve(profileDomain, path);
     }
 
     private String resolve(String domain, String path) {
         if (path == null || path.isBlank()) return null;
         if (path.startsWith("http")) return path;
+        if (path.startsWith("say-cheeeese/")) {
+            path = path.substring("say-cheeeese/".length());
+        }
         if (path.startsWith("/")) path = path.substring(1);
         return domain + "/" + path;
     }

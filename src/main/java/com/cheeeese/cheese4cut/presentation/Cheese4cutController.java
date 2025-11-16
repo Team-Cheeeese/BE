@@ -5,7 +5,6 @@ import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.cheese4cut.presentation.swagger.Cheese4cutSwagger;
 import com.cheeeese.global.common.CommonResponse;
-import com.cheeeese.global.common.code.SuccessCode;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
@@ -15,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import static com.cheeeese.global.common.code.SuccessCode.CHEESE4CUT_FINALIZE_SUCCESS;
+import static com.cheeeese.global.common.code.SuccessCode.*;
 
 @Validated
 @RestController
@@ -31,7 +30,7 @@ public class Cheese4cutController implements Cheese4cutSwagger {
             Authentication authentication,
             @PathVariable @NotBlank String code
     ) {
-        return CommonResponse.success(SuccessCode.CHEESE4CUT_GET_SUCCESS,
+        return CommonResponse.success(CHEESE4CUT_GET_SUCCESS,
                 cheese4cutService.getCheese4cutByAlbumCode(authentication, code));
     }
 

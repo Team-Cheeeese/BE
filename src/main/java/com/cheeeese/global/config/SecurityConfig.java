@@ -39,7 +39,8 @@ public class SecurityConfig {
             "/v1/album/*/invitation",
             "/v1/cheese4cut/*/preview",
             "/v1/album/*/participants",
-            "/internal/thumbnail/complete"
+            "/internal/thumbnail/complete",
+            "/v1/user/profile-images"
     };
 
     @Bean

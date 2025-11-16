@@ -86,7 +86,7 @@ public class AlbumValidator {
         }
     }
 
-    private void validateAlbumParticipant(Album album, User user) {
+    public void validateAlbumParticipant(Album album, User user) {
         validateAlbumExpiration(album);
 
         validateUserBlacklisted(album, user);
