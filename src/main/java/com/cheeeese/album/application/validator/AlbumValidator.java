@@ -15,13 +15,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class AlbumValidator {
 
+    private static final ZoneOffset KST_ZONE = ZoneOffset.of("+09:00");
     private final AlbumRepository albumRepository;
     private final UserAlbumRepository userAlbumRepository;
 
@@ -38,7 +41,7 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_EVENT_DATE_REQUIRED);
         }
 
-        if (request.eventDate().isAfter(LocalDate.now(ZoneId.of("Asia/Seoul")))) {
+        if (request.eventDate().isAfter(LocalDate.now(KST_ZONE))) {
             throw new AlbumException(AlbumErrorCode.ALBUM_EVENT_DATE_INVALID);
         }
 

@@ -14,11 +14,11 @@ public record UserProfileImageResponse(
                         [
                           {
                             "imageCode": "P5",
-                            "profileImageUrl": "https://say-cheese-profile.edge.naverncp.com/profile/signup_profile_5.jpg"
+                            "profileImageUrl": "https://say-cheese-profile.edge.naverncp.com/profile/sign_up_profile_5.jpg"
                           },
                           {
                             "imageCode": "P6",
-                            "profileImageUrl": "https://say-cheese-profile.edge.naverncp.com/profile/signup_profile_6.jpg"
+                            "profileImageUrl": "https://say-cheese-profile.edge.naverncp.com/profile/sign_up_profile_6.jpg"
                           }
                         ]
                         """
