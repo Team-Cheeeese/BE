@@ -26,6 +26,12 @@ public record PhotoLikedResponse(
         @Schema(description = "사진 썸네일 url", example = "example.jpg")
         String thumbnailUrl,
 
+        @Schema(description = "좋아요 수", example = "1")
+        int likeCnt,
+
+        @Schema(description = "좋아요 여부", example = "true")
+        boolean isLiked,
+
         @Schema(description = "다운로드 여부", example = "false")
         boolean isDownloaded,
 
