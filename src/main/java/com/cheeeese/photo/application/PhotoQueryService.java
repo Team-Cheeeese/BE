@@ -81,7 +81,7 @@ public class PhotoQueryService {
         }
 
         Set<Long> liked = findUserLikedPhotoIds(user.getId(), photoIds);
-        Set<Long> downloaded = findUserLikedPhotoIds(user.getId(), photoIds);
+        Set<Long> downloaded = findUserDownloadedPhotoIds(user.getId(), photoIds);
         Set<Long> recent = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
 
         List<PhotoLikedResponse> responses = buildPhotoLikedResponses(photos.getContent(), liked, downloaded, recent);
