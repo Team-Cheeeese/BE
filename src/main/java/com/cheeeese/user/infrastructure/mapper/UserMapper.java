@@ -21,9 +21,9 @@ public class UserMapper {
                 .build();
     }
 
-    public static UserInfoResponse toUserInfoResponse(User user) {
+    public static UserInfoResponse toUserInfoResponse(User user, String profileImage) {
         return UserInfoResponse.builder()
-                .profileImage(user.getProfileImage())
+                .profileImage(profileImage)
                 .name(user.getName())
                 .albumCount(user.getAlbumCnt())
                 .photoCount(user.getPhotoCnt())

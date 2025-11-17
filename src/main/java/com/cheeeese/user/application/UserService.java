@@ -1,5 +1,6 @@
 package com.cheeeese.user.application;
 
+import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.user.application.validator.UserValidator;
 import com.cheeeese.user.domain.User;
@@ -69,7 +70,8 @@ public class UserService {
     }
 
     public UserInfoResponse getUserInfo(User user) {
-        return UserMapper.toUserInfoResponse(user);
+        String profileImage = ProfileImageUtil.resolveProfileImage(user, cdnUrlResolver);
+        return UserMapper.toUserInfoResponse(user, profileImage);
     }
 
     @Transactional
