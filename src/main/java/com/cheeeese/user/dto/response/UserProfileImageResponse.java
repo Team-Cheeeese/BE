@@ -36,7 +36,7 @@ public record UserProfileImageResponse(
 
             @Schema(
                     description = "프로필 이미지의 CDN URL",
-                    example = "https://say-cheese-profile.edge.naverncp.com/profile/signup_profile_5.jpg"
+                    example = "https://say-cheese-profile.edge.naverncp.com/profile/sign_up_profile_5.jpg"
             )
             String profileImageUrl
     ) {}
