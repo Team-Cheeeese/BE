@@ -5,6 +5,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.S3Util;
+import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoHistory;
@@ -47,6 +48,7 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
+    private final PhotoReader photoReader;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
@@ -129,8 +131,7 @@ public class PhotoService {
 
     @Transactional
     public void createPhotoLikes(User user, Long photoId) {
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+        Photo photo = photoReader.getPhoto(photoId);
 
         PhotoLikes photoLikes = PhotoLikesMapper.toEntity(user, photo);
 
@@ -144,8 +145,7 @@ public class PhotoService {
 
     @Transactional
     public void deletePhotoLikes(User user, Long photoId) {
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+        Photo photo = photoReader.getPhoto(photoId);
 
         PhotoLikes photoLikes = photoLikesRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_LIKES_NOT_FOUND));
@@ -163,8 +163,7 @@ public class PhotoService {
         Album album = albumValidator.validateAlbumCode(code);
         UserAlbum userAlbum = albumValidator.getAlbumParticipant(album, user);
 
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+        Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
         photoValidator.validateDeletePermission(user, userAlbum, album, photo);
 

@@ -4,6 +4,7 @@ import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
+import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.dto.response.PhotoLikedUserResponse;
 import com.cheeeese.photo.exception.PhotoException;
@@ -26,6 +27,7 @@ public class PhotoInfoService {
 
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
+    private final PhotoReader photoReader;
     private final AlbumValidator albumValidator;
     private final CdnUrlResolver cdnUrlResolver;
 
@@ -34,8 +36,7 @@ public class PhotoInfoService {
 
         albumValidator.validateAlbumParticipant(album, user);
 
-        Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+        Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
         List<User> users = photoLikesRepository.findLikersByPhotoId(photo.getId());
 

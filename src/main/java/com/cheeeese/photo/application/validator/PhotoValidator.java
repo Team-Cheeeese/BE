@@ -148,9 +148,5 @@ public class PhotoValidator {
         if (!photo.getAlbum().getId().equals(album.getId())) {
             throw new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND_IN_ALBUM);
         }
-
-        if (photo.isDeleted()) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_ALREADY_DELETED);
-        }
     }
 }

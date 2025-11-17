@@ -3,6 +3,7 @@ package com.cheeeese.photo.application;
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
+import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.*;
@@ -33,6 +34,7 @@ public class PhotoQueryService {
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
+    private final PhotoReader photoReader;
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
 
@@ -70,7 +72,7 @@ public class PhotoQueryService {
     // TODO: 데이터 조회 로직을 Reader 클래스로 분리하는 것 고려
     public PhotoLikedPageResponse getPhotoLiked(User user, String code, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        Slice<Photo> photos = photoRepository.findLikedPhotosByAlbumAndUser(code, user.getId(), pageRequest);
+        Slice<Photo> photos = photoRepository.findLikedPhotosByAlbumAndUser(code, user.getId(), PhotoStatus.COMPLETED, pageRequest);
 
         List<Long> photoIds = photos.getContent().stream()
                 .map(Photo::getId)
@@ -94,8 +96,7 @@ public class PhotoQueryService {
     }
 
     public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {
-        Photo photo = photoRepository.findByIdAndAlbum_Code(photoId, code)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+        Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
         String resolveOriginalUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
         String resolveThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
