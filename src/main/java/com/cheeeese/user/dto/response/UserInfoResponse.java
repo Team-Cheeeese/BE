@@ -8,6 +8,7 @@ import lombok.Builder;
         description = "사용자 기본 정보 응답",
         requiredProperties = {
                 "profileImage",
+                "email",
                 "name",
                 "albumCount",
                 "photoCount",
@@ -16,6 +17,9 @@ import lombok.Builder;
 )public record UserInfoResponse(
         @Schema(description = "사용자 프로필 이미지 URL", example = "https://cdn.cheeeese.me/profile.png")
         String profileImage,
+
+        @Schema(description = "사용자 이메일", example = "say.cheese@gmail.com")
+        String email,
 
         @Schema(description = "사용자 이름", example = "치즈러버")
         String name,

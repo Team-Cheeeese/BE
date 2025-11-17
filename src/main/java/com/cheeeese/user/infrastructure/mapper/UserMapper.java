@@ -25,6 +25,7 @@ public class UserMapper {
         return UserInfoResponse.builder()
                 .profileImage(profileImage)
                 .name(user.getName())
+                .email(user.getEmail())
                 .albumCount(user.getAlbumCnt())
                 .photoCount(user.getPhotoCnt())
                 .likesCount(user.getLikesCnt())
