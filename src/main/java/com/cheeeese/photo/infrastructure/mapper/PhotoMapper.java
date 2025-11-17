@@ -85,6 +85,7 @@ public class PhotoMapper {
             Photo photo,
             String imageUrl,
             String thumbnailUrl,
+            boolean isLiked,
             boolean isDownloaded,
             boolean isRecentlyDownloaded
     ) {
@@ -93,6 +94,8 @@ public class PhotoMapper {
                 .photoId(photo.getId())
                 .imageUrl(imageUrl)
                 .thumbnailUrl(thumbnailUrl)
+                .likeCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
