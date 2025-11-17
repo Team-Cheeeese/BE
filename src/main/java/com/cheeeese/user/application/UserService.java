@@ -4,7 +4,7 @@ import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.user.application.validator.UserValidator;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.domain.type.ProfileImageType;
-import com.cheeeese.user.dto.request.UserAgreementRequest;
+import com.cheeeese.user.dto.request.UserOnboardingRequest;
 import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
 import com.cheeeese.user.dto.response.UserInfoResponse;
@@ -53,10 +53,13 @@ public class UserService {
     }
 
     @Transactional
-    public void saveUserAgreement(User user, UserAgreementRequest request) {
-        userValidator.validateUserAgreement(request);
+    public void saveUserOnboarding(User user, UserOnboardingRequest request) {
+        userValidator.validateUserOnboarding(request);
+        ProfileImageType type = ProfileImageType.fromName(request.imageCode());
 
-        user.saveUserAgreement(
+        user.saveUserOnboarding(
+                request.name(),
+                type.name(),
                 true,
                 request.isServiceAgreement(),
                 request.isUserInfoAgreement(),

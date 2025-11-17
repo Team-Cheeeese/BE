@@ -1,12 +1,21 @@
 package com.cheeeese.user.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "사용자 이용 약관 API")
-public record UserAgreementRequest(
+@Schema(description = "사용자 온보딩 API")
+public record UserOnboardingRequest(
+        @NotBlank
+        @Schema(description = "사용자 이름", example = "주")
+        String name,
+
+        @NotBlank
+        @Schema(description = "프로필 이미지 코드", example = "P2")
+        String imageCode,
+
         @NotNull
         @Schema(
                 description = "서비스 이용 약관 동의",
@@ -30,7 +39,7 @@ public record UserAgreementRequest(
         @NotNull
         @Schema(
                 description = "제3자 제공 동의",
-                example = "false"
+                example = "true"
         )
         boolean isThirdPartyAgreement
 ) {
