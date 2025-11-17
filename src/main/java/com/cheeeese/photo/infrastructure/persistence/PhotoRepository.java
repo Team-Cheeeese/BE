@@ -163,4 +163,13 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         WHERE p.id = :photoId
     """)
     String findAlbumCodeByPhotoId(@Param("photoId") Long photoId);
+
+    @Query("""
+        SELECT COUNT(p)
+        FROM Photo p
+        WHERE p.album.id = :albumId
+        AND p.isDeleted = FALSE
+        AND p.status IN ('UPLOADING', 'COMPLETED')
+    """)
+    long countActivePhotosByAlbumId(@Param("albumId") Long albumId);
 }

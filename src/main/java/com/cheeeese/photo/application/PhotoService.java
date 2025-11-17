@@ -68,16 +68,10 @@ public class PhotoService {
     @Transactional
     public PhotoPresignedUrlResponse createPresignedUrls(User user, PhotoPresignedUrlRequest request) {
         Album album = validateAlbumAndPermission(user, request.albumCode());
-        validateUploadRequest(album, request);
 
-        int uploadCount = request.fileInfos().size();
+        long currentActiveCount = photoRepository.countActivePhotosByAlbumId(album.getId());
 
-        int updatedRows = albumRepository.incrementPhotoCount(album.getId(), uploadCount);
-        if (updatedRows != 1) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_INCREMENT_FAILED);
-        }
-
-        userService.incrementPhotoCount(user.getId(), uploadCount);
+        validateUploadRequest(album, request, currentActiveCount);
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
 
@@ -163,12 +157,11 @@ public class PhotoService {
         return album;
     }
 
-    private void validateUploadRequest(Album album, PhotoPresignedUrlRequest request) {
-        int currentCount = album.getCurrentPhotoCount();
+    private void validateUploadRequest(Album album, PhotoPresignedUrlRequest request, long currentActiveCount) {
         int maxCount = album.getMaxPhotoCount();
         int requestedCount = request.fileInfos().size();
 
-        photoValidator.validatePhotoCount(currentCount, requestedCount, maxCount);
+        photoValidator.validatePhotoCount(currentActiveCount, requestedCount, maxCount);
         photoValidator.validateFileInfos(request.fileInfos());
     }
 
