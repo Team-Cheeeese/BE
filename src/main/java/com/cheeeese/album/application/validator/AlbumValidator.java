@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -37,7 +38,7 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_EVENT_DATE_REQUIRED);
         }
 
-        if (request.eventDate().isAfter(LocalDate.now())) {
+        if (request.eventDate().isAfter(LocalDate.now(ZoneId.of("Asia/Seoul")))) {
             throw new AlbumException(AlbumErrorCode.ALBUM_EVENT_DATE_INVALID);
         }
 
