@@ -2,6 +2,7 @@ package com.cheeeese.photo.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.S3Util;
 import com.cheeeese.photo.application.validator.PhotoValidator;
@@ -155,6 +156,21 @@ public class PhotoService {
         userRepository.decrementLikeCnt(photo.getUser().getId());
 
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
+    }
+
+    @Transactional
+    public void deletePhoto(User user, String code, Long photoId) {
+        Album album = albumValidator.validateAlbumCode(code);
+        UserAlbum userAlbum = albumValidator.getAlbumParticipant(album, user);
+
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+
+        photoValidator.validateDeletePermission(user, userAlbum, album, photo);
+
+        photo.softDelete();
+
+        photoQueryService.invalidatePhotoCache(album.getCode());
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {

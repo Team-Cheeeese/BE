@@ -71,4 +71,8 @@ public class Photo extends BaseEntity {
     public void updateImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    public void softDelete() {
+        this.isDeleted = true;
+    }
 }

@@ -1,6 +1,7 @@
 package com.cheeeese.album.application.validator;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.exception.AlbumException;
@@ -92,6 +93,14 @@ public class AlbumValidator {
         validateUserBlacklisted(album, user);
 
         userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
+                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+    }
+
+    public UserAlbum getAlbumParticipant(Album album, User user) {
+        validateAlbumExpiration(album);
+        validateUserBlacklisted(album, user);
+
+        return userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
     }
 
