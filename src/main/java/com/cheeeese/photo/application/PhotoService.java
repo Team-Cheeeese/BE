@@ -223,7 +223,7 @@ public class PhotoService {
         }
 
         String objectKey = S3Util.extractObjectKey(photo.getImageUrl());
-        String url = presignedUrlService.generatePresignedGetUrl(objectKey);
+        String url = presignedUrlService.generatePresignedGetUrl(objectKey, fileName);
 
         return PhotoMapper.toDownloadPresignedUrlInfo(photo, fileName, url);
     }
