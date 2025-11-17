@@ -36,10 +36,11 @@ public class PresignedUrlService {
         return presignedRequest.url().toString();
     }
 
-    public String generatePresignedGetUrl(String uniqueKey) {
+    public String generatePresignedGetUrl(String uniqueKey, String fileName) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(uniqueKey)
+                .responseContentDisposition("attachment; filename=\"" + fileName + "\"")
                 .build();
 
         PresignedGetObjectRequest presignedRequest =

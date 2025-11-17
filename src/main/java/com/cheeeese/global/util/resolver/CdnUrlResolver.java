@@ -3,8 +3,16 @@ package com.cheeeese.global.util.resolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class CdnUrlResolver {
+
+    private static final List<String> PREFIXES = List.of(
+            "say-cheeeese/",
+            "say-cheeeese-thumbnail/",
+            "say-cheeeese-profile/"
+    );
 
     @Value("${cdn.original-domain}")
     private String originalDomain;
@@ -30,9 +38,14 @@ public class CdnUrlResolver {
     private String resolve(String domain, String path) {
         if (path == null || path.isBlank()) return null;
         if (path.startsWith("http")) return path;
-        if (path.startsWith("say-cheeeese/")) {
-            path = path.substring("say-cheeeese/".length());
+
+        for (String prefix : PREFIXES) {
+            if (path.startsWith(prefix)) {
+                path = path.substring(prefix.length());
+                break;
+            }
         }
+
         if (path.startsWith("/")) path = path.substring(1);
         return domain + "/" + path;
     }
