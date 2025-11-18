@@ -73,4 +73,14 @@ public interface UserAlbumRepository extends JpaRepository<UserAlbum, Long> {
             @Param("status") Album.AlbumStatus status,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT ua
+        FROM UserAlbum ua
+        JOIN FETCH ua.user
+        WHERE ua.album.id = :albumId
+        AND ua.role = :role
+    """)
+    Optional<UserAlbum> findMakerByAlbumId(@Param("albumId") Long albumId, @Param("role") Role role);
+
 }
