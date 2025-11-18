@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 
 public class S3Util {
 
+    private static final String PREFIX = "say-cheeeese/";
+
     public static String extractObjectKey(String imageUrl) {
         if (imageUrl == null) {
             throw new NullPointerException("image url is null");
@@ -13,14 +15,19 @@ public class S3Util {
         try {
             URI uri = new URI(imageUrl);
             String path = uri.getPath();
-            if (path != null && !path.isBlank()) {
-                return path.startsWith("/") ? path.substring(1) : path;
-            }
-        } catch (URISyntaxException e) {
 
-        }
-        if (imageUrl.startsWith("album/")) {
-            return imageUrl;
+            if (path != null && !path.isBlank()) {
+                if (path.startsWith("/")) {
+                    path = path.substring(1);
+                }
+
+                if (path.startsWith(PREFIX)) {
+                    path = path.substring(PREFIX.length());
+                }
+
+                return path;
+            }
+        } catch (URISyntaxException ignored) {
         }
         return imageUrl;
     }
@@ -40,7 +47,6 @@ public class S3Util {
         if (underscoreIdx >= 0 && underscoreIdx < fileName.length() - 1) {
             fileName = fileName.substring(underscoreIdx + 1);
         }
-
         return fileName;
     }
 }
