@@ -2,7 +2,6 @@ package com.cheeeese.photo.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
-import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.S3Util;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
@@ -22,7 +21,6 @@ import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
-import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,14 +39,12 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PhotoService {
 
-    private final UserService userService;
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
-    private final AlbumRepository albumRepository;
     private final PresignedUrlService presignedUrlService;
     private final PhotoQueryService photoQueryService;
 
@@ -243,12 +239,14 @@ public class PhotoService {
             throw new PhotoException(PhotoErrorCode.PHOTO_STATUS_UPDATE_FAILED);
         }
 
-        if (updatedRows > 0) {
-            int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
-            if (decremented == 0) {
-                throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
-            }
-            userService.decrementPhotoCount(user.getId(), updatedRows);
-        }
+        // 업로드 로직 재설계 (선제적으로 count를 올려놓지 않음 -> count 감소 로직 제거)
+        // 혹시 몰라서 나둠
+//        if (updatedRows > 0) {
+//            int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
+//            if (decremented == 0) {
+//                throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
+//            }
+//            userService.decrementPhotoCount(user.getId(), updatedRows);
+//        }
     }
 }
