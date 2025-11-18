@@ -153,4 +153,18 @@ public class AlbumMapper {
                 .isLiked(isLiked)
                 .build();
     }
+
+    public static AlbumInfoResponse toAlbumInfoResponse(Album album, User user) {
+        return AlbumInfoResponse.builder()
+                .title(album.getTitle())
+                .makerId(album.getMakerId())
+                .name(user.getName())
+                .themeEmoji(album.getThemeEmoji())
+                .participant(album.getParticipant())
+                .currentParticipant(album.getCurrentParticipant())
+                .eventDate(album.getEventDate())
+                .currentPhotoCnt(album.getCurrentPhotoCount())
+                .expiredAt(album.getExpiredAt())
+                .build();
+    }
 }

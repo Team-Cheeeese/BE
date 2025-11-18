@@ -153,19 +153,6 @@ public class PhotoMapper {
                 .build();
     }
 
-    public static AlbumInfoResponse toAlbumInfoResponse(Album album) {
-        return AlbumInfoResponse.builder()
-                .title(album.getTitle())
-                .makerId(album.getMakerId())
-                .themeEmoji(album.getThemeEmoji())
-                .participant(album.getParticipant())
-                .currentParticipant(album.getCurrentParticipant())
-                .eventDate(album.getEventDate())
-                .currentPhotoCnt(album.getCurrentPhotoCount())
-                .expiredAt(album.getExpiredAt())
-                .build();
-    }
-
     public static PhotoLikedUserResponse.PhotoLiker toPhotoLiker(User user, String profileImageUrl, boolean isMe, Role role) {
         return PhotoLikedUserResponse.PhotoLiker.builder()
                 .name(user.getName())
