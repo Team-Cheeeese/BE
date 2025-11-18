@@ -1,6 +1,5 @@
-package com.cheeeese.photo.dto.request;
+package com.cheeeese.photo.application;
 
-import com.cheeeese.photo.application.PhotoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
