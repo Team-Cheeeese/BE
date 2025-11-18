@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -172,4 +173,17 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         AND p.status IN ('UPLOADING', 'COMPLETED')
     """)
     long countActivePhotosByAlbumId(@Param("albumId") Long albumId);
+
+    @Modifying
+    @Query("""
+        UPDATE Photo p
+        SET p.status = :newStatus
+        WHERE p.status = :expectedStatus
+        AND p.createdAt < :threshold
+    """)
+    int updateOldUploadingPhotosStatus(
+            @Param("newStatus") PhotoStatus newStatus,
+            @Param("expectedStatus") PhotoStatus expectedStatus,
+            @Param("threshold") LocalDateTime threshold
+    );
 }

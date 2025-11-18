@@ -147,6 +147,16 @@ public class PhotoService {
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 
+    @Transactional
+    public void cleanupOldUploadingPhotos() {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(30);
+        int updatedCount = photoRepository.updateOldUploadingPhotosStatus(
+                PhotoStatus.FAILED,
+                PhotoStatus.UPLOADING,
+                threshold
+        );
+    }
+
     private Album validateAlbumAndPermission(User user, String albumCode) {
         Album album = albumValidator.validateAlbumCode(albumCode);
         albumValidator.validateUploadPermission(album, user);
