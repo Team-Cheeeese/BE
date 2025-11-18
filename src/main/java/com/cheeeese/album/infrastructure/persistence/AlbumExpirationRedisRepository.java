@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 public class AlbumExpirationRedisRepository {
 
     private static final String EXPIRATION_ZSET_KEY = "expired:album:zset";
-    private static final ZoneOffset KST_ZONE = ZoneOffset.of("+09:00");
 
     @Qualifier("cacheRedisTemplate")
     private final RedisTemplate<String, Object> cacheRedisTemplate;
@@ -29,7 +28,7 @@ public class AlbumExpirationRedisRepository {
      */
     public void registerAlbum(Long albumId, LocalDateTime expiredAt) {
         // LocalDateTime을 Unix Timestamp (ms)로 변환
-        long expirationMillis = expiredAt.toInstant(KST_ZONE).toEpochMilli();
+        long expirationMillis = expiredAt.toInstant(ZoneOffset.UTC).toEpochMilli();
 
         // ZADD key score member
         cacheRedisTemplate.opsForZSet().add(EXPIRATION_ZSET_KEY, albumId.toString(), (double) expirationMillis);
@@ -41,7 +40,7 @@ public class AlbumExpirationRedisRepository {
      */
     public Set<Long> getExpiredAlbumIds() {
         // 현재 시각의 Unix Timestamp (밀리초)
-        long currentTimestamp = LocalDateTime.now().toInstant(KST_ZONE).toEpochMilli();
+        long currentTimestamp = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
 
         // ZRANGEBYSCORE key min max: Score가 0부터 현재 시각까지인 모든 Member를 조회
         Set<Object> members = cacheRedisTemplate.opsForZSet().rangeByScore(EXPIRATION_ZSET_KEY, 0, currentTimestamp);
