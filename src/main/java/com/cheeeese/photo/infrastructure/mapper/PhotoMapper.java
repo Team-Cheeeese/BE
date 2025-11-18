@@ -85,6 +85,7 @@ public class PhotoMapper {
             Photo photo,
             String imageUrl,
             String thumbnailUrl,
+            boolean isLiked,
             boolean isDownloaded,
             boolean isRecentlyDownloaded
     ) {
@@ -93,6 +94,8 @@ public class PhotoMapper {
                 .photoId(photo.getId())
                 .imageUrl(imageUrl)
                 .thumbnailUrl(thumbnailUrl)
+                .likeCnt(photo.getLikesCnt())
+                .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
                 .build();
@@ -147,19 +150,6 @@ public class PhotoMapper {
                 .isRecentlyDownloaded(isRecentlyDownloaded)
                 .captureTime(photo.getCaptureTime())
                 .createdAt(photo.getCreatedAt())
-                .build();
-    }
-
-    public static AlbumInfoResponse toAlbumInfoResponse(Album album) {
-        return AlbumInfoResponse.builder()
-                .title(album.getTitle())
-                .makerId(album.getMakerId())
-                .themeEmoji(album.getThemeEmoji())
-                .participant(album.getParticipant())
-                .currentParticipant(album.getCurrentParticipant())
-                .eventDate(album.getEventDate())
-                .currentPhotoCnt(album.getCurrentPhotoCount())
-                .expiredAt(album.getExpiredAt())
                 .build();
     }
 

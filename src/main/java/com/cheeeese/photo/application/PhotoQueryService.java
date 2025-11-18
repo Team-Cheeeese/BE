@@ -82,15 +82,11 @@ public class PhotoQueryService {
             return PhotoMapper.toPhotoLikedPageResponse(photos, List.of());
         }
 
-        Set<Long> downloaded = photoHistoryRepository.findDownloadedPhotoIds(user.getId(), photoIds);
+        Set<Long> liked = findUserLikedPhotoIds(user.getId(), photoIds);
+        Set<Long> downloaded = findUserDownloadedPhotoIds(user.getId(), photoIds);
+        Set<Long> recent = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
 
-        Set<Long> recent = photoHistoryRepository.findRecentlyDownloadedPhotoIds(
-                user.getId(),
-                photoIds,
-                LocalDateTime.now().minusHours(1)
-        );
-
-        List<PhotoLikedResponse> responses = buildPhotoLikedResponses(photos.getContent(), downloaded, recent);
+        List<PhotoLikedResponse> responses = buildPhotoLikedResponses(photos.getContent(), liked, downloaded, recent);
 
         return PhotoMapper.toPhotoLikedPageResponse(photos, responses);
     }
@@ -174,15 +170,16 @@ public class PhotoQueryService {
         };
     }
 
-    private List<PhotoLikedResponse> buildPhotoLikedResponses(List<Photo> photos, Set<Long> downloaded, Set<Long> recent) {
+    private List<PhotoLikedResponse> buildPhotoLikedResponses(List<Photo> photos, Set<Long> liked, Set<Long> downloaded, Set<Long> recent) {
         return photos.stream()
                 .map(photo -> {
                     Long id = photo.getId();
                     String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
                     String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
+                    boolean isLiked = liked.contains(id);
                     boolean isDownloaded = downloaded.contains(id);
                     boolean isRecentlyDownloaded = recent.contains(id);
-                    return PhotoMapper.toPhotoLikedResponse(photo, imageUrl, thumbnailUrl, isDownloaded, isRecentlyDownloaded);
+                    return PhotoMapper.toPhotoLikedResponse(photo, imageUrl, thumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded);
                 })
                 .toList();
     }

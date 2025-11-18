@@ -12,6 +12,9 @@ public record AlbumInfoResponse(
         @Schema(description = "생성자 ID", example = "1")
         Long makerId,
 
+        @Schema(description = "생성자 이름", example = "주정빈")
+        String name,
+
         @Schema(description = "앨범 제목", example = "김수한무거북이")
         String title,
 

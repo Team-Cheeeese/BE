@@ -15,8 +15,8 @@ import java.util.Collections;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "Cheeeese API 명세서",
-                description = "Cheeeese API 명세서",
+                title = "🧀 치이이즈 API 명세서",
+                description = "🧀 치이이즈 API 명세서",
                 version = "v1.0.0"
         ),
         servers = {

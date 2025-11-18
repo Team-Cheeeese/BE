@@ -204,7 +204,11 @@ public class AlbumService {
 
         albumValidator.validateAlbumParticipant(album, user);
 
-        return PhotoMapper.toAlbumInfoResponse(album);
+        User maker = userAlbumRepository.findMakerByAlbumId(album.getId(), Role.MAKER)
+                .map(UserAlbum::getUser)
+                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_MAKER));
+
+        return AlbumMapper.toAlbumInfoResponse(album, maker);
     }
 
     public List<AlbumBest4CutResponse> getAlbumBest4Cut(User user, String code) {
