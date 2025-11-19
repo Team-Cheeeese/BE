@@ -167,6 +167,14 @@ public class PhotoService {
 
         photoValidator.validateDeletePermission(user, userAlbum, album, photo);
 
+        albumRepository.decrementPhotoCount(album.getId(), 1);
+
+        userRepository.decrementPhotoCount(photo.getUser().getId(), 1);
+
+        userRepository.decrementLikeCnt(photo.getUser().getId());
+
+        photoLikesRepository.deleteAllByPhotoId(photo.getId());
+
         photo.softDelete();
 
         photoQueryService.invalidatePhotoCache(album.getCode());

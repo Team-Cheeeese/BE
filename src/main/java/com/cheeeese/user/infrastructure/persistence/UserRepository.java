@@ -11,11 +11,11 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByProviderId(String providerId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("UPDATE User u SET u.photoCnt = u.photoCnt + :count WHERE u.id = :userId")
     int incrementPhotoCount(@Param("userId") Long userId, @Param("count") int count);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("UPDATE User u SET u.photoCnt = u.photoCnt - :count WHERE u.id = :userId AND u.photoCnt >= :count")
     int decrementPhotoCount(@Param("userId") Long userId, @Param("count") int count);
 

@@ -36,4 +36,6 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
         WHERE pl.photo.id = :photoId
     """)
     List<User> findLikersByPhotoId(@Param("photoId") Long photoId);
+
+    void deleteAllByPhotoId(Long photoId);
 }
