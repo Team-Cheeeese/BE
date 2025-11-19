@@ -75,14 +75,8 @@ public class AlbumController implements AlbumSwagger {
 
     @Override
     @GetMapping("/{code}/info")
-    public CommonResponse<AlbumInfoResponse> getAlbumInfo(
-            @CurrentUser User user,
-            @PathVariable String code
-    ) {
-        return CommonResponse.success(
-                ALBUM_INFO_GET_SUCCESS,
-                albumService.getAlbumInfo(user, code)
-        );
+    public CommonResponse<AlbumInfoResponse> getAlbumInfo(@PathVariable String code) {
+        return CommonResponse.success(ALBUM_INFO_GET_SUCCESS, albumService.getAlbumInfo(code));
     }
 
     @Override

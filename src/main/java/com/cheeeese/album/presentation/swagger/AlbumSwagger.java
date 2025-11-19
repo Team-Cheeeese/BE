@@ -273,7 +273,6 @@ public interface AlbumSwagger {
             )
     })
     CommonResponse<AlbumInfoResponse> getAlbumInfo(
-            @CurrentUser User user,
             @PathVariable String code
     );
 

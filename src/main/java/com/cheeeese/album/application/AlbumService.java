@@ -199,10 +199,8 @@ public class AlbumService {
         );
     }
 
-    public AlbumInfoResponse getAlbumInfo(User user, String code) {
+    public AlbumInfoResponse getAlbumInfo(String code) {
         Album album = albumValidator.validateAlbumCode(code);
-
-        albumValidator.validateAlbumParticipant(album, user);
 
         User maker = userAlbumRepository.findMakerByAlbumId(album.getId(), Role.MAKER)
                 .map(UserAlbum::getUser)
