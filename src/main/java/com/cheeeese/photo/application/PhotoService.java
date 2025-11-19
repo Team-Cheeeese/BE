@@ -171,7 +171,9 @@ public class PhotoService {
 
         userRepository.decrementPhotoCount(photo.getUser().getId(), 1);
 
-        userRepository.decrementLikeCnt(photo.getUser().getId());
+        if (photo.getLikesCnt() > 0) {
+            userRepository.decrementLikeCntBy(photo.getUser().getId(), photo.getLikesCnt());
+        }
 
         photoLikesRepository.deleteAllByPhotoId(photo.getId());
 

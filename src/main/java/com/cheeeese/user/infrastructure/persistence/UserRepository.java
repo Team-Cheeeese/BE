@@ -43,4 +43,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
         AND u.likesCnt > 0
     """)
     void decrementLikeCnt(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("""
+        UPDATE User u
+        SET u.likesCnt = u.likesCnt - :count
+        WHERE u.id = :userId
+        AND u.likesCnt >= :count
+    """)
+    void decrementLikeCntBy(@Param("userId") Long userId, @Param("count") int count);
 }
