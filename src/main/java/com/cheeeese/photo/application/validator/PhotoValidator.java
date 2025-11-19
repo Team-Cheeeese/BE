@@ -1,10 +1,14 @@
 package com.cheeeese.photo.application.validator;
 
+import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.UserAlbum;
+import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.dto.request.PhotoPresignedUrlRequest;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -130,4 +134,19 @@ public class PhotoValidator {
      * 검증 결과 객체: 앨범 ID + 사진 리스트 보관
      */
     public record ValidatedPhotos(List<Photo> photos, Long albumId) {}
+
+    /**
+     * 사진 삭제 권한 검증
+     */
+    public void validateDeletePermission(User user, UserAlbum userAlbum, Album album, Photo photo) {
+        if (userAlbum.getRole() == Role.MAKER) return;
+
+        if (!photo.getUser().getId().equals(user.getId())) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_OWNER_MISMATCH);
+        }
+
+        if (!photo.getAlbum().getId().equals(album.getId())) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND_IN_ALBUM);
+        }
+    }
 }

@@ -37,11 +37,14 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         JOIN p.album a
         JOIN PhotoLikes pl ON pl.photo = p
         WHERE a.code = :albumCode
+        AND p.isDeleted = FALSE
+        AND p.status = :status
         AND pl.user.id = :userId
     """)
     Slice<Photo> findLikedPhotosByAlbumAndUser(
             @Param("albumCode") String albumCode,
             @Param("userId") Long userId,
+            @Param("status") PhotoStatus status,
             Pageable pageable
     );
 

@@ -1,9 +1,12 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.S3Util;
+import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoHistory;
@@ -22,6 +25,7 @@ import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,13 +45,16 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PhotoService {
 
+    private final UserService userService;
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
     private final AlbumRepository albumRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
+    private final PhotoReader photoReader;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
+    private final AlbumReader albumReader;
     private final PresignedUrlService presignedUrlService;
     private final PhotoQueryService photoQueryService;
 
@@ -127,8 +134,7 @@ public class PhotoService {
 
     @Transactional
     public void createPhotoLikes(User user, Long photoId) {
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+        Photo photo = photoReader.getPhoto(photoId);
 
         PhotoLikes photoLikes = PhotoLikesMapper.toEntity(user, photo);
 
@@ -142,8 +148,7 @@ public class PhotoService {
 
     @Transactional
     public void deletePhotoLikes(User user, Long photoId) {
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+        Photo photo = photoReader.getPhoto(photoId);
 
         PhotoLikes photoLikes = photoLikesRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_LIKES_NOT_FOUND));
@@ -164,6 +169,33 @@ public class PhotoService {
                 PhotoStatus.UPLOADING,
                 threshold
         );
+    }
+
+    @Transactional
+    public void deletePhoto(User user, String code, Long photoId) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateAlbumEntry(album, user);
+
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
+
+        Photo photo = photoReader.getPhotoInAlbum(photoId, code);
+
+        photoValidator.validateDeletePermission(user, userAlbum, album, photo);
+
+        int updatedRows = albumRepository.decrementPhotoCount(album.getId(), 1);
+        if (updatedRows == 0) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
+        }
+
+        userService.decrementPhotoCount(photo.getUser().getId(), 1);
+
+        userRepository.decrementLikeCntBy(photo.getUser().getId(), photo.getLikesCnt());
+
+        photoLikesRepository.deleteAllByPhotoId(photo.getId());
+
+        photo.softDelete();
+
+        photoQueryService.invalidatePhotoCache(album.getCode());
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {

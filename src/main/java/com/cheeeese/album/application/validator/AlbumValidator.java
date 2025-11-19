@@ -85,9 +85,7 @@ public class AlbumValidator {
     }
 
     public void validateAlbumParticipant(Album album, User user) {
-        validateAlbumExpiration(album);
-
-        validateUserBlacklisted(album, user);
+        validateAlbumEntry(album, user);
 
         userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
