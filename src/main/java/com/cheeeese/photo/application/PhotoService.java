@@ -167,7 +167,10 @@ public class PhotoService {
 
         photoValidator.validateDeletePermission(user, userAlbum, album, photo);
 
-        albumRepository.decrementPhotoCount(album.getId(), 1);
+        int updatedRows = albumRepository.decrementPhotoCount(album.getId(), 1);
+        if (updatedRows == 0) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
+        }
 
         userService.decrementPhotoCount(photo.getUser().getId(), 1);
 
