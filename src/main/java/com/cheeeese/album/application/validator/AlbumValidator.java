@@ -74,10 +74,6 @@ public class AlbumValidator {
         }
     }
 
-    public void validateUploadPermission(Album album, User user) { // [NEW]
-        validateAlbumParticipant(album, user);
-    }
-
     public void validateDownloadPermission(Album album, User user, List<Photo> photos) {
         validateAlbumParticipant(album, user);
 

@@ -1,10 +1,13 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoCompleteRequest;
 import com.cheeeese.photo.exception.PhotoException;
 import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.application.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,8 @@ public class PhotoCallbackService {
 
     private final PhotoRepository photoRepository;
     private final PhotoQueryService photoQueryService;
+    private final AlbumRepository albumRepository;
+    private final UserService userService;
 
     public void markUploadCompleted(PhotoCompleteRequest request) {
         int updated = photoRepository.updateStatusAndUrl(
@@ -28,6 +33,22 @@ public class PhotoCallbackService {
         if (updated == 0) {
             throw new PhotoException(PhotoErrorCode.THUMBNAIL_UPDATE_FAILED);
         }
+
+        Photo photo = photoRepository.findById(request.photoId())
+                .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
+
+        int albumUpdated = albumRepository.incrementPhotoCount(photo.getAlbum().getId(), 1);
+        if (albumUpdated == 0) {
+            photoRepository.updateStatusAndUrl(
+                    photo.getId(),
+                    PhotoStatus.COMPLETED,
+                    PhotoStatus.FAILED,
+                    photo.getThumbnailUrl()
+            );
+            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_INCREMENT_FAILED);
+        }
+
+        userService.incrementPhotoCount(photo.getUser().getId(), 1);
 
         String albumCode = photoRepository.findAlbumCodeByPhotoId(request.photoId());
         if (albumCode != null) {

@@ -50,7 +50,7 @@ public class PhotoValidator {
     /**
      * 앨범 내 업로드 제한 검증
      */
-    public void validatePhotoCount(int currentCount, int uploadCount, int maxPhotoCount) {
+    public void validatePhotoCount(long currentCount, int uploadCount, int maxPhotoCount) {
         if (currentCount + uploadCount > maxPhotoCount) {
             throw new PhotoException(PhotoErrorCode.PHOTO_MAX_COUNT_EXCEEDED);
         }

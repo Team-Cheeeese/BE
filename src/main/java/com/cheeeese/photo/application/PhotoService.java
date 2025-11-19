@@ -22,7 +22,6 @@ import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
-import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,14 +41,13 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PhotoService {
 
-    private final UserService userService;
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
+    private final AlbumRepository albumRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
-    private final AlbumRepository albumRepository;
     private final PresignedUrlService presignedUrlService;
     private final PhotoQueryService photoQueryService;
 
@@ -67,17 +66,17 @@ public class PhotoService {
 
     @Transactional
     public PhotoPresignedUrlResponse createPresignedUrls(User user, PhotoPresignedUrlRequest request) {
-        Album album = validateAlbumAndPermission(user, request.albumCode());
-        validateUploadRequest(album, request);
+        Album album = albumRepository.findByIdForUpdate(
+                albumValidator.validateAlbumCode(request.albumCode()).getId()
+        );
+        albumValidator.validateAlbumParticipant(album, user);
 
-        int uploadCount = request.fileInfos().size();
+        long currentActiveCount = photoRepository.countActivePhotosByAlbumId(
+                album.getId(),
+                Arrays.asList(PhotoStatus.UPLOADING, PhotoStatus.COMPLETED)
+        );
 
-        int updatedRows = albumRepository.incrementPhotoCount(album.getId(), uploadCount);
-        if (updatedRows != 1) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_INCREMENT_FAILED);
-        }
-
-        userService.incrementPhotoCount(user.getId(), uploadCount);
+        validateUploadRequest(album, request, currentActiveCount);
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
 
@@ -157,18 +156,27 @@ public class PhotoService {
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 
+    @Transactional
+    public void cleanupOldUploadingPhotos() {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(30);
+        int updatedCount = photoRepository.updateOldUploadingPhotosStatus(
+                PhotoStatus.FAILED,
+                PhotoStatus.UPLOADING,
+                threshold
+        );
+    }
+
     private Album validateAlbumAndPermission(User user, String albumCode) {
         Album album = albumValidator.validateAlbumCode(albumCode);
-        albumValidator.validateUploadPermission(album, user);
+        albumValidator.validateAlbumParticipant(album, user);
         return album;
     }
 
-    private void validateUploadRequest(Album album, PhotoPresignedUrlRequest request) {
-        int currentCount = album.getCurrentPhotoCount();
+    private void validateUploadRequest(Album album, PhotoPresignedUrlRequest request, long currentActiveCount) {
         int maxCount = album.getMaxPhotoCount();
         int requestedCount = request.fileInfos().size();
 
-        photoValidator.validatePhotoCount(currentCount, requestedCount, maxCount);
+        photoValidator.validatePhotoCount(currentActiveCount, requestedCount, maxCount);
         photoValidator.validateFileInfos(request.fileInfos());
     }
 
@@ -250,12 +258,14 @@ public class PhotoService {
             throw new PhotoException(PhotoErrorCode.PHOTO_STATUS_UPDATE_FAILED);
         }
 
-        if (updatedRows > 0) {
-            int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
-            if (decremented == 0) {
-                throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
-            }
-            userService.decrementPhotoCount(user.getId(), updatedRows);
-        }
+        // 업로드 로직 재설계 (선제적으로 count를 올려놓지 않음 -> count 감소 로직 제거)
+        // 혹시 몰라서 나둠
+//        if (updatedRows > 0) {
+//            int decremented = albumRepository.decrementPhotoCount(albumId, updatedRows);
+//            if (decremented == 0) {
+//                throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
+//            }
+//            userService.decrementPhotoCount(user.getId(), updatedRows);
+//        }
     }
 }
