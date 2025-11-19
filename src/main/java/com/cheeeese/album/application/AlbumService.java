@@ -156,7 +156,7 @@ public class AlbumService {
 
     public UploadAvailableCountResponse getAvailablePhotoCount(User user, String code) {
         Album album = albumValidator.validateAlbumCode(code);
-        albumValidator.validateUploadPermission(album, user);
+        albumValidator.validateAlbumParticipant(album, user);
 
         int availableCount = calculateRemainingUploadSlots(album);
 

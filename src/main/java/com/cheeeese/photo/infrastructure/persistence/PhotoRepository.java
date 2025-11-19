@@ -170,9 +170,9 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         FROM Photo p
         WHERE p.album.id = :albumId
         AND p.isDeleted = FALSE
-        AND p.status IN ('UPLOADING', 'COMPLETED')
+        AND p.status IN :statuses
     """)
-    long countActivePhotosByAlbumId(@Param("albumId") Long albumId);
+    long countActivePhotosByAlbumId(@Param("albumId") Long albumId, @Param("statuses") List<PhotoStatus> statuses);
 
     @Modifying
     @Query("""

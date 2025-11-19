@@ -2,6 +2,7 @@ package com.cheeeese.photo.application;
 
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.S3Util;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,6 +43,7 @@ public class PhotoService {
 
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
+    private final AlbumRepository albumRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
     private final PhotoValidator photoValidator;
@@ -63,9 +66,15 @@ public class PhotoService {
 
     @Transactional
     public PhotoPresignedUrlResponse createPresignedUrls(User user, PhotoPresignedUrlRequest request) {
-        Album album = validateAlbumAndPermission(user, request.albumCode());
+        Album album = albumRepository.findByIdForUpdate(
+                albumValidator.validateAlbumCode(request.albumCode()).getId()
+        );
+        albumValidator.validateAlbumParticipant(album, user);
 
-        long currentActiveCount = photoRepository.countActivePhotosByAlbumId(album.getId());
+        long currentActiveCount = photoRepository.countActivePhotosByAlbumId(
+                album.getId(),
+                Arrays.asList(PhotoStatus.UPLOADING, PhotoStatus.COMPLETED)
+        );
 
         validateUploadRequest(album, request, currentActiveCount);
 
@@ -159,7 +168,7 @@ public class PhotoService {
 
     private Album validateAlbumAndPermission(User user, String albumCode) {
         Album album = albumValidator.validateAlbumCode(albumCode);
-        albumValidator.validateUploadPermission(album, user);
+        albumValidator.validateAlbumParticipant(album, user);
         return album;
     }
 
