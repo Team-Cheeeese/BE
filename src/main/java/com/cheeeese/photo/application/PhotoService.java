@@ -169,7 +169,7 @@ public class PhotoService {
 
         albumRepository.decrementPhotoCount(album.getId(), 1);
 
-        userService.decrementPhotoCount(user.getId(), 1);
+        userService.decrementPhotoCount(photo.getUser().getId(), 1);
 
         userRepository.decrementLikeCntBy(photo.getUser().getId(), photo.getLikesCnt());
 
