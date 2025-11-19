@@ -176,7 +176,7 @@ public interface PhotoSwagger {
     );
 
     @Operation(
-            summary = "사진 좋아요 생성 API",
+            summary = "사진 좋아요 생성 API - 추후 수정 필요 (Command로 이동 예정)",
             description = """
                     ### PathVariable
                     ---
@@ -195,7 +195,7 @@ public interface PhotoSwagger {
     );
 
     @Operation(
-            summary = "사진 좋아요 삭제 API",
+            summary = "사진 좋아요 삭제 API - 추후 수정 필요 (Command로 이동 예정)",
             description = """
                     ### PathVariable
                     ---
