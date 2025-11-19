@@ -3,6 +3,7 @@ package com.cheeeese.photo.presentation;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.photo.application.PhotoService;
+import com.cheeeese.photo.presentation.swagger.PhotoCommandSwagger;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +16,11 @@ import static com.cheeeese.global.common.code.SuccessCode.PHOTO_DELETE_SUCCESS;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/album/{code}/photo")
-public class PhotoCommandController {
+public class PhotoCommandController implements PhotoCommandSwagger {
 
     private final PhotoService photoService;
 
+    @Override
     @DeleteMapping("/{photoId}")
     public CommonResponse<Void> deletePhoto(
             @CurrentUser User user,
