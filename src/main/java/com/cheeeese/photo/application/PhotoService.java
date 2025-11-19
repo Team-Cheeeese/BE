@@ -1,5 +1,6 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.UserAlbum;
@@ -52,6 +53,7 @@ public class PhotoService {
     private final PhotoValidator photoValidator;
     private final AlbumValidator albumValidator;
     private final AlbumRepository albumRepository;
+    private final AlbumReader albumReader;
     private final PresignedUrlService presignedUrlService;
     private final PhotoQueryService photoQueryService;
 
@@ -161,7 +163,9 @@ public class PhotoService {
     @Transactional
     public void deletePhoto(User user, String code, Long photoId) {
         Album album = albumValidator.validateAlbumCode(code);
-        UserAlbum userAlbum = albumValidator.getAlbumParticipant(album, user);
+        albumValidator.validateAlbumEntry(album, user);
+
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
 
         Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
