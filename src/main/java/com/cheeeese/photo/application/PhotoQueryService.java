@@ -95,7 +95,7 @@ public class PhotoQueryService {
     public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {
         Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
-        String profileImage = ProfileImageUtil.resolveProfileImage(user, cdnUrlResolver);
+        String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
         String resolveOriginalUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
         String resolveThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
 
