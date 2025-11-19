@@ -1,6 +1,7 @@
 package com.cheeeese.photo.application;
 
 import com.cheeeese.album.domain.type.AlbumSorting;
+import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.support.PhotoReader;
@@ -94,6 +95,7 @@ public class PhotoQueryService {
     public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {
         Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
+        String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
         String resolveOriginalUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
         String resolveThumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
 
@@ -103,7 +105,7 @@ public class PhotoQueryService {
                 user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
         );
 
-        return PhotoMapper.toPhotoDetailResponse(photo, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded);
+        return PhotoMapper.toPhotoDetailResponse(photo, profileImage, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded);
     }
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {

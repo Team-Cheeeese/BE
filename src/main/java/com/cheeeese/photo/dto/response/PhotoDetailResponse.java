@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
         description = "사진 상세 조회 API",
         requiredProperties = {
                 "name",
+                "profileImage",
                 "photoId",
                 "imageUrl",
                 "thumbnailUrl",
@@ -22,6 +23,9 @@ import java.time.LocalDateTime;
 public record PhotoDetailResponse(
         @Schema(description = "업로더 이름", example = "주정빈")
         String name,
+
+        @Schema(description = "업로더 프로필 이미지", example = "https://say-cheese...")
+        String profileImage,
 
         @Schema(description = "사진 ID", example = "1")
         Long photoId,
