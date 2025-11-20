@@ -41,6 +41,10 @@ public class PhotoValidator {
                 throw new PhotoException(PhotoErrorCode.PHOTO_FILE_NAME_REQUIRED);
             }
 
+            if (file.captureTime() == null) {
+                throw new PhotoException(PhotoErrorCode.PHOTO_CAPTURE_TIME_REQUIRED);
+            }
+
             if (file.fileSize() > MAX_FILE_SIZE) {
                 throw new PhotoException(PhotoErrorCode.PHOTO_FILE_SIZE_EXCEEDED);
             }
