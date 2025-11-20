@@ -28,6 +28,7 @@ public enum PhotoErrorCode implements BaseCode {
 
     // 사진 도메인 관련 오류
     PHOTO_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사진을 찾을 수 없습니다."),
+    PHOTO_CAPTURE_TIME_REQUIRED(HttpStatus.BAD_REQUEST, "촬영 시간이 누락되었습니다."),
     PHOTO_LIKES_NOT_FOUND(HttpStatus.NOT_FOUND, "사진에 대한 좋아요 내역이 존재하지 않습니다."),
     PHOTO_NOT_FOUND_IN_ALBUM(HttpStatus.NOT_FOUND, "해당 사진은 이 앨범에 포함되어 있지 않습니다."),
     PHOTO_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 사진입니다."),

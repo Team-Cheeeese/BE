@@ -14,13 +14,13 @@ import java.util.List;
 
 public class PhotoMapper {
 
-    public static Photo toEntity(User user, Album album) {
+    public static Photo toEntity(User user, Album album, LocalDateTime captureTime) {
         return Photo.builder()
                 .user(user)
                 .album(album)
                 .imageUrl(null) // presigned URL 생성 후 updateImageUrl()로 세팅됨
                 .thumbnailUrl(null)
-                .captureTime(LocalDateTime.now())
+                .captureTime(captureTime != null ? captureTime : LocalDateTime.now())
                 .status(PhotoStatus.UPLOADING)
                 .build();
     }

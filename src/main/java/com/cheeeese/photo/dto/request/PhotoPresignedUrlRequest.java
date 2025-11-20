@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -24,6 +25,10 @@ public record PhotoPresignedUrlRequest(
             @NotBlank
             @Schema(description = "원본 파일명", example = "my_holiday_pic.jpg")
             String fileName,
+
+            @NotNull
+            @Schema(description = "촬영 시간 (없을 경우 현재 시간)", example = "2025-02-01T14:30:00")
+            LocalDateTime captureTime,
 
             @Schema(description = "파일 크기 (Byte)", example = "3000000")
             long fileSize,
