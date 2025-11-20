@@ -26,7 +26,7 @@ public record PhotoPresignedUrlRequest(
             @Schema(description = "원본 파일명", example = "my_holiday_pic.jpg")
             String fileName,
 
-            @NotBlank
+            @NotNull
             @Schema(description = "촬영 시간 (없을 경우 현재 시간)", example = "2025-02-01T14:30:00")
             LocalDateTime captureTime,
 
