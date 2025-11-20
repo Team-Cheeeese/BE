@@ -26,7 +26,7 @@ public interface PhotoSwagger {
                     ### RequestBody
                     ---
                     `albumCode`: 사진을 업로드할 앨범의 코드 \n
-                    `fileInfos`: 업로드할 파일 정보 목록 (파일명, 크기, Content-Type) \n
+                    `fileInfos`: 업로드할 파일 정보 목록 (파일명, captureTime, 크기, Content-Type) \n
                     
                     ### 로직 상세
                     ---
