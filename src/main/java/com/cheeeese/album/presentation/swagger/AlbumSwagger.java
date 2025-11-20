@@ -248,7 +248,7 @@ public interface AlbumSwagger {
             description = """
                     ### PathVariable
                     ---
-                    `code`: 앨범 코드
+                    `code`: 앨범 코드 (String)
                     """
     )
     @ApiResponses(value = {
