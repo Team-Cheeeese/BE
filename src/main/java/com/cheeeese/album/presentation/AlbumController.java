@@ -51,14 +51,8 @@ public class AlbumController implements AlbumSwagger {
 
     @Override
     @GetMapping("/{code}/available-count")
-    public CommonResponse<UploadAvailableCountResponse> getAvailableUploadCount(
-            @CurrentUser User user,
-            @PathVariable String code
-    ) {
-        return CommonResponse.success(
-                PHOTO_AVAILABLE_COUNT_FETCH_SUCCESS,
-                albumService.getAvailablePhotoCount(user, code)
-        );
+    public CommonResponse<UploadAvailableCountResponse> getAvailableUploadCount(@PathVariable String code) {
+        return CommonResponse.success(PHOTO_AVAILABLE_COUNT_FETCH_SUCCESS, albumService.getAvailablePhotoCount(code));
     }
 
     @Override

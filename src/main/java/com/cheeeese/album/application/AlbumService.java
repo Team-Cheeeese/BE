@@ -154,9 +154,8 @@ public class AlbumService {
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
 
-    public UploadAvailableCountResponse getAvailablePhotoCount(User user, String code) {
+    public UploadAvailableCountResponse getAvailablePhotoCount(String code) {
         Album album = albumValidator.validateAlbumCode(code);
-        albumValidator.validateAlbumParticipant(album, user);
 
         int availableCount = calculateRemainingUploadSlots(album);
 
