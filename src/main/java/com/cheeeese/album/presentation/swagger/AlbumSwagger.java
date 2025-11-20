@@ -187,20 +187,6 @@ public interface AlbumSwagger {
                     description = "업로드 가능 사진 수 조회가 성공적으로 완료되었습니다."
             ),
             @ApiResponse(
-                    responseCode = "403",
-                    description = "참여자가 아닌 사용자의 경우",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(example = """
-                                {
-                                  "isSuccess": false,
-                                  "code": 403,
-                                  "message": "사용자가 해당 앨범의 참가자가 아닙니다."
-                                }
-                                """)
-                    )
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "존재하지 않거나 유효하지 않은 앨범 코드",
                     content = @Content(
@@ -216,7 +202,6 @@ public interface AlbumSwagger {
             )
     })
     CommonResponse<UploadAvailableCountResponse> getAvailableUploadCount(
-            @CurrentUser User user,
             @PathVariable String code
     );
 
