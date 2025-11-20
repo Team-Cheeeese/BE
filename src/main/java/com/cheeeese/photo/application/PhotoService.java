@@ -236,7 +236,7 @@ public class PhotoService {
             Album album,
             PhotoPresignedUrlRequest.FileInfo file
     ) {
-        Photo photo = PhotoMapper.toEntity(user, album);
+        Photo photo = PhotoMapper.toEntity(user, album, file.captureTime());
         photoRepository.save(photo);
 
         String safeFileName = sanitizeFileName(file.fileName());
