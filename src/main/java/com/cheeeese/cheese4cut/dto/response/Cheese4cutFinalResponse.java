@@ -30,10 +30,10 @@ public record Cheese4cutFinalResponse(
                 }
         )
         public record FinalPhotoInfo(
-                @Schema(description = "원본 사진 ID", example = "101")
+                @Schema(description = "사진 ID", example = "101")
                 Long photoId,
 
-                @Schema(description = "사진 원본 URL", example = "https://cdn.cheeeese.com/album/1/original/101.jpg")
+                @Schema(description = "사진 썸네일 URL", example = "https://cdn.cheeeese.com/album/1/original/101.jpg")
                 String imageUrl,
 
                 @Schema(description = "선정 순위 (1~4)", example = "1")

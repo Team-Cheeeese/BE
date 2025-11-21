@@ -31,8 +31,8 @@ public interface Cheese4cutSwagger {
                     ---
                     이 API는 앨범의 **치즈네컷 확정 상태**에 따라 응답 형태가 달라지는 다형적(Polymorphic) 응답을 반환합니다.
                     
-                    1. **확정 전 (isFinalized: false)**: 좋아요 TOP 4 사진의 원본 URL, 유니크 좋아요 수, 전체 참여자 수를 제공합니다.
-                    2. **확정 후 (isFinalized: true)**: 확정된 좋아요 TOP 4 사진의 원본 URL
+                    1. **확정 전 (isFinalized: false)**: 좋아요 TOP 4 사진의 썸네일 URL, 유니크 좋아요 수, 전체 참여자 수를 제공합니다.
+                    2. **확정 후 (isFinalized: true)**: 확정된 좋아요 TOP 4 사진의 썸네일 URL
                     """
     )
     @ApiResponses(value = {
