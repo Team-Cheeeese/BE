@@ -26,7 +26,7 @@ public class AlbumValidator {
     private final AlbumRepository albumRepository;
     private final UserAlbumRepository userAlbumRepository;
 
-    public void validateAlbumCreation(AlbumCreationRequest request) {
+    public void validateAlbumCreation(long createdThisWeek, AlbumCreationRequest request) {
         if (request.themeEmoji() == null || request.themeEmoji().isBlank()) {
             throw new AlbumException(AlbumErrorCode.ALBUM_THEME_EMOJI_NOT_SELECTED);
         }
@@ -47,9 +47,9 @@ public class AlbumValidator {
             throw new AlbumException(AlbumErrorCode.ALBUM_INVALID_CAPACITY);
         }
 
-//        if (createdThisWeek >= 3) {
-//            throw new AlbumException(AlbumErrorCode.ALBUM_CREATION_LIMIT_EXCEEDED);
-//        }
+        if (createdThisWeek >= 3) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_CREATION_LIMIT_EXCEEDED);
+        }
     }
 
     public Album validateAlbumCode(String code) {

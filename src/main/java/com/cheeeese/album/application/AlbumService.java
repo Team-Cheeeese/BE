@@ -68,9 +68,9 @@ public class AlbumService {
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
         String code = UuidCreator.getTimeOrdered().toString();
 
-        // long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
+        long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
 
-        albumValidator.validateAlbumCreation(request);
+        albumValidator.validateAlbumCreation(createdThisWeek, request);
 
         LocalDateTime expiredAt = LocalDateTime.now().plusDays(7);
 
