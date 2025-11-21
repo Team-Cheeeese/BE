@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
                 "likesCnt",
                 "isLiked",
                 "isDownloaded",
-                "isRecentlyDownloaded"
+                "isRecentlyDownloaded",
+                "canDeleted"
         }
 )
 public record PhotoDetailResponse(
@@ -47,6 +48,9 @@ public record PhotoDetailResponse(
 
         @Schema(description = "1시간 이내 다운로드 여부", example = "false")
         boolean isRecentlyDownloaded,
+
+        @Schema(description = "삭제 가능 여부", example = "false")
+        boolean canDeleted,
 
         @Schema(description = "촬영 시각", example = "2025-01-13T14:23:45")
         LocalDateTime captureTime,
