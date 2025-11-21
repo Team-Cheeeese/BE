@@ -104,8 +104,12 @@ public class PhotoQueryService {
         boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAtAfter(
                 user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
         );
+        boolean canDelete = photo.getUser().getId().equals(user.getId())
+                || photo.getAlbum().getMakerId().equals(user.getId());
 
-        return PhotoMapper.toPhotoDetailResponse(photo, profileImage, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded);
+        return PhotoMapper.toPhotoDetailResponse(
+                photo, profileImage, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded, canDelete
+        );
     }
 
     private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
