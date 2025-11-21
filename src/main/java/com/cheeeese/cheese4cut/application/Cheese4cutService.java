@@ -66,7 +66,7 @@ public class Cheese4cutService {
             List<Cheese4cutFinalResponse.FinalPhotoInfo> photos = cheese4cut.getPhotos().stream()
                     .map(p -> Cheese4cutMapper.toFinalPhotoInfo(
                             p.getPhotoId(),
-                            cdnUrlResolver.resolveOriginal(p.getImageUrl()),
+                            cdnUrlResolver.resolveThumbnail(p.getThumbnailImageUrl()),
                             p.getPhotoRank()
                     ))
                     .toList();
@@ -110,7 +110,7 @@ public class Cheese4cutService {
                         .mapToObj(index -> {
                             Photo p = orderedPhotos.get(index);
                             return Cheese4cutMapper.toPreviewPhotoInfo(
-                                    p.getId(), cdnUrlResolver.resolveOriginal(p.getImageUrl()), index+1
+                                    p.getId(), cdnUrlResolver.resolveThumbnail(p.getThumbnailUrl()), index+1
                             );
                         })
                         .toList();
