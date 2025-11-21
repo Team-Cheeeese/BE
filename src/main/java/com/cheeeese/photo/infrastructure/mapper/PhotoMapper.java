@@ -139,7 +139,7 @@ public class PhotoMapper {
             boolean isLiked,
             boolean isDownloaded,
             boolean isRecentlyDownloaded,
-            boolean canDeleted
+            boolean canDelete
     ) {
         return PhotoDetailResponse.builder()
                 .name(photo.getUser().getName())
@@ -151,7 +151,7 @@ public class PhotoMapper {
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
-                .canDeleted(canDeleted)
+                .canDelete(canDelete)
                 .captureTime(photo.getCaptureTime())
                 .createdAt(photo.getCreatedAt())
                 .build();

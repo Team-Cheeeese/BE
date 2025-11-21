@@ -50,7 +50,7 @@ public record PhotoDetailResponse(
         boolean isRecentlyDownloaded,
 
         @Schema(description = "삭제 가능 여부", example = "false")
-        boolean canDeleted,
+        boolean canDelete,
 
         @Schema(description = "촬영 시각", example = "2025-01-13T14:23:45")
         LocalDateTime captureTime,

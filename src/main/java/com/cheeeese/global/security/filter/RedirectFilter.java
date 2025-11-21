@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class RedirectFilter extends OncePerRequestFilter {
@@ -22,7 +24,8 @@ public class RedirectFilter extends OncePerRequestFilter {
         String redirect = request.getParameter("redirect");
 
         if (redirect != null && !redirect.isBlank()) {
-            Cookie cookie = new Cookie("REDIRECT_URI", redirect);
+            String encodedRedirect = URLEncoder.encode(redirect, StandardCharsets.UTF_8);
+            Cookie cookie = new Cookie("REDIRECT_URI", encodedRedirect);
             cookie.setHttpOnly(true);
             cookie.setPath("/");
             cookie.setMaxAge(300);
