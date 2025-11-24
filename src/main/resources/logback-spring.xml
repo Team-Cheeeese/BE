@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- JSON 형식으로 stdout 출력 -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        {"type":"%X{type:-application}"}
+                    </pattern>
+                </pattern>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>KST</timeZone>
+                </timestamp>
+
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+
+                <message/>
+
+                <!-- MDC (추후 TraceId, UserId 등 삽입 가능) -->
+                <mdc/>
+
+                <stackTrace>
+                    <fieldName>stackTrace</fieldName>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Hibernate SQL 로그도 JSON으로 감싸기 위해 additivity 유지 -->
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="true"/>
+    <logger name="org.hibernate.type.descriptor.sql" level="TRACE" additivity="true"/>
+
+    <root level="INFO">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </root>
+
+</configuration>
