@@ -2,7 +2,6 @@ package com.cheeeese.photo.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
-import com.cheeeese.album.dto.response.AlbumInfoResponse;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.*;

@@ -7,6 +7,9 @@ import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.oauth2.domain.OAuth2UserInfo;
 import com.cheeeese.oauth2.infrastructure.userinfo.KakaoUserInfo;
+import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.infrastructure.mapper.UserMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -84,6 +87,14 @@ public class FixtureFactory {
                 user,
                 album,
                 Role.MAKER
+        );
+    }
+
+    public static Photo createPhoto(User user, Album album, LocalDateTime captureTime) {
+        return PhotoMapper.toEntity(
+                user,
+                album,
+                LocalDateTime.now()
         );
     }
 }
