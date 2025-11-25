@@ -59,6 +59,8 @@ dependencies {
 	implementation 'software.amazon.awssdk:auth:2.25.46'
 	implementation 'software.amazon.awssdk:regions:2.25.46'
 
+	testImplementation 'com.h2database:h2'
+
     // aop
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
@@ -70,4 +72,6 @@ tasks.named('test') {
     useJUnitPlatform {
         excludeTags 'benchmark'
     }
+
+	jvmArgs '-XX:+EnableDynamicAgentLoading'
 }
