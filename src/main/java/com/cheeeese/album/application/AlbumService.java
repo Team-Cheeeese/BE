@@ -1,5 +1,6 @@
 package com.cheeeese.album.application;
 
+import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
@@ -63,6 +64,7 @@ public class AlbumService {
     private final PhotoService photoService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final CdnUrlResolver cdnUrlResolver;
+    private final AlbumReader albumReader;
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
@@ -237,11 +239,9 @@ public class AlbumService {
     @Transactional
     public void leaveUser(User user, String code) {
         Album album = albumValidator.validateAlbumCode(code);
-        albumValidator.validateAlbumParticipant(album, user);
         albumValidator.validateMakerLeaveAllowed(album, user);
 
-        UserAlbum userAlbum = userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
-                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
 
         userAlbum.hide();
     }

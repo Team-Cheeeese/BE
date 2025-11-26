@@ -85,6 +85,7 @@ public class AlbumController implements AlbumSwagger {
         );
     }
 
+    @Override
     @DeleteMapping("/{code}/participants/me")
     public CommonResponse<Void> leaveUser(@CurrentUser User user, @PathVariable String code) {
         albumService.leaveUser(user, code);
