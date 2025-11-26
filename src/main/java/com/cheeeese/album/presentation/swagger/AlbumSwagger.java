@@ -300,7 +300,7 @@ public interface AlbumSwagger {
                     description = "앨범 나가기 성공적으로 실행되었습니다."
             )
     })
-    CommonResponse<Void> leaveUser(
+    CommonResponse<Void> leaveAlbum(
             @CurrentUser User user,
             @PathVariable String code
     );

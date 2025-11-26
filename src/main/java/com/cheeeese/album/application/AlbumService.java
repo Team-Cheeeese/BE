@@ -22,7 +22,6 @@ import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
-import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
@@ -47,7 +46,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -237,7 +235,7 @@ public class AlbumService {
     }
 
     @Transactional
-    public void leaveUser(User user, String code) {
+    public void leaveAlbum(User user, String code) {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateMakerLeaveAllowed(album, user);
 
