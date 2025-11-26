@@ -1,5 +1,6 @@
 package com.cheeeese.album.application;
 
+import com.cheeeese.album.application.logger.AlbumLogger;
 import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
@@ -64,11 +65,11 @@ public class AlbumService {
     private final CdnUrlResolver cdnUrlResolver;
     private final AlbumReader albumReader;
 
+    private final AlbumLogger albumLogger;
+
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
         String code = UuidCreator.getTimeOrdered().toString();
-
-        // long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
 
         albumValidator.validateAlbumCreation(request);
 
@@ -95,6 +96,7 @@ public class AlbumService {
 
         albumExpirationRedisRepository.registerAlbum(album.getId(), expiredAt);
 
+        albumLogger.logAlbumCreated(user.getId(), album.getCode(), request.participant());
         return AlbumMapper.toCreationResponse(album);
     }
 
@@ -125,6 +127,9 @@ public class AlbumService {
         if (existing.isPresent()) {
             UserAlbum userAlbum = existing.get();
 
+            // 재방문 로그
+            albumLogger.logAlbumViewed(currentUser.getId(), album.getCode(), userAlbum.getRole());
+
             if (!userAlbum.isVisible()) {
                 userAlbum.show();
                 return AlbumMapper.toExistingResponse(album, AlbumJoinStatus.REJOINED, makerInfo);
@@ -150,6 +155,9 @@ public class AlbumService {
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
         int remainingUploadSlots = calculateRemainingUploadSlots(album);
+
+        boolean photoExist = album.getCurrentPhotoCount() > 0;
+        albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), photoExist);
 
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
@@ -259,14 +267,6 @@ public class AlbumService {
         int current = album.getCurrentPhotoCount();
         int max = album.getMaxPhotoCount();
         return Math.max(0, max - current);
-    }
-
-    private long countUserAlbumsCreatedThisWeek(User user) {
-        return albumRepository.countByUserAndCreatedAtBetween(
-                user.getId(),
-                LocalDate.now().with(DayOfWeek.MONDAY).atTime(LocalTime.MIN),
-                LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(1).atTime(LocalTime.now())
-        );
     }
 
     private User getMaker(Long makerId) {
