@@ -1,9 +1,10 @@
-# 🧀 치이이즈  : 딱 7일만 열리는 특별한 공유 앨범 서비스
-> 🔗 서비스 링크: https://say-cheese.me
+# 🧀 치이이즈 : 딱 7일만 열리는 특별한 공유 앨범 서비스
+> 🔗 서비스 링크: [https://say-cheese.me](https://say-cheese.me)
 
-![img.png](img.png)
+![웹 썸네일](https://github.com/user-attachments/assets/f5a6c97a-21b9-4dff-a7b7-8c12fe6e27db)
 
 ## 🧑‍🤝‍🧑 Backend Members
+
 |**우다현** |                                                     **주정빈**                                                      |
 | :--------: |:----------------------------------------------------------------------------------------------------------------:|
 | <a href="https://github.com/dahyun24"><img src="https://avatars.githubusercontent.com/u/123882512?v=4" width="150"> | <a href="https://github.com/zyovn"><img src="https://avatars.githubusercontent.com/u/166782961?v=4" width="150"> |
@@ -51,7 +52,7 @@ src
             │   ├── photo                       # 🖼️ 사진 도메인
             │   ├── cheese4cut                  # 🎞️ 치즈네컷 도메인
             │   ├── user                        # 👤 사용자 도메인
-            │   ├── auth                        # 🔐 인증/인가
+            │   ├── auth                        # 🔐 인증 / 인가
             │   └── oauth2                      # 🔑 소셜 로그인(OAuth2)
             │       ├── application             # 서비스 / 유스케이스
             │       ├── domain                  # 엔티티 / 비즈니스 규칙
