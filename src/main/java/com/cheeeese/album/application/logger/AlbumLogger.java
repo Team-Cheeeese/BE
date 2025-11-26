@@ -1,0 +1,57 @@
+package com.cheeeese.album.application.logger;
+
+import com.cheeeese.album.domain.type.Role;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+@Slf4j
+@Component
+public class AlbumLogger {
+
+    private static final String STAT_PREFIX = "[STAT]";
+
+    /**
+     * [지표 1] 앨범 생성
+     * album_created(user_id, album_code, expected_participant, created_at)
+     */
+    public void logAlbumCreated(Long userId, String albumCode, int expectedParticipant) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} album_created | user_id={} album_code={} expected_participant={} created_at={}",
+                    STAT_PREFIX, userId, albumCode, expectedParticipant, LocalDateTime.now());
+        } finally {
+            MDC.remove("type");
+        }
+    }
+
+    /**
+     * [지표 1, 2] 앨범 입장 (신규)
+     * album_joined(user_id, album_code, is_first_join, photo_exist_on_join, joined_at)
+     */
+    public void logAlbumJoined(Long userId, String albumCode, boolean photoExistOnJoin) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} album_joined | user_id={} album_code={} is_first_join=true photo_exist_on_join={} joined_at={}",
+                    STAT_PREFIX, userId, albumCode, photoExistOnJoin, LocalDateTime.now());
+        } finally {
+            MDC.remove("type");
+        }
+    }
+
+    /**
+     * [지표 2, 4] 앨범 재방문 (조회)
+     * album_view_start(user_id, album_code, role, viewed_at)
+     */
+    public void logAlbumViewed(Long userId, String albumCode, Role role) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} album_view_start | user_id={} album_code={} role={} viewed_at={}",
+                    STAT_PREFIX, userId, albumCode, role, LocalDateTime.now());
+        } finally {
+            MDC.remove("type");
+        }
+    }
+}

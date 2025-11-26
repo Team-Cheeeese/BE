@@ -26,12 +26,14 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +41,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -140,6 +143,9 @@ public class Cheese4cutService {
             throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
 
         cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
+
+        log.info("[Cheese4cut] Cheese4cut Finalized | album_id={} maker_id={} photo_ids={} finalized_at={}",
+                album.getId(), user.getId(), request.photoIds(), LocalDateTime.now());
     }
 
     private List<Photo> getOrderedPhotos(List<Long> photoIds) {

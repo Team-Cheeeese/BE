@@ -20,12 +20,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -45,6 +47,8 @@ public class AuthService {
 
         redisUtil.deleteValue("auth:" + code);
 
+        log.info("[AUTH] Token Exchange Success | user_id={}", user.getId());
+
         return AuthMapper.toExchangeResponse(tokens.get("accessToken"), tokens.get("refreshToken"), user);
     }
 
@@ -62,6 +66,7 @@ public class AuthService {
         savedToken.updateRefreshToken(newRefreshToken);
         refreshTokenRepository.save(savedToken);
 
+        log.info("[AUTH] Token Reissue Success | user_id={}", user.getId());
         return AuthMapper.toReissueResponse(newAccessToken, newRefreshToken);
     }
 
@@ -78,6 +83,8 @@ public class AuthService {
         if (expiration <= 0) {
             expiration = 1000;
         }
+
+        log.info("[AUTH] Logout Success | user_id={}", user.getId());
         tokenBlacklistService.addBlackList(accessToken, "logout", Duration.ofMillis(expiration));
     }
 

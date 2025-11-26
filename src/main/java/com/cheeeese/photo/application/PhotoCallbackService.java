@@ -1,6 +1,7 @@
 package com.cheeeese.photo.application;
 
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.photo.application.logger.PhotoLogger;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoCompleteRequest;
@@ -21,6 +22,8 @@ public class PhotoCallbackService {
     private final PhotoQueryService photoQueryService;
     private final AlbumRepository albumRepository;
     private final UserService userService;
+
+    private final PhotoLogger photoLogger;
 
     public void markUploadCompleted(PhotoCompleteRequest request) {
         int updated = photoRepository.updateStatusAndUrl(
@@ -51,6 +54,9 @@ public class PhotoCallbackService {
         userService.incrementPhotoCount(photo.getUser().getId(), 1);
 
         String albumCode = photoRepository.findAlbumCodeByPhotoId(request.photoId());
+
+        photoLogger.logUploadCompleted(photo.getUser().getId(), albumCode, photo.getId());
+
         if (albumCode != null) {
             photoQueryService.invalidatePhotoCache(albumCode);
         }
