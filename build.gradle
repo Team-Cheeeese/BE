@@ -60,6 +60,11 @@ dependencies {
 	implementation 'software.amazon.awssdk:regions:2.25.46'
 
 	testImplementation 'com.h2database:h2'
+    // aop
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+	// monitoring
+	implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
 
 	// prometheus
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
