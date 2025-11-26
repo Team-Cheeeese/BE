@@ -234,6 +234,18 @@ public class AlbumService {
                 .toList();
     }
 
+    @Transactional
+    public void leaveUser(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateAlbumParticipant(album, user);
+        albumValidator.validateMakerLeaveAllowed(album, user);
+
+        UserAlbum userAlbum = userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
+                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
+
+        userAlbum.hide();
+    }
+
     private User extractUser(Authentication authentication) {
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
             return null;

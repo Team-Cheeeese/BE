@@ -84,4 +84,10 @@ public class AlbumController implements AlbumSwagger {
                 albumService.getAlbumBest4Cut(user, code)
         );
     }
+
+    @DeleteMapping("/{code}/participants/me")
+    public CommonResponse<Void> leaveUser(@CurrentUser User user, @PathVariable String code) {
+        albumService.leaveUser(user, code);
+        return CommonResponse.success(ALBUM_LEAVE_SUCCESS);
+    }
 }
