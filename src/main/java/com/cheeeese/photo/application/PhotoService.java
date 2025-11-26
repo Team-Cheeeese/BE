@@ -6,6 +6,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.S3Util;
+import com.cheeeese.photo.application.logger.PhotoLogger;
 import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
@@ -29,6 +30,7 @@ import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,6 +60,8 @@ public class PhotoService {
     private final AlbumReader albumReader;
     private final PresignedUrlService presignedUrlService;
     private final PhotoQueryService photoQueryService;
+
+    private final PhotoLogger photoLogger;
 
     @Value("${ncp.object-storage.bucket}")
     private String bucket;
@@ -87,6 +92,9 @@ public class PhotoService {
 
         List<PhotoPresignedUrlResponse.PresignedUrlInfo> presignedUrls = generatePresignedUrls(user, album, request.fileInfos());
 
+        log.info("[Photo] Photo Upload Request | user_id={} album_code={} file_count={}",
+                user.getId(), request.albumCode(), request.fileInfos().size());
+
         return PhotoMapper.toPresignedUrlResponse(presignedUrls);
     }
 
@@ -116,6 +124,8 @@ public class PhotoService {
                                 () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
                         )
                 );
+
+        photoLogger.logDownload(user.getId(), request.code(), request.photoIds());
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
