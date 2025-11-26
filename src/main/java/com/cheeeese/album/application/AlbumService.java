@@ -71,6 +71,8 @@ public class AlbumService {
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
         String code = UuidCreator.getTimeOrdered().toString();
 
+        // long createdThisWeek = countUserAlbumsCreatedThisWeek(user);
+
         albumValidator.validateAlbumCreation(request);
 
         LocalDateTime expiredAt = LocalDateTime.now().plusDays(7);
@@ -269,7 +271,15 @@ public class AlbumService {
         return Math.max(0, max - current);
     }
 
-    private User getMaker(Long makerId) {
+    private long countUserAlbumsCreatedThisWeek(User user) {
+        return albumRepository.countByUserAndCreatedAtBetween(
+                user.getId(),
+                LocalDate.now().with(DayOfWeek.MONDAY).atTime(LocalTime.MIN),
+                LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(1).atTime(LocalTime.now())
+        );
+    }
+
+        private User getMaker(Long makerId) {
         return userRepository.findById(makerId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
