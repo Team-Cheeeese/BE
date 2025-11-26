@@ -101,7 +101,7 @@ public class PhotoQueryService {
 
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
-        boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAtAfter(
+        boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndUpdatedAtAfter(
                 user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
         );
         boolean canDelete = photo.getUser().getId().equals(user.getId())
