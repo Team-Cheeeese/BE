@@ -43,7 +43,7 @@ public class PhotoInfoService {
 
         List<PhotoLikedUserResponse.PhotoLiker> likers = users.stream()
                 .map(liker -> {
-                    String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
+                    String profileImage = ProfileImageUtil.resolveProfileImage(liker, cdnUrlResolver);
                     boolean isMe = liker.getId().equals(user.getId());
                     Role role = liker.getId().equals(album.getMakerId()) ? Role.MAKER : Role.GUEST;
 
