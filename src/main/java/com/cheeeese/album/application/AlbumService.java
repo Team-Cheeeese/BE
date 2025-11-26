@@ -1,5 +1,6 @@
 package com.cheeeese.album.application;
 
+import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
@@ -21,7 +22,6 @@ import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
-import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
@@ -46,7 +46,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -63,6 +62,7 @@ public class AlbumService {
     private final PhotoService photoService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final CdnUrlResolver cdnUrlResolver;
+    private final AlbumReader albumReader;
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
@@ -232,6 +232,16 @@ public class AlbumService {
                     return AlbumMapper.toBest4CutResponse(photo, thumbnailUrl, isLiked);
                 })
                 .toList();
+    }
+
+    @Transactional
+    public void leaveAlbum(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateMakerLeaveAllowed(album, user);
+
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
+
+        userAlbum.hide();
     }
 
     private User extractUser(Authentication authentication) {

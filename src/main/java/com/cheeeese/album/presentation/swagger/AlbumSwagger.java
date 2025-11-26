@@ -279,4 +279,29 @@ public interface AlbumSwagger {
             @CurrentUser User user,
             @PathVariable String code
     );
+
+    @Operation(
+            summary = "앨범 나가기 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드 (String) \n
+                    
+                    ### 로직 상세
+                    ---
+                    1. MAKER일 경우, 만료된 앨범만 나가기 가능
+                    2. GUEST는 만료 여부 상관없이 나가기 가능
+                    3. 나간 앨범은 마이 페이지에서 보이지 않음
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "앨범 나가기 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<Void> leaveAlbum(
+            @CurrentUser User user,
+            @PathVariable String code
+    );
 }

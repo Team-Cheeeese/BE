@@ -91,6 +91,17 @@ public class AlbumValidator {
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
     }
 
+    public void validateMakerLeaveAllowed(Album album, User user) {
+        if (!album.getMakerId().equals(user.getId())) {
+            return;
+        }
+
+        // Maker일 경우, 만료된 앨범만 나가기 가능
+        if (album.getStatus() != Album.AlbumStatus.EXPIRED) {
+            throw new AlbumException(AlbumErrorCode.MAKER_CANNOT_LEAVE_UNTIL_CLOSED);
+        }
+    }
+
     private void validateAlbumExpiration(Album album) {
         if (album.isExpired()) {
             throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
