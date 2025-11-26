@@ -23,7 +23,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class PhotoInfoService {
 
-    private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoReader photoReader;
     private final AlbumValidator albumValidator;
