@@ -118,9 +118,10 @@ public class PhotoQueryService {
 
         List<PhotoListResponse> responses = photos.getContent().stream()
                 .map(photo -> {
+                    String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
                     String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
                     String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
-                    return PhotoMapper.toPhotoListResponse(photo, imageUrl, thumbnailUrl, false, false);
+                    return PhotoMapper.toPhotoListResponse(photo, profileImage, imageUrl, thumbnailUrl, false, false);
                 })
                 .toList();
 
