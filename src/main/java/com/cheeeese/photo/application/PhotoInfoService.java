@@ -3,6 +3,7 @@ package com.cheeeese.photo.application;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
+import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.domain.Photo;
@@ -42,12 +43,11 @@ public class PhotoInfoService {
 
         List<PhotoLikedUserResponse.PhotoLiker> likers = users.stream()
                 .map(liker -> {
-                    ProfileImageType type = ProfileImageType.fromName(liker.getProfileImage());
-                    String profileImageUrl = cdnUrlResolver.resolveProfile(type.getPath());
+                    String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
                     boolean isMe = liker.getId().equals(user.getId());
                     Role role = liker.getId().equals(album.getMakerId()) ? Role.MAKER : Role.GUEST;
 
-                    return PhotoMapper.toPhotoLiker(liker, profileImageUrl, isMe, role);
+                    return PhotoMapper.toPhotoLiker(liker, profileImage, isMe, role);
                 })
                 .toList();
 
