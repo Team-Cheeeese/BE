@@ -23,6 +23,7 @@ public record PhotoListResponse(
         @Schema(description = "사진 ID", example = "1")
         Long photoId,
 
+        @Schema(description = "업로더 프로필 이미지", example = "example.jpg")
         String profileImage,
 
         @Schema(description = "사진 원본 url", example = "example.jpg")
