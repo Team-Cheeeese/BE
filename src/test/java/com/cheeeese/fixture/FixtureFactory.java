@@ -98,7 +98,7 @@ public class FixtureFactory {
         return PhotoMapper.toEntity(
                 user,
                 album,
-                LocalDateTime.now()
+                captureTime
         );
     }
 

@@ -56,12 +56,12 @@ public class PhotoQueryServiceIntegrationTest {
     @Autowired
     private PhotoInfoService photoInfoService;
 
-    private static User testUser;
-    private static Album testAlbum;
-    private static UserAlbum testUserAlbum;
-    private static Photo testPhoto;
-    private static PhotoHistory testPhotoHistory;
-    private static PhotoLikes testPhotoLikes;
+    private User testUser;
+    private Album testAlbum;
+    private UserAlbum testUserAlbum;
+    private Photo testPhoto;
+    private PhotoHistory testPhotoHistory;
+    private PhotoLikes testPhotoLikes;
 
     @BeforeEach
     void setUp() {
