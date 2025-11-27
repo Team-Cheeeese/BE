@@ -1,6 +1,8 @@
 package com.cheeeese.album;
 
 import com.cheeeese.album.application.AlbumService;
+import com.cheeeese.album.application.logger.AlbumLogger;
+import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.UserAlbum;
@@ -54,6 +56,8 @@ class AlbumServiceTest {
     @Mock private PhotoService photoService;
     @Mock private AlbumExpirationRedisRepository albumExpirationRedisRepository;
     @Mock private CdnUrlResolver cdnUrlResolver;
+    @Mock private AlbumReader albumReader;
+    @Mock private AlbumLogger albumLogger;
 
     @BeforeEach
     void setUp() {
@@ -67,7 +71,9 @@ class AlbumServiceTest {
                 photoLikesRepository,
                 photoService,
                 albumExpirationRedisRepository,
-                cdnUrlResolver
+                cdnUrlResolver,
+                albumReader,
+                albumLogger
         );
     }
 

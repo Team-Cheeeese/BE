@@ -7,6 +7,13 @@ import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.oauth2.domain.OAuth2UserInfo;
 import com.cheeeese.oauth2.infrastructure.userinfo.KakaoUserInfo;
+import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoHistory;
+import com.cheeeese.photo.domain.PhotoLikes;
+import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.infrastructure.mapper.PhotoHistoryMapper;
+import com.cheeeese.photo.infrastructure.mapper.PhotoLikesMapper;
+import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.infrastructure.mapper.UserMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -84,6 +91,39 @@ public class FixtureFactory {
                 user,
                 album,
                 Role.MAKER
+        );
+    }
+
+    public static Photo createPhoto(User user, Album album, LocalDateTime captureTime) {
+        return PhotoMapper.toEntity(
+                user,
+                album,
+                captureTime
+        );
+    }
+
+    public static Photo createCompletedPhoto(User user, Album album, LocalDateTime now) {
+        return Photo.builder()
+                .user(user)
+                .album(album)
+                .imageUrl(null)
+                .thumbnailUrl(null)
+                .captureTime(now)
+                .status(PhotoStatus.COMPLETED)
+                .build();
+    }
+
+    public static PhotoHistory createPhotoHistory(User user, Photo photo) {
+        return PhotoHistoryMapper.toEntity(
+                user,
+                photo
+        );
+    }
+
+    public static PhotoLikes createPhotoLikes(User user, Photo photo) {
+        return PhotoLikesMapper.toEntity(
+                user,
+                photo
         );
     }
 }
