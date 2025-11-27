@@ -13,7 +13,7 @@ import java.util.Set;
 public interface PhotoHistoryRepository extends JpaRepository<PhotoHistory, Long> {
     boolean existsByUserIdAndPhotoId(Long userId, Long photoId);
 
-    boolean existsByUserIdAndPhotoIdAndCreatedAtAfter(Long userId, Long photoId, LocalDateTime createdAt);
+    boolean existsByUserIdAndPhotoIdAndUpdatedAtAfter(Long userId, Long photoId, LocalDateTime updatedAt);
 
     @Query("""
         SELECT ph.photo.id
@@ -28,7 +28,7 @@ public interface PhotoHistoryRepository extends JpaRepository<PhotoHistory, Long
         FROM PhotoHistory ph
         WHERE ph.user.id = :userId
         AND ph.photo.id IN :photoIds
-        AND ph.createdAt >= :threshold
+        AND ph.updatedAt >= :threshold
     """)
     Set<Long> findRecentlyDownloadedPhotoIds(
             @Param("userId") Long userId,

@@ -45,7 +45,8 @@ public class SecurityConfig {
             "/internal/thumbnail/complete",
             "/v1/user/profile-images",
             "/v1/album/*/info",
-            "/v1/album/*/available-count"
+            "/v1/album/*/available-count",
+            "/actuator/**"
     };
 
     @Bean

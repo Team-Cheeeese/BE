@@ -1,5 +1,7 @@
 package com.cheeeese.album.application;
 
+import com.cheeeese.album.application.logger.AlbumLogger;
+import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
@@ -21,7 +23,6 @@ import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
-import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
@@ -46,7 +47,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -63,6 +63,9 @@ public class AlbumService {
     private final PhotoService photoService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final CdnUrlResolver cdnUrlResolver;
+    private final AlbumReader albumReader;
+
+    private final AlbumLogger albumLogger;
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
@@ -95,6 +98,7 @@ public class AlbumService {
 
         albumExpirationRedisRepository.registerAlbum(album.getId(), expiredAt);
 
+        albumLogger.logAlbumCreated(user.getId(), album.getCode(), request.participant());
         return AlbumMapper.toCreationResponse(album);
     }
 
@@ -125,6 +129,9 @@ public class AlbumService {
         if (existing.isPresent()) {
             UserAlbum userAlbum = existing.get();
 
+            // 재방문 로그
+            albumLogger.logAlbumViewed(currentUser.getId(), album.getCode(), userAlbum.getRole());
+
             if (!userAlbum.isVisible()) {
                 userAlbum.show();
                 return AlbumMapper.toExistingResponse(album, AlbumJoinStatus.REJOINED, makerInfo);
@@ -150,6 +157,9 @@ public class AlbumService {
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
         int remainingUploadSlots = calculateRemainingUploadSlots(album);
+
+        boolean photoExist = album.getCurrentPhotoCount() > 0;
+        albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), photoExist);
 
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
@@ -234,6 +244,16 @@ public class AlbumService {
                 .toList();
     }
 
+    @Transactional
+    public void leaveAlbum(User user, String code) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateMakerLeaveAllowed(album, user);
+
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
+
+        userAlbum.hide();
+    }
+
     private User extractUser(Authentication authentication) {
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
             return null;
@@ -259,7 +279,7 @@ public class AlbumService {
         );
     }
 
-    private User getMaker(Long makerId) {
+        private User getMaker(Long makerId) {
         return userRepository.findById(makerId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }

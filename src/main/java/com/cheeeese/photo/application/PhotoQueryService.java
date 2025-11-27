@@ -101,7 +101,7 @@ public class PhotoQueryService {
 
         boolean isLiked = photoLikesRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
         boolean isDownloaded = photoHistoryRepository.existsByUserIdAndPhotoId(user.getId(), photo.getId());
-        boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndCreatedAtAfter(
+        boolean isRecentlyDownloaded = photoHistoryRepository.existsByUserIdAndPhotoIdAndUpdatedAtAfter(
                 user.getId(), photo.getId(), LocalDateTime.now().minusHours(1)
         );
         boolean canDelete = photo.getUser().getId().equals(user.getId())
@@ -118,9 +118,10 @@ public class PhotoQueryService {
 
         List<PhotoListResponse> responses = photos.getContent().stream()
                 .map(photo -> {
+                    String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
                     String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
                     String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
-                    return PhotoMapper.toPhotoListResponse(photo, imageUrl, thumbnailUrl, false, false);
+                    return PhotoMapper.toPhotoListResponse(photo, profileImage, imageUrl, thumbnailUrl, false, false);
                 })
                 .toList();
 
