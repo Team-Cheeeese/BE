@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +57,7 @@ class PhotoServiceTest {
         Album album = Album.builder().makerId(1L).maxPhotoCount(100).build();
 
         PhotoPresignedUrlRequest.FileInfo fileInfo =
-                new PhotoPresignedUrlRequest.FileInfo("test.jpg", 1000L, "image/jpeg");
+                new PhotoPresignedUrlRequest.FileInfo("1.jpg", LocalDateTime.now(), 3000000, "image/jpeg");
         PhotoPresignedUrlRequest request =
                 new PhotoPresignedUrlRequest(code, List.of(fileInfo));
 
@@ -98,8 +99,8 @@ class PhotoServiceTest {
         given(photoRepository.countActivePhotosByAlbumId(eq(1L), anyList())).willReturn(99L);
 
         PhotoPresignedUrlRequest request = new PhotoPresignedUrlRequest(code, List.of(
-                new PhotoPresignedUrlRequest.FileInfo("1.jpg", 100L, "image/jpeg"),
-                new PhotoPresignedUrlRequest.FileInfo("2.jpg", 100L, "image/jpeg")
+                new PhotoPresignedUrlRequest.FileInfo("1.jpg", LocalDateTime.now(), 3000000, "image/jpeg"),
+                new PhotoPresignedUrlRequest.FileInfo("2.jpg", LocalDateTime.now(), 3000000, "image/jpeg")
         ));
 
         // Validator가 예외를 던지도록 설정 (Spy나 실제 객체 사용 시에는 로직에 따라 발생, 여기선 Mock의 행동 정의)
