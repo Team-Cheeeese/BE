@@ -65,6 +65,7 @@ public class PhotoMapper {
 
     public static PhotoListResponse toPhotoListResponse(
             Photo photo,
+            String profileImage,
             String imageUrl,
             String thumbnailUrl,
             boolean isLiked,
@@ -73,6 +74,7 @@ public class PhotoMapper {
         return PhotoListResponse.builder()
                 .name(photo.getUser().getName())
                 .photoId(photo.getId())
+                .profileImage(profileImage)
                 .imageUrl(imageUrl)
                 .thumbnailUrl(thumbnailUrl)
                 .likeCnt(photo.getLikesCnt())
