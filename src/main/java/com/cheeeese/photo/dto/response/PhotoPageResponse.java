@@ -27,7 +27,7 @@ public record PhotoPageResponse(
                             "profileImage": "https://say-cheese-profile.edge...",
                             "imageUrl": "https://cdn.cheeeese.me/original.jpg",
                             "thumbnailUrl": "https://cdn.cheeeese.me/thumb1.jpg",
-                            "likesCnt": 1,
+                            "likeCnt": 1,
                             "isLiked": true,
                             "isDownloaded": false,
                             "isRecentlyDownloaded": false
