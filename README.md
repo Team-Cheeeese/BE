@@ -47,22 +47,21 @@ src
 └── main
     └── java
         └── com.cheeeese
-            ├── domain                          # 🧩 도메인 전체 (Bounded Context 모음)
-            │   ├── album                       # 📸 앨범 도메인
-            │   ├── photo                       # 🖼️ 사진 도메인
-            │   ├── cheese4cut                  # 🎞️ 치즈네컷 도메인
-            │   ├── user                        # 👤 사용자 도메인
-            │   ├── auth                        # 🔐 인증 / 인가
-            │   └── oauth2                      # 🔑 소셜 로그인(OAuth2)
-            │       ├── application             # 서비스 / 유스케이스
-            │       ├── domain                  # 엔티티 / 비즈니스 규칙
-            │       ├── dto                     # 요청·응답 DTO
-            │       ├── exception               # 도메인 전용 예외
-            │       ├── infrastructure          # JPA / 외부 연동
-            │       └── presentation            # 컨트롤러 / API
+            ├── album                       # 📸 앨범 도메인
+            ├── photo                       # 🖼️ 사진 도메인
+            ├── cheese4cut                  # 🎞️ 치즈네컷 도메인
+            ├── user                        # 👤 사용자 도메인
+            ├── auth                        # 🔐 인증 / 인가
+            ├── oauth2                      # 🔑 소셜 로그인(OAuth2)
+            │   ├── application             # 서비스 / 유스케이스
+            │   ├── domain                  # 엔티티 / 비즈니스 규칙
+            │   ├── dto                     # 요청·응답 DTO
+            │   ├── exception               # 예외
+            │   ├── infrastructure          # JPA / 외부 연동
+            │   └── presentation            # 컨트롤러 / API
             │
-            ├── global                           # 🌍 전역 설정 / 유틸 / AOP / 공통 예외
-            └── CheeeeseApplication.java         # 🚀 Spring Boot 메인 실행 파일
+            ├── global                      # 🌍 전역 설정 / 유틸 / AOP / 공통 예외
+            └── CheeeeseApplication.java    # 🚀 메인 실행 파일
 ```
 
 
