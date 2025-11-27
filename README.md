@@ -5,16 +5,16 @@
 
 ## 🧑‍🤝‍🧑 Backend Members
 
-|**우다현** |                                                     **주정빈**                                                      |
-| :--------: |:----------------------------------------------------------------------------------------------------------------:|
+|**우다현** | **주정빈** |
+| :--------: |:----------:|
 | <a href="https://github.com/dahyun24"><img src="https://avatars.githubusercontent.com/u/123882512?v=4" width="150"> | <a href="https://github.com/zyovn"><img src="https://avatars.githubusercontent.com/u/166782961?v=4" width="150"> |
-| `backend` |                                                    `backend`                                                     |
+| `backend` | `backend` |
 
 ## 📜 API 명세서
 [[Swagger] 🧀 치이이즈 API 명세서](https://dev.say-cheese.me/swagger-ui/index.html#/)
 
 ## 🗃️ ERD
-<img width="1680" height="862" alt="Cheeeese (2)" src="https://github.com/user-attachments/assets/a523f9d5-a40e-44bf-8d5a-64b072469454" />
+<img width="1730" height="912" alt="Cheeeese (1)" src="https://github.com/user-attachments/assets/f612d679-78ac-4a92-8b2b-6a81bba19e55" />
 
 ## 🏛️ System Architecture
 <img width="3812" height="2232" alt="image" src="https://github.com/user-attachments/assets/2f90fde1-3a95-4ed9-8720-009bd289c829" />
