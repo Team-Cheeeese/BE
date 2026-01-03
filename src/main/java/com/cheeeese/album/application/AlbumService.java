@@ -274,8 +274,8 @@ public class AlbumService {
     private long countUserAlbumsCreatedThisWeek(User user) {
         return albumRepository.countByUserAndCreatedAtBetween(
                 user.getId(),
-                LocalDate.now().with(DayOfWeek.MONDAY).atTime(LocalTime.MIN),
-                LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(1).atTime(LocalTime.now())
+                LocalDateTime.now().minusDays(7),
+                LocalDateTime.now()
         );
     }
 
