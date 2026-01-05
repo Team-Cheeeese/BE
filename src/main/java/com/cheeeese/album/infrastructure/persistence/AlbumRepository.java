@@ -49,4 +49,5 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Query("SELECT a FROM Album a WHERE a.id = :id")
     Album findByIdForUpdate(@Param("id") Long id);
 
+    boolean existsByMakerId(Long makerId);
 }

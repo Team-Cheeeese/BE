@@ -64,7 +64,6 @@ public class AlbumService {
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final CdnUrlResolver cdnUrlResolver;
     private final AlbumReader albumReader;
-
     private final AlbumLogger albumLogger;
 
     @Transactional
@@ -87,6 +86,8 @@ public class AlbumService {
                 true,
                 expiredAt
         );
+        boolean isFirst = !albumRepository.existsByMakerId(user.getId());
+
         albumRepository.save(album);
 
         userAlbumRepository.save(UserAlbumMapper.toEntity(
@@ -99,7 +100,8 @@ public class AlbumService {
         albumExpirationRedisRepository.registerAlbum(album.getId(), expiredAt);
 
         albumLogger.logAlbumCreated(user.getId(), album.getCode(), request.participant());
-        return AlbumMapper.toCreationResponse(album);
+
+        return AlbumMapper.toCreationResponse(album, isFirst);
     }
 
     public AlbumInvitationResponse getInvitationInfo(String code) {

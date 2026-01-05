@@ -45,11 +45,13 @@ public class AlbumMapper {
     /**
      * Album 생성 후, UUID Code 발급
      */
-    public static AlbumCreationResponse toCreationResponse(Album album) {
+    public static AlbumCreationResponse toCreationResponse(Album album, boolean isFirst) {
         return AlbumCreationResponse.builder()
                 .themeEmoji(album.getThemeEmoji())
                 .title(album.getTitle())
                 .eventDate(album.getEventDate())
+                .createdAt(album.getCreatedAt())
+                .isFirst(isFirst)
                 .currentPhotoCnt(album.getCurrentPhotoCount())
                 .code(album.getCode())
                 .build();
