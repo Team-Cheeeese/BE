@@ -50,4 +50,12 @@ public class UserAlbum extends BaseEntity {
     public void show() {
         this.isVisible = true;
     }
+
+    public void blacklist() {
+        this.role = Role.BLACK;
+    }
+
+    public boolean isBlacklisted() {
+        return this.role == Role.BLACK;
+    }
 }

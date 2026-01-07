@@ -166,6 +166,19 @@ public class AlbumService {
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
 
+    @Transactional
+    public void blacklistUser(User user, String code, Long targetUserId) {
+        Album album = albumValidator.validateAlbumCode(code);
+
+        UserAlbum requesterAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
+
+        albumValidator.validateBlacklistPermission(requesterAlbum);
+
+        UserAlbum targetAlbum = albumReader.getAlbumParticipant(targetUserId, album.getId());
+
+        targetAlbum.blacklist();
+    }
+
     public UploadAvailableCountResponse getAvailablePhotoCount(String code) {
         Album album = albumValidator.validateAlbumCode(code);
 
@@ -179,7 +192,6 @@ public class AlbumService {
     }
 
     public AlbumParticipantResponse getAlbumParticipantList(Authentication authentication, String code) {
-
         User currentUser = extractUser(authentication);
 
         Album album = albumValidator.validateAlbumCode(code);
@@ -251,7 +263,7 @@ public class AlbumService {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateMakerLeaveAllowed(album, user);
 
-        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
 
         userAlbum.hide();
     }

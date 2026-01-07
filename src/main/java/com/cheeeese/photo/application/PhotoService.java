@@ -186,7 +186,7 @@ public class PhotoService {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateAlbumEntry(album, user);
 
-        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
 
         Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 

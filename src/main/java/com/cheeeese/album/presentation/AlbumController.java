@@ -11,6 +11,7 @@ import com.cheeeese.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +48,16 @@ public class AlbumController implements AlbumSwagger {
     ) {
         AlbumEnterResponse response = albumService.enterAlbum(code, user);
         return CommonResponse.success(ALBUM_ENTER_SUCCESS, response);
+    }
+
+    @PostMapping("/{code}/blacklist/{targetUserId}")
+    public CommonResponse<Void> blacklistAlbum(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @PathVariable Long targetUserId
+    ) {
+        albumService.blacklistUser(user, code, targetUserId);
+        return CommonResponse.success(ALBUM_ENTER_SUCCESS);
     }
 
     @Override
