@@ -12,7 +12,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ObjectStorageService {
+public class ObjectStorageDeleteUtil {
 
     private final S3Client s3Client;
 
