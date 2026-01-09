@@ -226,7 +226,7 @@ public class AlbumService {
         }
 
         // 앨범의 전체 참여자 목록
-        List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumId(album.getId());
+        List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumIdExcludeBlack(album.getId(), Role.BLACK);
 
         List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUserId);
 
