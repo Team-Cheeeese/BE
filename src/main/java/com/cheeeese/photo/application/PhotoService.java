@@ -192,14 +192,7 @@ public class PhotoService {
 
         photoValidator.validateDeletePermission(user, userAlbum, album, photo);
 
-        int updatedRows = albumRepository.decrementPhotoCount(album.getId(), 1);
-        if (updatedRows == 0) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
-        }
-
-        userService.decrementPhotoCount(photo.getUser().getId(), 1);
-
-        userRepository.decrementLikeCntBy(photo.getUser().getId(), photo.getLikesCnt());
+        userService.onPhotoDeleted(user.getId(), album.getId());
 
         photoLikesRepository.deleteAllByPhotoId(photo.getId());
 

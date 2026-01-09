@@ -89,6 +89,14 @@ public class UserService {
     }
 
     @Transactional
+    public void onPhotoDeleted(Long userId, Long albumId) {
+        int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
+
+        decrementPhotoCount(userId, 1);
+        decrementLikeCount(userId, likeCnt);
+    }
+
+    @Transactional
     public void incrementPhotoCount(Long userId, int count) {
         int updated = userRepository.incrementPhotoCount(userId, count);
         if (updated != 1) {
