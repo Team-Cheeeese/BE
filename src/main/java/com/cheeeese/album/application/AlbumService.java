@@ -162,7 +162,7 @@ public class AlbumService {
 
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
-        int remainingUploadSlots = calculateRemainingUploadSlots(album);
+        int remainingUploadSlots = album.getRemainingUploadSlots();
 
         boolean photoExist = album.getCurrentPhotoCount() > 0;
         albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), photoExist);
@@ -195,85 +195,6 @@ public class AlbumService {
         photoQueryService.invalidatePhotoCache(album.getCode());
     }
 
-    public UploadAvailableCountResponse getAvailablePhotoCount(String code) {
-        Album album = albumValidator.validateAlbumCode(code);
-
-        int availableCount = calculateRemainingUploadSlots(album);
-
-        return AlbumMapper.toAvailableCountResponse(
-                availableCount,
-                album.getMaxPhotoCount(),
-                album.getCurrentPhotoCount()
-        );
-    }
-
-    public AlbumParticipantResponse getAlbumParticipantList(Authentication authentication, String code) {
-        User currentUser = extractUser(authentication);
-
-        Album album = albumValidator.validateAlbumCode(code);
-
-        boolean isExpired = album.isExpired();
-
-        Role myRole = null;
-        Long currentUserId = currentUser != null ? currentUser.getId() : null;
-
-        if (currentUserId != null) {
-            Optional<UserAlbum> myUserAlbumOptional = userAlbumRepository.findByUserIdAndAlbumId(currentUserId, album.getId());
-
-            if (myUserAlbumOptional.isPresent()) {
-                myRole = myUserAlbumOptional.get().getRole();
-            }
-        }
-
-        // 앨범의 전체 참여자 목록
-        List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumIdExcludeBlack(album.getId(), Role.BLACK);
-
-        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUserId);
-
-        return UserAlbumMapper.toAlbumParticipantResponse(
-                album,
-                isExpired,
-                myRole,
-                participantInfos
-        );
-    }
-
-    public AlbumInfoResponse getAlbumInfo(String code) {
-        Album album = albumValidator.validateAlbumCode(code);
-
-        User maker = userAlbumRepository.findMakerByAlbumId(album.getId(), Role.MAKER)
-                .map(UserAlbum::getUser)
-                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_MAKER));
-
-        return AlbumMapper.toAlbumInfoResponse(album, maker);
-    }
-
-    public List<AlbumBest4CutResponse> getAlbumBest4Cut(User user, String code) {
-        Album album = albumValidator.validateAlbumCode(code);
-
-        albumValidator.validateAlbumParticipant(album, user);
-
-        List<Photo> topPhotos = photoRepository.findTop4CompletedPhotosByLikes(
-                album.getId(),
-                PhotoStatus.COMPLETED,
-                PageRequest.of(0, 4)
-        );
-
-        List<Long> photoIds = topPhotos.stream()
-                .map(Photo::getId)
-                .toList();
-
-        Set<Long> likedPhotoIds = photoLikesRepository.findAllLikedPhotoIds(user.getId(), photoIds);
-
-        return topPhotos.stream()
-                .map(photo -> {
-                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
-                    boolean isLiked = likedPhotoIds.contains(photo.getId());
-                    return AlbumMapper.toBest4CutResponse(photo, thumbnailUrl, isLiked);
-                })
-                .toList();
-    }
-
     @Transactional
     public void leaveAlbum(User user, String code) {
         Album album = albumValidator.validateAlbumCode(code);
@@ -282,23 +203,6 @@ public class AlbumService {
         UserAlbum userAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
 
         userAlbum.hide();
-    }
-
-    private User extractUser(Authentication authentication) {
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            return null;
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomUserDetails customUserDetails) {
-            return customUserDetails.getUser();
-        }
-        return null;
-    }
-
-    private int calculateRemainingUploadSlots(Album album) {
-        int current = album.getCurrentPhotoCount();
-        int max = album.getMaxPhotoCount();
-        return Math.max(0, max - current);
     }
 
     private long countUserAlbumsCreatedThisWeek(User user) {
@@ -337,28 +241,6 @@ public class AlbumService {
                     );
                     return AlbumMapper.toRecentPhotoResponse(photo, profileUrl);
                 })
-                .toList();
-    }
-
-    private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
-            List<UserAlbum> userAlbums,
-            Long currentUserId
-    ) {
-        return userAlbums.stream()
-                .map(userAlbum -> {
-                    User user = userAlbum.getUser();
-                    Role role = userAlbum.getRole();
-                    ProfileImageType type = ProfileImageType.fromName(user.getProfileImage());
-                    String profileImageUrl = cdnUrlResolver.resolveProfile(type.getPath());
-                    boolean isMe = currentUserId != null && user.getId().equals(currentUserId);
-
-                    return UserAlbumMapper.toParticipantInfo(user, profileImageUrl, role, isMe);
-                })
-                .sorted(Comparator
-                        .comparing(AlbumParticipantListResponse.ParticipantInfo::isMe, Comparator.reverseOrder())
-                        .thenComparing(p -> p.role() == Role.MAKER ? 0 : 1)
-                        .thenComparing(AlbumParticipantListResponse.ParticipantInfo::name)
-                )
                 .toList();
     }
 }
