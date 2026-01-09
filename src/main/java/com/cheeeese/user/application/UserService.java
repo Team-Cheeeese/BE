@@ -2,6 +2,8 @@ package com.cheeeese.user.application;
 
 import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
+import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
+import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.validator.UserValidator;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.domain.type.ProfileImageType;
@@ -28,6 +30,8 @@ public class UserService {
 
     private final UserValidator userValidator;
     private final UserRepository userRepository;
+    private final PhotoRepository photoRepository;
+    private final PhotoLikesRepository photoLikesRepository;
     private final CdnUrlResolver cdnUrlResolver;
 
     @Transactional
@@ -75,6 +79,16 @@ public class UserService {
     }
 
     @Transactional
+    public void onAlbumUserBlacklisted(Long userId, Long albumId) {
+        int photoCnt = photoRepository.countByAlbumIdAndUserId(albumId, userId);
+        int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
+
+        decrementAlbumCount(userId);
+        decrementPhotoCount(userId, photoCnt);
+        decrementLikeCount(userId, likeCnt);
+    }
+
+    @Transactional
     public void incrementPhotoCount(Long userId, int count) {
         int updated = userRepository.incrementPhotoCount(userId, count);
         if (updated != 1) {
@@ -85,6 +99,20 @@ public class UserService {
     @Transactional
     public void decrementPhotoCount(Long userId, int count) {
         int updated = userRepository.decrementPhotoCount(userId, count);
+        if (updated != 1) {
+            throw new UserException(UserErrorCode.USER_PHOTO_COUNT_DECREMENT_FAILED);
+        }
+    }
+
+    private void decrementAlbumCount(Long userId) {
+        int updated = userRepository.decrementAlbumCnt(userId);
+        if (updated != 1) {
+            throw new UserException(UserErrorCode.USER_PHOTO_COUNT_DECREMENT_FAILED);
+        }
+    }
+
+    private void decrementLikeCount(Long userId, int count) {
+        int updated = userRepository.decrementLikeCntBy(userId, count);
         if (updated != 1) {
             throw new UserException(UserErrorCode.USER_PHOTO_COUNT_DECREMENT_FAILED);
         }

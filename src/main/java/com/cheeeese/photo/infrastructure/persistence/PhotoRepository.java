@@ -189,4 +189,24 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
             @Param("expectedStatus") PhotoStatus expectedStatus,
             @Param("threshold") LocalDateTime threshold
     );
+
+    int countByAlbumIdAndUserId(Long albumId, Long userId);
+
+    @Query("""
+        SELECT p.id
+        FROM Photo p
+        WHERE p.album.id = :albumId
+        AND p.user.id = :userId
+    """)
+    List<Long> findIdsByAlbumIdAndUserId(
+            @Param("albumId") Long albumId,
+            @Param("userId") Long userId
+    );
+
+    @Modifying
+    @Query("""
+        DELETE FROM Photo p
+        WHERE p.id IN :photoIds
+    """)
+    void deleteAllByIds(@Param("photoIds") List<Long> photoIds);
 }

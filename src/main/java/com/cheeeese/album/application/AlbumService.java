@@ -17,6 +17,7 @@ import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
+import com.cheeeese.photo.application.PhotoQueryService;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
@@ -25,6 +26,7 @@ import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.domain.type.ProfileImageType;
 import com.cheeeese.user.exception.UserException;
@@ -60,7 +62,9 @@ public class AlbumService {
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
+    private final UserService userService;
     private final PhotoService photoService;
+    private final PhotoQueryService photoQueryService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final CdnUrlResolver cdnUrlResolver;
     private final AlbumReader albumReader;
@@ -177,6 +181,18 @@ public class AlbumService {
         UserAlbum targetAlbum = albumReader.getAlbumParticipant(targetUserId, album.getId());
 
         targetAlbum.blacklist();
+
+        List<Long> photoIds = photoRepository.findIdsByAlbumIdAndUserId(
+                album.getId(), targetUserId
+        );
+
+        if (!photoIds.isEmpty()) {
+            photoLikesRepository.deleteAllByPhotoIds(photoIds);
+            photoRepository.deleteAllByIds(photoIds);
+        }
+        userService.onAlbumUserBlacklisted(targetUserId, album.getId());
+
+        photoQueryService.invalidatePhotoCache(album.getCode());
     }
 
     public UploadAvailableCountResponse getAvailablePhotoCount(String code) {
