@@ -55,7 +55,7 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
     @Modifying
     @Query("""
         DELETE FROM PhotoLikes pl
-        WHERE pl.id IN :photoIds
+        WHERE pl.photo.id IN :photoIds
     """)
     void deleteAllByPhotoIds(@Param("photoIds") List<Long> photoIds);
 }

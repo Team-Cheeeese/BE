@@ -192,7 +192,7 @@ public class PhotoService {
 
         photoValidator.validateDeletePermission(user, userAlbum, album, photo);
 
-        userService.onPhotoDeleted(user.getId(), album.getId());
+        userService.onPhotoDeleted(photo.getUser().getId(), album.getId());
 
         photoLikesRepository.deleteAllByPhotoId(photo.getId());
 

@@ -175,9 +175,9 @@ public class AlbumService {
 
         UserStatsImpact impact = removeUserFromAlbum(album.getId(), targetUserId);
 
-        userService.onAlbumUserBlacklisted(targetUserId, impact.photoCnt(), impact.likeCnt());
+        userService.onAlbumUserBlacklisted(targetUserId, impact.photoCnt(), impact.likesCnt());
 
-        albumRepository.decrementParticipantCount(album.getId());
+        onAlbumUserBlacklisted(album.getId(), impact.photoCnt());
 
         photoQueryService.invalidatePhotoCache(album.getCode());
     }
@@ -243,5 +243,10 @@ public class AlbumService {
             photoRepository.deleteAllByIds(photoIds);
         }
         return UserStatsImpact.of(photoCnt, likeCnt);
+    }
+
+    private void onAlbumUserBlacklisted(Long albumId, int photoCnt) {
+        albumRepository.decrementPhotoCount(albumId, photoCnt);
+        albumRepository.decrementParticipantCount(albumId);
     }
 }

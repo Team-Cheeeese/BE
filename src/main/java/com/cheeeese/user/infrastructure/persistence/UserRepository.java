@@ -32,6 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         UPDATE User u
         SET u.albumCnt = u.albumCnt - 1
         WHERE u.id = :userId
+        AND u.albumCnt > 0
     """)
     int decrementAlbumCnt(@Param("userId") Long userId);
 

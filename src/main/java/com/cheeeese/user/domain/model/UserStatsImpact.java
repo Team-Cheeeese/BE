@@ -5,12 +5,12 @@ import lombok.Builder;
 @Builder
 public record UserStatsImpact(
         int photoCnt,
-        int likeCnt
+        int likesCnt
 ) {
-    public static UserStatsImpact of(int photoCnt, int likeCnt) {
+    public static UserStatsImpact of(int photoCnt, int likesCnt) {
         return UserStatsImpact.builder()
                 .photoCnt(photoCnt)
-                .likeCnt(likeCnt)
+                .likesCnt(likesCnt)
                 .build();
     }
 }
