@@ -23,6 +23,7 @@ public enum AlbumErrorCode implements BaseCode {
     USER_NOT_PARTICIPANT(HttpStatus.FORBIDDEN, "사용자는 해당 앨범의 참가자가 아닙니다."),
     USER_NOT_MAKER(HttpStatus.FORBIDDEN, "해당 사용자는 MAKER가 아닙니다."),
     MAKER_CANNOT_LEAVE_UNTIL_CLOSED(HttpStatus.BAD_REQUEST, "앨범 메이커는 앨범이 닫힌 상태에서만 나갈 수 있습니다."),
+    USER_CANNOT_BLACKLIST_SELF(HttpStatus.BAD_REQUEST, "본인은 블랙 리스트할 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

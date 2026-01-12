@@ -165,6 +165,7 @@ public class AlbumService {
         UserAlbum requesterAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
 
         albumValidator.validateBlacklistPermission(requesterAlbum);
+        albumValidator.validateBlacklistTarget(user, targetUserId);
 
         UserAlbum targetAlbum = albumReader.getAlbumParticipant(targetUserId, album.getId());
 
