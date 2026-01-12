@@ -25,6 +25,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.domain.model.UserStatsImpact;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
@@ -169,22 +170,11 @@ public class AlbumService {
 
         UserAlbum targetAlbum = albumReader.getAlbumParticipant(targetUserId, album.getId());
 
-        targetAlbum.hide();
         targetAlbum.blacklist();
 
-        // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
-        int photoCnt = photoRepository.countByAlbumIdAndUserId(album.getId(), targetUserId);
-        int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(album.getId(), targetUserId);
+        UserStatsImpact impact = removeUserFromAlbum(album.getId(), targetUserId);
 
-        List<Long> photoIds = photoRepository.findIdsByAlbumIdAndUserId(
-                album.getId(), targetUserId
-        );
-
-        if (!photoIds.isEmpty()) {
-            photoLikesRepository.deleteAllByPhotoIds(photoIds);
-            photoRepository.deleteAllByIds(photoIds);
-        }
-        userService.onAlbumUserBlacklisted(targetUserId, photoCnt, likeCnt);
+        userService.onAlbumUserBlacklisted(targetUserId, impact.photoCnt(), impact.likeCnt());
 
         albumRepository.decrementParticipantCount(album.getId());
 
@@ -238,5 +228,19 @@ public class AlbumService {
                     return AlbumMapper.toRecentPhotoResponse(photo, profileUrl);
                 })
                 .toList();
+    }
+
+    private UserStatsImpact removeUserFromAlbum(Long albumId, Long userId) {
+        // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
+        int photoCnt = photoRepository.countByAlbumIdAndUserId(albumId, userId);
+        int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
+
+        List<Long> photoIds = photoRepository.findIdsByAlbumIdAndUserId(albumId, userId);
+
+        if (!photoIds.isEmpty()) {
+            photoLikesRepository.deleteAllByPhotoIds(photoIds);
+            photoRepository.deleteAllByIds(photoIds);
+        }
+        return UserStatsImpact.of(photoCnt, likeCnt);
     }
 }

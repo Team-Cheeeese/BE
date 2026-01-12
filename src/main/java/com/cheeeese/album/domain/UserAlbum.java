@@ -52,6 +52,7 @@ public class UserAlbum extends BaseEntity {
     }
 
     public void blacklist() {
+        hide();
         this.role = Role.BLACK;
     }
 
