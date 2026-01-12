@@ -79,10 +79,7 @@ public class UserService {
     }
 
     @Transactional
-    public void onAlbumUserBlacklisted(Long userId, Long albumId) {
-        int photoCnt = photoRepository.countByAlbumIdAndUserId(albumId, userId);
-        int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
-
+    public void onAlbumUserBlacklisted(Long userId, int photoCnt, int likeCnt) {
         decrementAlbumCount(userId);
         decrementPhotoCount(userId, photoCnt);
         decrementLikeCount(userId, likeCnt);

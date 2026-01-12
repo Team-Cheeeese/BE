@@ -171,6 +171,10 @@ public class AlbumService {
 
         targetAlbum.blacklist();
 
+        // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
+        int photoCnt = photoRepository.countByAlbumIdAndUserId(album.getId(), targetUserId);
+        int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(album.getId(), targetUserId);
+
         List<Long> photoIds = photoRepository.findIdsByAlbumIdAndUserId(
                 album.getId(), targetUserId
         );
@@ -179,7 +183,7 @@ public class AlbumService {
             photoLikesRepository.deleteAllByPhotoIds(photoIds);
             photoRepository.deleteAllByIds(photoIds);
         }
-        userService.onAlbumUserBlacklisted(targetUserId, album.getId());
+        userService.onAlbumUserBlacklisted(targetUserId, photoCnt, likeCnt);
 
         albumRepository.decrementParticipantCount(album.getId());
 
