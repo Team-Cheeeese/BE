@@ -109,9 +109,13 @@ public class AlbumValidator {
         }
     }
 
-    public void validateBlacklistTarget(User user, Long targetUserId) {
-        if (user.getId().equals(targetUserId)) {
+    public void validateBlacklistTarget(User user, UserAlbum targetAlbum) {
+        if (user.getId().equals(targetAlbum.getUser().getId())) {
             throw new AlbumException(AlbumErrorCode.USER_CANNOT_BLACKLIST_SELF);
+        }
+
+        if (targetAlbum.isBlacklisted()) {
+            throw new AlbumException(AlbumErrorCode.USER_ALREADY_BLACKLISTED);
         }
     }
 
