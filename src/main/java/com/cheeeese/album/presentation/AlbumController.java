@@ -51,6 +51,7 @@ public class AlbumController implements AlbumSwagger {
         return CommonResponse.success(ALBUM_ENTER_SUCCESS, response);
     }
 
+    @Override
     @PostMapping("/{code}/blacklist/{targetUserId}")
     public CommonResponse<Void> blacklistAlbum(
             @CurrentUser User user,
