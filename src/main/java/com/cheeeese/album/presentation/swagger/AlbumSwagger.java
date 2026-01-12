@@ -180,7 +180,7 @@ public interface AlbumSwagger {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "초대장 정보 조회가 성공적으로 실행되었습니다."
+                    description = "사용자 블랙 리스트 등록이 성공적으로 실행되었습니다."
             )
     })
     CommonResponse<Void> blacklistAlbum(
