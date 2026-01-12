@@ -169,6 +169,7 @@ public class AlbumService {
 
         UserAlbum targetAlbum = albumReader.getAlbumParticipant(targetUserId, album.getId());
 
+        targetAlbum.hide();
         targetAlbum.blacklist();
 
         // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
