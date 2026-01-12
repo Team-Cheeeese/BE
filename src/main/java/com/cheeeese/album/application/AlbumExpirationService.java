@@ -4,8 +4,11 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.cheese4cut.domain.Cheese4cut;
+import com.cheeeese.cheese4cut.domain.Cheese4cutPhoto;
 import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
+import com.cheeeese.global.util.ObjectStorageDeleteUtil;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
@@ -31,6 +34,7 @@ public class AlbumExpirationService {
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
     private final Cheese4cutRepository cheese4cutRepository;
+    private final ObjectStorageDeleteUtil objectStorageDeleteUtil;
 
     @Transactional
     public void expireAlbum(Long albumId) {
@@ -42,10 +46,20 @@ public class AlbumExpirationService {
             log.info("[AlbumExpiration] Album id={} status updated to EXPIRED", albumId);
         }
 
-        if (cheese4cutRepository.findByAlbumId(albumId).isPresent()) {
-            return;
-        }
+        List<Long> cheese4cutPhotoIds = cheese4cutRepository.findByAlbumId(albumId)
+                .map(this::extractCheese4cutPhotoIds)
+                .orElseGet(() -> createCheese4cutIfPossible(albumId, album));
 
+        cleanupPhotosExceptCheese4cut(album, cheese4cutPhotoIds);
+    }
+
+    private List<Long> extractCheese4cutPhotoIds(Cheese4cut cheese4cut) {
+        return cheese4cut.getPhotos().stream()
+                .map(Cheese4cutPhoto::getPhotoId)
+                .toList();
+    }
+
+    private List<Long> createCheese4cutIfPossible(Long albumId, Album album) {
         List<Long> topPhotoIds = photoRepository.findTop4CompletedPhotoIdsByLikes(
                 albumId,
                 PhotoStatus.COMPLETED,
@@ -58,7 +72,7 @@ public class AlbumExpirationService {
                     albumId,
                     topPhotoIds.size()
             );
-            return;
+            return List.of();
         }
 
         List<Photo> photos = photoRepository.findAllByIdIn(topPhotoIds);
@@ -71,11 +85,31 @@ public class AlbumExpirationService {
 
         if (orderedPhotos.stream().anyMatch(Objects::isNull)) {
             log.warn("[AlbumExpiration] Album id={} has missing photos for cheese4cut creation", albumId);
-            return;
+            return List.of();
         }
 
         cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
         log.info("[AlbumExpiration] Cheese4cut created automatically for album id={}", albumId);
+        return topPhotoIds;
+    }
+
+    private void cleanupPhotosExceptCheese4cut(Album album, List<Long> cheese4cutPhotoIds) {
+        List<Photo> photosToDelete = cheese4cutPhotoIds.isEmpty()
+                ? photoRepository.findAllByAlbumId(album.getId())
+                : photoRepository.findAllByAlbumIdAndIdNotIn(
+                        album.getId(),
+                        cheese4cutPhotoIds
+                );
+
+        if (photosToDelete.isEmpty()) {
+            return;
+        }
+
+        for (Photo photo : photosToDelete) {
+            objectStorageDeleteUtil.deletePhotoObjects(photo.getImageUrl(), photo.getThumbnailUrl());
+        }
+
+        photoRepository.deleteAll(photosToDelete);
     }
 }
