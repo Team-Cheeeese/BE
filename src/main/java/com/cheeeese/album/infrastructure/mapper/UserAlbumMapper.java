@@ -22,6 +22,7 @@ public class UserAlbumMapper {
 
     public static AlbumParticipantListResponse.ParticipantInfo toParticipantInfo(User user, String profileImage, Role role, boolean isMe) {
         return AlbumParticipantListResponse.ParticipantInfo.builder()
+                .userId(user.getId())
                 .name(user.getName())
                 .role(role)
                 .profileImage(profileImage)
