@@ -58,7 +58,7 @@ public class AlbumController implements AlbumSwagger {
             @PathVariable Long targetUserId
     ) {
         albumService.blacklistUser(user, code, targetUserId);
-        return CommonResponse.success(ALBUM_ENTER_SUCCESS);
+        return CommonResponse.success(ALBUM_USER_BLACKLISTED_SUCCESS);
     }
 
     @Override

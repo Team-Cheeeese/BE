@@ -115,14 +115,14 @@ public class UserService {
     private void decrementAlbumCount(Long userId) {
         int updated = userRepository.decrementAlbumCnt(userId);
         if (updated != 1) {
-            throw new UserException(UserErrorCode.USER_PHOTO_COUNT_DECREMENT_FAILED);
+            throw new UserException(UserErrorCode.USER_ALBUM_COUNT_DECREMENT_FAILED);
         }
     }
 
     private void decrementLikeCount(Long userId, int count) {
         int updated = userRepository.decrementLikeCntBy(userId, count);
         if (updated != 1) {
-            throw new UserException(UserErrorCode.USER_PHOTO_COUNT_DECREMENT_FAILED);
+            throw new UserException(UserErrorCode.USER_PHOTO_LIKE_COUNT_DECREMENT_FAILED);
         }
     }
 }
