@@ -20,6 +20,15 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Query("UPDATE Album a SET a.currentParticipant = a.currentParticipant + 1 WHERE a.id = :albumId AND a.currentParticipant < a.participant")
     int incrementParticipantCountAtomically(@Param("albumId") Long albumId);
 
+    @Modifying
+    @Query("""
+        UPDATE Album a
+        SET a.currentParticipant = a.currentParticipant - 1
+        WHERE a.id = :albumId
+        AND a.currentParticipant > 0
+    """)
+    void decrementParticipantCount(@Param("albumId") Long albumId);
+
     @Query("""
         SELECT COUNT(a)
         FROM Album a

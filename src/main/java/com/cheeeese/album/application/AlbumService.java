@@ -180,6 +180,8 @@ public class AlbumService {
         }
         userService.onAlbumUserBlacklisted(targetUserId, album.getId());
 
+        albumRepository.decrementParticipantCount(album.getId());
+
         photoQueryService.invalidatePhotoCache(album.getCode());
     }
 
@@ -201,7 +203,7 @@ public class AlbumService {
         );
     }
 
-        private User getMaker(Long makerId) {
+    private User getMaker(Long makerId) {
         return userRepository.findById(makerId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
