@@ -15,16 +15,17 @@ public class StorageDeleteOutbox {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "album_id", nullable = false)
     private Long albumId;
 
+    @Column(name = "payload_json", nullable = false, columnDefinition = "LONGTEXT")
     @Lob
-    @Column(nullable = false)
     private String payloadJson;
 
     @Column(nullable = false)
     private String reason;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     private StorageDeleteOutbox(Long albumId, String payloadJson, String reason) {
