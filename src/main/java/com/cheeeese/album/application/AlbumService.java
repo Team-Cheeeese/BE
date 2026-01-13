@@ -233,14 +233,14 @@ public class AlbumService {
 
     private UserStatsImpact removeUserFromAlbum(Long albumId, Long userId) {
         // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
-        int photoCnt = photoRepository.countByAlbumIdAndUserId(albumId, userId);
+        int photoCnt = photoRepository.countNotDeletedPhotosByAlbumAndUser(albumId, userId);
         int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
 
         List<Long> photoIds = photoRepository.findIdsByAlbumIdAndUserId(albumId, userId);
 
         if (!photoIds.isEmpty()) {
             photoLikesRepository.deleteAllByPhotoIds(photoIds);
-            photoRepository.deleteAllByIds(photoIds);
+            photoRepository.softDeleteAllByIds(photoIds);
         }
         return UserStatsImpact.of(photoCnt, likeCnt);
     }

@@ -190,7 +190,17 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
             @Param("threshold") LocalDateTime threshold
     );
 
-    int countByAlbumIdAndUserId(Long albumId, Long userId);
+    @Query("""
+        SELECT COUNT(p)
+        FROM Photo p
+        WHERE p.album.id = :albumId
+        AND p.user.id = :userId
+        AND p.isDeleted = FALSE
+    """)
+    int countNotDeletedPhotosByAlbumAndUser(
+            @Param("albumId") Long albumId,
+            @Param("userId") Long userId
+    );
 
     @Query("""
         SELECT p.id
@@ -205,8 +215,9 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
     @Modifying
     @Query("""
-        DELETE FROM Photo p
+        UPDATE Photo p
+        SET p.isDeleted = true
         WHERE p.id IN :photoIds
     """)
-    void deleteAllByIds(@Param("photoIds") List<Long> photoIds);
+    void softDeleteAllByIds(@Param("photoIds") List<Long> photoIds);
 }

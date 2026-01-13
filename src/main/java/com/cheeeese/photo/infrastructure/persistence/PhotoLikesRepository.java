@@ -46,6 +46,7 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
         JOIN pl.photo p
         WHERE p.album.id = :albumId
         AND p.user.id = :userId
+        AND p.isDeleted = FALSE
     """)
     int countLikesByAlbumAndPhotoOwner(
             @Param("albumId") Long albumId,
