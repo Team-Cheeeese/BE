@@ -207,6 +207,7 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         FROM Photo p
         WHERE p.album.id = :albumId
         AND p.user.id = :userId
+        AND p.isDeleted = FALSE
     """)
     List<Long> findIdsByAlbumIdAndUserId(
             @Param("albumId") Long albumId,
