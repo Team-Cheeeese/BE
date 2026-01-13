@@ -1,7 +1,5 @@
 package com.cheeeese.album.application;
 
-import com.cheeeese.album.domain.StorageDeleteOutbox;
-import com.cheeeese.album.infrastructure.persistence.StorageDeleteOutboxRepository;
 import com.cheeeese.global.util.ObjectStorageDeleteUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +9,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
 
@@ -20,7 +19,7 @@ import org.springframework.transaction.event.TransactionPhase;
 public class AlbumStorageDeleteEventHandler {
 
     private final ObjectStorageDeleteUtil objectStorageDeleteUtil;
-    private final StorageDeleteOutboxRepository outboxRepository;
+    private final StorageDeleteOutboxWriter outboxWriter;
     private final ObjectMapper objectMapper;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -41,7 +40,7 @@ public class AlbumStorageDeleteEventHandler {
             );
         }
 
-        log.info("[AlbumExpiration][StorageDelete] albumId={} async delete completed (photoObjects={})",
+        log.info("[AlbumExpiration][StorageDelete] albumId={} delete completed (photoObjects={})",
                 albumId, event.photoObjectTargets().size());
     }
 
@@ -50,13 +49,14 @@ public class AlbumStorageDeleteEventHandler {
      * - Outbox에 이벤트 payload 저장
      */
     @Recover
+    @Transactional
     public void recover(Exception e, AlbumStorageDeleteEvent event) {
         Long albumId = event.albumId();
 
         String payloadJson = safeToJson(event);
         String reason = (e.getMessage() == null) ? e.getClass().getSimpleName() : e.getMessage();
 
-        outboxRepository.save(StorageDeleteOutbox.of(albumId, payloadJson, reason));
+        outboxWriter.save(albumId, payloadJson, reason);
         log.error("[AlbumExpiration][StorageDelete][OUTBOX] albumId={} saved to outbox. reason={}", albumId, reason, e);
     }
 
