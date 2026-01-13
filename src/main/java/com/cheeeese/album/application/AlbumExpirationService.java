@@ -8,16 +8,17 @@ import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.domain.Cheese4cutPhoto;
 import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
-import com.cheeeese.global.util.ObjectStorageDeleteUtil;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +35,7 @@ public class AlbumExpirationService {
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
     private final Cheese4cutRepository cheese4cutRepository;
-    private final ObjectStorageDeleteUtil objectStorageDeleteUtil;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void expireAlbum(Long albumId) {
@@ -67,11 +68,7 @@ public class AlbumExpirationService {
         );
 
         if (topPhotoIds.size() < CHEESE4CUT_PHOTO_COUNT) {
-            log.warn(
-                    "[AlbumExpiration] Album id={} does not have enough photos to create cheese4cut (found={})",
-                    albumId,
-                    topPhotoIds.size()
-            );
+            log.warn("[AlbumExpiration] Album id={} has less than 4 photos, skipping cheese4cut creation", albumId);
             return List.of();
         }
 
@@ -81,7 +78,7 @@ public class AlbumExpirationService {
 
         List<Photo> orderedPhotos = topPhotoIds.stream()
                 .map(photoMap::get)
-                .collect(Collectors.toList());
+                .toList();
 
         if (orderedPhotos.stream().anyMatch(Objects::isNull)) {
             log.warn("[AlbumExpiration] Album id={} has missing photos for cheese4cut creation", albumId);
@@ -94,6 +91,10 @@ public class AlbumExpirationService {
         return topPhotoIds;
     }
 
+    /**
+     * 트랜잭션 안에서는 "DB 삭제"만 처리
+     * 스토리지 삭제는 AFTER_COMMIT 이벤트로 넘김
+     */
     private void cleanupPhotosExceptCheese4cut(Album album, List<Long> cheese4cutPhotoIds) {
         List<Photo> photosToDelete = cheese4cutPhotoIds.isEmpty()
                 ? photoRepository.findAllByAlbumId(album.getId())
@@ -102,14 +103,32 @@ public class AlbumExpirationService {
                         cheese4cutPhotoIds
                 );
 
-        if (photosToDelete.isEmpty()) {
-            return;
-        }
-
+        // 이벤트 payload 구성 (스토리지 삭제 대상 URL만 수집)
+        List<AlbumStorageDeleteEvent.PhotoObjectDeleteTarget> photoObjectTargets = new ArrayList<>();
         for (Photo photo : photosToDelete) {
-            objectStorageDeleteUtil.deletePhotoObjects(photo.getImageUrl(), photo.getThumbnailUrl());
+            photoObjectTargets.add(new AlbumStorageDeleteEvent.PhotoObjectDeleteTarget(
+                    photo.getImageUrl(),
+                    photo.getThumbnailUrl(),
+                    true
+            ));
         }
 
-        photoRepository.deleteAll(photosToDelete);
+        // DB 삭제(트랜잭션 내)
+        if (!photosToDelete.isEmpty()) {
+            // photoRepository.deleteAll(photosToDelete);
+            photoRepository.deleteAllInBatch(photosToDelete);
+
+            log.info("[AlbumExpiration] Album id={} deleted photos count={}", album.getId(), photosToDelete.size());
+        }
+
+        // 트랜잭션 커밋 이후 실행될 이벤트 발행
+        if (!photoObjectTargets.isEmpty()) {
+            eventPublisher.publishEvent(new AlbumStorageDeleteEvent(
+                    album.getId(),
+                    photoObjectTargets
+            ));
+            log.info("[AlbumExpiration] Album id={} published storage delete event (photoObjects={})",
+                    album.getId(), photoObjectTargets.size());
+        }
     }
 }
