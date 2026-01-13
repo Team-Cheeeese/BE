@@ -66,6 +66,10 @@ public class Album extends BaseEntity {
         return this.expiredAt.isBefore(LocalDateTime.now()) || this.status == AlbumStatus.EXPIRED;
     }
 
+    public int getRemainingUploadSlots() {
+        return Math.max(0, maxPhotoCount - currentPhotoCount);
+    }
+
     @Builder
     private Album(
             Long makerId,

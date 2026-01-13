@@ -15,8 +15,8 @@ public class AlbumReader {
 
     private final UserAlbumRepository userAlbumRepository;
 
-    public UserAlbum getAlbumParticipant(Album album, User user) {
-        return userAlbumRepository.findByUserIdAndAlbumId(user.getId(), album.getId())
+    public UserAlbum getAlbumParticipant(Long userId, Long albumId) {
+        return userAlbumRepository.findByUserIdAndAlbumId(userId, albumId)
                 .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_PARTICIPANT));
     }
 }

@@ -1,5 +1,6 @@
 package com.cheeeese.album.presentation;
 
+import com.cheeeese.album.application.AlbumQueryService;
 import com.cheeeese.album.application.AlbumService;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.dto.response.*;
@@ -23,6 +24,7 @@ import static com.cheeeese.global.common.code.SuccessCode.*;
 public class AlbumController implements AlbumSwagger {
 
     private final AlbumService albumService;
+    private final AlbumQueryService albumQueryService;
 
     @Override
     @PostMapping
@@ -50,9 +52,20 @@ public class AlbumController implements AlbumSwagger {
     }
 
     @Override
+    @PostMapping("/{code}/blacklist/{targetUserId}")
+    public CommonResponse<Void> blacklistAlbum(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @PathVariable Long targetUserId
+    ) {
+        albumService.blacklistUser(user, code, targetUserId);
+        return CommonResponse.success(ALBUM_USER_BLACKLISTED_SUCCESS);
+    }
+
+    @Override
     @GetMapping("/{code}/available-count")
     public CommonResponse<UploadAvailableCountResponse> getAvailableUploadCount(@PathVariable String code) {
-        return CommonResponse.success(PHOTO_AVAILABLE_COUNT_FETCH_SUCCESS, albumService.getAvailablePhotoCount(code));
+        return CommonResponse.success(PHOTO_AVAILABLE_COUNT_FETCH_SUCCESS, albumQueryService.getAvailablePhotoCount(code));
     }
 
     @Override
@@ -63,14 +76,14 @@ public class AlbumController implements AlbumSwagger {
     ) {
       return CommonResponse.success(
               ALBUM_PARTICIPANT_FETCH_SUCCESS,
-              albumService.getAlbumParticipantList(authentication, code)
+              albumQueryService.getAlbumParticipantList(authentication, code)
       );
     }
 
     @Override
     @GetMapping("/{code}/info")
     public CommonResponse<AlbumInfoResponse> getAlbumInfo(@PathVariable String code) {
-        return CommonResponse.success(ALBUM_INFO_GET_SUCCESS, albumService.getAlbumInfo(code));
+        return CommonResponse.success(ALBUM_INFO_GET_SUCCESS, albumQueryService.getAlbumInfo(code));
     }
 
     @Override
@@ -81,7 +94,7 @@ public class AlbumController implements AlbumSwagger {
     ) {
         return CommonResponse.success(
                 ALBUM_BEST4CUT_GET_SUCCESS,
-                albumService.getAlbumBest4Cut(user, code)
+                albumQueryService.getAlbumBest4Cut(user, code)
         );
     }
 

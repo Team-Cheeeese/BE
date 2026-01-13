@@ -186,20 +186,13 @@ public class PhotoService {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateAlbumEntry(album, user);
 
-        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
 
         Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
         photoValidator.validateDeletePermission(user, userAlbum, album, photo);
 
-        int updatedRows = albumRepository.decrementPhotoCount(album.getId(), 1);
-        if (updatedRows == 0) {
-            throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_DECREMENT_FAILED);
-        }
-
-        userService.decrementPhotoCount(photo.getUser().getId(), 1);
-
-        userRepository.decrementLikeCntBy(photo.getUser().getId(), photo.getLikesCnt());
+        userService.onPhotoDeleted(photo.getUser().getId(), album.getId());
 
         photoLikesRepository.deleteAllByPhotoId(photo.getId());
 

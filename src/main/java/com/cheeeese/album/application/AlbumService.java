@@ -14,39 +14,30 @@ import com.cheeeese.album.infrastructure.mapper.AlbumMapper;
 import com.cheeeese.album.infrastructure.mapper.UserAlbumMapper;
 import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
-import com.cheeeese.global.security.CustomUserDetails;
 import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
+import com.cheeeese.photo.application.PhotoQueryService;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.photo.domain.Photo;
-import com.cheeeese.photo.domain.PhotoStatus;
-import com.cheeeese.album.dto.response.AlbumBest4CutResponse;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
+import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
-import com.cheeeese.user.domain.type.ProfileImageType;
+import com.cheeeese.user.domain.model.UserStatsImpact;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
 import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -60,7 +51,9 @@ public class AlbumService {
     private final UserRepository userRepository;
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
+    private final UserService userService;
     private final PhotoService photoService;
+    private final PhotoQueryService photoQueryService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final CdnUrlResolver cdnUrlResolver;
     private final AlbumReader albumReader;
@@ -158,7 +151,7 @@ public class AlbumService {
 
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
-        int remainingUploadSlots = calculateRemainingUploadSlots(album);
+        int remainingUploadSlots = album.getRemainingUploadSlots();
 
         boolean photoExist = album.getCurrentPhotoCount() > 0;
         albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), photoExist);
@@ -166,84 +159,27 @@ public class AlbumService {
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
 
-    public UploadAvailableCountResponse getAvailablePhotoCount(String code) {
+    @Transactional
+    public void blacklistUser(User user, String code, Long targetUserId) {
         Album album = albumValidator.validateAlbumCode(code);
 
-        int availableCount = calculateRemainingUploadSlots(album);
+        UserAlbum requesterAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
 
-        return AlbumMapper.toAvailableCountResponse(
-                availableCount,
-                album.getMaxPhotoCount(),
-                album.getCurrentPhotoCount()
-        );
-    }
+        albumValidator.validateBlacklistPermission(requesterAlbum);
 
-    public AlbumParticipantResponse getAlbumParticipantList(Authentication authentication, String code) {
+        UserAlbum targetAlbum = albumReader.getAlbumParticipant(targetUserId, album.getId());
 
-        User currentUser = extractUser(authentication);
+        albumValidator.validateBlacklistTarget(user, targetAlbum);
 
-        Album album = albumValidator.validateAlbumCode(code);
+        targetAlbum.blacklist();
 
-        boolean isExpired = album.isExpired();
+        UserStatsImpact impact = removeUserFromAlbum(album.getId(), targetUserId);
 
-        Role myRole = null;
-        Long currentUserId = currentUser != null ? currentUser.getId() : null;
+        userService.onAlbumUserBlacklisted(targetUserId, impact.photoCnt(), impact.likesCnt());
 
-        if (currentUserId != null) {
-            Optional<UserAlbum> myUserAlbumOptional = userAlbumRepository.findByUserIdAndAlbumId(currentUserId, album.getId());
+        onAlbumUserBlacklisted(album.getId(), impact.photoCnt());
 
-            if (myUserAlbumOptional.isPresent()) {
-                myRole = myUserAlbumOptional.get().getRole();
-            }
-        }
-
-        // 앨범의 전체 참여자 목록
-        List<UserAlbum> userAlbums = userAlbumRepository.findAllByAlbumId(album.getId());
-
-        List<AlbumParticipantListResponse.ParticipantInfo> participantInfos = buildSortedParticipantInfos(userAlbums, currentUserId);
-
-        return UserAlbumMapper.toAlbumParticipantResponse(
-                album,
-                isExpired,
-                myRole,
-                participantInfos
-        );
-    }
-
-    public AlbumInfoResponse getAlbumInfo(String code) {
-        Album album = albumValidator.validateAlbumCode(code);
-
-        User maker = userAlbumRepository.findMakerByAlbumId(album.getId(), Role.MAKER)
-                .map(UserAlbum::getUser)
-                .orElseThrow(() -> new AlbumException(AlbumErrorCode.USER_NOT_MAKER));
-
-        return AlbumMapper.toAlbumInfoResponse(album, maker);
-    }
-
-    public List<AlbumBest4CutResponse> getAlbumBest4Cut(User user, String code) {
-        Album album = albumValidator.validateAlbumCode(code);
-
-        albumValidator.validateAlbumParticipant(album, user);
-
-        List<Photo> topPhotos = photoRepository.findTop4CompletedPhotosByLikes(
-                album.getId(),
-                PhotoStatus.COMPLETED,
-                PageRequest.of(0, 4)
-        );
-
-        List<Long> photoIds = topPhotos.stream()
-                .map(Photo::getId)
-                .toList();
-
-        Set<Long> likedPhotoIds = photoLikesRepository.findAllLikedPhotoIds(user.getId(), photoIds);
-
-        return topPhotos.stream()
-                .map(photo -> {
-                    String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
-                    boolean isLiked = likedPhotoIds.contains(photo.getId());
-                    return AlbumMapper.toBest4CutResponse(photo, thumbnailUrl, isLiked);
-                })
-                .toList();
+        photoQueryService.invalidatePhotoCache(album.getCode());
     }
 
     @Transactional
@@ -251,26 +187,9 @@ public class AlbumService {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateMakerLeaveAllowed(album, user);
 
-        UserAlbum userAlbum = albumReader.getAlbumParticipant(album, user);
+        UserAlbum userAlbum = albumReader.getAlbumParticipant(user.getId(), album.getId());
 
         userAlbum.hide();
-    }
-
-    private User extractUser(Authentication authentication) {
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            return null;
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomUserDetails customUserDetails) {
-            return customUserDetails.getUser();
-        }
-        return null;
-    }
-
-    private int calculateRemainingUploadSlots(Album album) {
-        int current = album.getCurrentPhotoCount();
-        int max = album.getMaxPhotoCount();
-        return Math.max(0, max - current);
     }
 
     private long countUserAlbumsCreatedThisWeek(User user) {
@@ -281,7 +200,7 @@ public class AlbumService {
         );
     }
 
-        private User getMaker(Long makerId) {
+    private User getMaker(Long makerId) {
         return userRepository.findById(makerId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
@@ -312,25 +231,22 @@ public class AlbumService {
                 .toList();
     }
 
-    private List<AlbumParticipantListResponse.ParticipantInfo> buildSortedParticipantInfos(
-            List<UserAlbum> userAlbums,
-            Long currentUserId
-    ) {
-        return userAlbums.stream()
-                .map(userAlbum -> {
-                    User user = userAlbum.getUser();
-                    Role role = userAlbum.getRole();
-                    ProfileImageType type = ProfileImageType.fromName(user.getProfileImage());
-                    String profileImageUrl = cdnUrlResolver.resolveProfile(type.getPath());
-                    boolean isMe = currentUserId != null && user.getId().equals(currentUserId);
+    private UserStatsImpact removeUserFromAlbum(Long albumId, Long userId) {
+        // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
+        int photoCnt = photoRepository.countNotDeletedPhotosByAlbumAndUser(albumId, userId);
+        int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
 
-                    return UserAlbumMapper.toParticipantInfo(user, profileImageUrl, role, isMe);
-                })
-                .sorted(Comparator
-                        .comparing(AlbumParticipantListResponse.ParticipantInfo::isMe, Comparator.reverseOrder())
-                        .thenComparing(p -> p.role() == Role.MAKER ? 0 : 1)
-                        .thenComparing(AlbumParticipantListResponse.ParticipantInfo::name)
-                )
-                .toList();
+        List<Long> photoIds = photoRepository.findIdsByAlbumIdAndUserId(albumId, userId);
+
+        if (!photoIds.isEmpty()) {
+            photoLikesRepository.deleteAllByPhotoIds(photoIds);
+            photoRepository.softDeleteAllByIds(photoIds);
+        }
+        return UserStatsImpact.of(photoCnt, likeCnt);
+    }
+
+    private void onAlbumUserBlacklisted(Long albumId, int photoCnt) {
+        albumRepository.decrementPhotoCount(albumId, photoCnt);
+        albumRepository.decrementParticipantCount(albumId);
     }
 }

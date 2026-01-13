@@ -23,6 +23,7 @@ public class UserMapper {
 
     public static UserInfoResponse toUserInfoResponse(User user, String profileImage) {
         return UserInfoResponse.builder()
+                .userId(user.getId())
                 .profileImage(profileImage)
                 .name(user.getName())
                 .email(user.getEmail())

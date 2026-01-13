@@ -3,6 +3,7 @@ package com.cheeeese.photo.infrastructure.persistence;
 import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -38,4 +39,24 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
     List<User> findLikersByPhotoId(@Param("photoId") Long photoId);
 
     void deleteAllByPhotoId(Long photoId);
+
+    @Query("""
+        SELECT count(pl)
+        FROM PhotoLikes pl
+        JOIN pl.photo p
+        WHERE p.album.id = :albumId
+        AND p.user.id = :userId
+        AND p.isDeleted = FALSE
+    """)
+    int countLikesByAlbumAndPhotoOwner(
+            @Param("albumId") Long albumId,
+            @Param("userId") Long userId
+    );
+
+    @Modifying
+    @Query("""
+        DELETE FROM PhotoLikes pl
+        WHERE pl.photo.id IN :photoIds
+    """)
+    void deleteAllByPhotoIds(@Param("photoIds") List<Long> photoIds);
 }

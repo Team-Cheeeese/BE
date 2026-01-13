@@ -1,6 +1,7 @@
 package com.cheeeese.album.application.validator;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
 import com.cheeeese.album.exception.AlbumException;
@@ -99,6 +100,22 @@ public class AlbumValidator {
         // Maker일 경우, 만료된 앨범만 나가기 가능
         if (album.getStatus() != Album.AlbumStatus.EXPIRED) {
             throw new AlbumException(AlbumErrorCode.MAKER_CANNOT_LEAVE_UNTIL_CLOSED);
+        }
+    }
+
+    public void validateBlacklistPermission(UserAlbum userAlbum) {
+        if (userAlbum.getRole() != Role.MAKER) {
+            throw new AlbumException(AlbumErrorCode.USER_NOT_MAKER);
+        }
+    }
+
+    public void validateBlacklistTarget(User user, UserAlbum targetAlbum) {
+        if (user.getId().equals(targetAlbum.getUser().getId())) {
+            throw new AlbumException(AlbumErrorCode.USER_CANNOT_BLACKLIST_SELF);
+        }
+
+        if (targetAlbum.isBlacklisted()) {
+            throw new AlbumException(AlbumErrorCode.USER_ALREADY_BLACKLISTED);
         }
     }
 

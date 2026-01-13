@@ -42,8 +42,29 @@ public class FixtureFactory {
         return new KakaoUserInfo(attributes);
     }
 
+    public static KakaoUserInfo createKakaoTargetInfo() {
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("nickname", "카카오타겟");
+        profile.put("profile_image_url", "https://example.com/kakao-profile.png");
+
+        Map<String, Object> kakaoAccount = new HashMap<>();
+        kakaoAccount.put("email", "kakao_target@test.com");
+        kakaoAccount.put("profile", profile);
+
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("id", 9876543210L);
+        attributes.put("kakao_account", kakaoAccount);
+
+        return new KakaoUserInfo(attributes);
+    }
+
     public static User createKakaoUser() {
         KakaoUserInfo kakaoInfo = createKakaoUserInfo();
+        return UserMapper.toEntity(kakaoInfo);
+    }
+
+    public static User createKakaoTarget() {
+        KakaoUserInfo kakaoInfo = createKakaoTargetInfo();
         return UserMapper.toEntity(kakaoInfo);
     }
 
@@ -91,6 +112,14 @@ public class FixtureFactory {
                 user,
                 album,
                 Role.MAKER
+        );
+    }
+
+    public static UserAlbum createGuestUserAlbum(User user, Album album) {
+        return UserAlbumMapper.toEntity(
+                user,
+                album,
+                Role.GUEST
         );
     }
 

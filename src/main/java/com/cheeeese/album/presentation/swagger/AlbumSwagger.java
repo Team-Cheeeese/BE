@@ -169,6 +169,27 @@ public interface AlbumSwagger {
     );
 
     @Operation(
+            summary = "사용자 블랙 리스트 등록 API",
+            description = """
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 고유 코드 (String) \n
+                    `targetUserId`: 차단할 사용자 ID (Long)
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사용자 블랙 리스트 등록이 성공적으로 실행되었습니다."
+            )
+    })
+    CommonResponse<Void> blacklistAlbum(
+            @CurrentUser User user,
+            @PathVariable String code,
+            @PathVariable Long targetUserId
+    );
+
+    @Operation(
             summary = "업로드 가능 사진 수 조회 API",
             description = """ 
                     ### PathVariable

@@ -21,6 +21,7 @@ public record AlbumParticipantListResponse(
     @Schema(
             description = "참가자 개별 정보",
             requiredProperties = {
+                    "userId",
                     "name",
                     "profileImage",
                     "role",
@@ -28,6 +29,9 @@ public record AlbumParticipantListResponse(
             }
     )
     public record ParticipantInfo(
+            @Schema(description = "사용자 ID", example = "1")
+            Long userId,
+
             @Schema(description = "이름", example = "우다현")
             String name,
 
