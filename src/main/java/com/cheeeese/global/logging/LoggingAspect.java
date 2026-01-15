@@ -26,24 +26,24 @@ public class LoggingAspect {
         long start = System.currentTimeMillis();
         try {
             Object result = joinPoint.proceed();
-            long executionTime = System.currentTimeMillis() - start;
+            long executionTimeMs = System.currentTimeMillis() - start;
 
-            MDC.put("executionTime", String.valueOf(executionTime));
+            MDC.put("executionTimeMs", String.valueOf(executionTimeMs));
             MDC.put("methodStatus", "SUCCESS");
 
             logger.info("[✅ End] {}.{} | took = {}ms",
-                    className, methodName, executionTime);
+                    className, methodName, executionTimeMs);
 
             return result;
         } catch (Throwable ex) {
-            long executionTime = System.currentTimeMillis() - start;
+            long executionTimeMs = System.currentTimeMillis() - start;
 
-            MDC.put("executionTimeMs", String.valueOf(executionTime));
+            MDC.put("executionTimeMs", String.valueOf(executionTimeMs));
             MDC.put("methodStatus", "EXCEPTION");
             MDC.put("exceptionType", ex.getClass().getSimpleName());
 
             logger.error("[‼️ Exception] {}.{} | took = {}ms | message = {}",
-                    className, methodName, executionTime, ex.getMessage());
+                    className, methodName, executionTimeMs, ex.getMessage());
 
             throw ex;
         } finally {
