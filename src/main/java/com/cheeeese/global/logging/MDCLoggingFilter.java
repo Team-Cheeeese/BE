@@ -31,20 +31,18 @@ public class MDCLoggingFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain chain
     ) throws ServletException, IOException {
-        MDC.put("traceId", UUID.randomUUID().toString().substring(0, 8));
-        MDC.put("requestUri", request.getRequestURI());
-        MDC.put("httpMethod", request.getMethod());
-
         try {
+            MDC.put("traceId", UUID.randomUUID().toString().substring(0, 8));
+            MDC.put("requestUri", request.getRequestURI());
+            MDC.put("httpMethod", request.getMethod());
+
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication != null
                     && authentication.isAuthenticated()
-                    && !"anonymousUser".equals(authentication.getPrincipal())
+                    && authentication.getPrincipal() instanceof CustomUserDetails userDetails
             ) {
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
                 String rawUserId = String.valueOf(userDetails.getUser().getId());
-
                 MDC.put("userId", maskIdentifier(maskIdentifier(rawUserId)));
             } else {
                 MDC.put("userId", "null");

@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -21,23 +22,34 @@ public class LoggingAspect {
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
-        Object[] args = joinPoint.getArgs();
-
-        logger.info("[▶️ Start] {}.{} | args = {}", className, methodName, args);
 
         long start = System.currentTimeMillis();
         try {
             Object result = joinPoint.proceed();
-            long end = System.currentTimeMillis();
+            long executionTime = System.currentTimeMillis() - start;
 
-            logger.info("[✅ End] {}.{} | took = {}ms | return = {}", className, methodName, (end - start), result);
+            MDC.put("executionTime", String.valueOf(executionTime));
+            MDC.put("methodStatus", "SUCCESS");
+
+            logger.info("[✅ End] {}.{} | took = {}ms",
+                    className, methodName, executionTime);
 
             return result;
         } catch (Throwable ex) {
-            long end = System.currentTimeMillis();
-            logger.error("[‼️ Exception] {}.{} | took = {}ms | message = {}", className, methodName, (end - start), ex.getMessage(), ex);
+            long executionTime = System.currentTimeMillis() - start;
+
+            MDC.put("executionTimeMs", String.valueOf(executionTime));
+            MDC.put("methodStatus", "EXCEPTION");
+            MDC.put("exceptionType", ex.getClass().getSimpleName());
+
+            logger.error("[‼️ Exception] {}.{} | took = {}ms | message = {}",
+                    className, methodName, executionTime, ex.getMessage());
 
             throw ex;
+        } finally {
+            MDC.remove("executionTime");
+            MDC.remove("status");
+            MDC.remove("exceptionType");
         }
     }
 }
