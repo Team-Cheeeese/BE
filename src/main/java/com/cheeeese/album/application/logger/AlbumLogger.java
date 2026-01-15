@@ -1,6 +1,8 @@
 package com.cheeeese.album.application.logger;
 
 import com.cheeeese.album.domain.type.Role;
+import com.cheeeese.global.logging.LogMaskingUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -9,9 +11,12 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AlbumLogger {
 
     private static final String STAT_PREFIX = "[STAT]";
+
+    private final LogMaskingUtil logMaskingUtil;
 
     /**
      * [지표 1] 앨범 생성
@@ -20,8 +25,8 @@ public class AlbumLogger {
     public void logAlbumCreated(Long userId, String albumCode, int expectedParticipant) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_created | user_id={} album_code={} expected_participant={} created_at={}",
-                    STAT_PREFIX, userId, albumCode, expectedParticipant, LocalDateTime.now());
+            log.info("{} album_created | user_key={} album_code={} expected_participant={} created_at={}",
+                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, expectedParticipant, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }
@@ -34,8 +39,8 @@ public class AlbumLogger {
     public void logAlbumJoined(Long userId, String albumCode, boolean photoExistOnJoin) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_joined | user_id={} album_code={} is_first_join=true photo_exist_on_join={} joined_at={}",
-                    STAT_PREFIX, userId, albumCode, photoExistOnJoin, LocalDateTime.now());
+            log.info("{} album_joined | user_key={} album_code={} is_first_join=true photo_exist_on_join={} joined_at={}",
+                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, photoExistOnJoin, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }
@@ -48,8 +53,8 @@ public class AlbumLogger {
     public void logAlbumViewed(Long userId, String albumCode, Role role) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_view_start | user_id={} album_code={} role={} viewed_at={}",
-                    STAT_PREFIX, userId, albumCode, role, LocalDateTime.now());
+            log.info("{} album_view_start | user_key={} album_code={} role={} viewed_at={}",
+                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, role, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }

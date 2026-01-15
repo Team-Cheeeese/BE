@@ -1,5 +1,7 @@
 package com.cheeeese.photo.application.logger;
 
+import com.cheeeese.global.logging.LogMaskingUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -9,9 +11,12 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class PhotoLogger {
 
     private static final String STAT_PREFIX = "[STAT]";
+
+    private final LogMaskingUtil logMaskingUtil;
 
     /**
      * [지표 2, 3] 사진 업로드 완료
@@ -20,8 +25,8 @@ public class PhotoLogger {
     public void logUploadCompleted(Long userId, String albumCode, Long photoId) {
         try {
             MDC.put("type", "photo");
-            log.info("{} photo_upload_completed | user_id={} album_code={} photo_id={} created_at={}",
-                    STAT_PREFIX, userId, albumCode, photoId, LocalDateTime.now());
+            log.info("{} photo_upload_completed | user_key={} album_code={} photo_id={} created_at={}",
+                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, photoId, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }
@@ -34,8 +39,8 @@ public class PhotoLogger {
     public void logDownload(Long userId, String albumCode, List<Long> photoIds) {
         try {
             MDC.put("type", "photo");
-            log.info("{} photo_download_log | user_id={} album_code={} photo_ids={} requested_at={}",
-                    STAT_PREFIX, userId, albumCode, photoIds, LocalDateTime.now());
+            log.info("{} photo_download_log | user_key={} album_code={} photo_ids={} requested_at={}",
+                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, photoIds, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }
