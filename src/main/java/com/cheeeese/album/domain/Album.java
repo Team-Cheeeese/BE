@@ -86,7 +86,8 @@ public class Album extends BaseEntity {
             int currentPhotoCount,
             boolean isInfoAvailable,
             LocalDateTime expiredAt,
-            AlbumStatus status
+            AlbumStatus status,
+            LocalDateTime participantMilestoneAt
     ) {
         this.makerId = makerId;
         this.title = title;
@@ -100,5 +101,6 @@ public class Album extends BaseEntity {
         this.isInfoAvailable = isInfoAvailable;
         this.expiredAt = expiredAt;
         this.status = status;
+        this.participantMilestoneAt = participantMilestoneAt;
     }
 }
