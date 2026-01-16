@@ -153,4 +153,10 @@ public class PhotoValidator {
             throw new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND_IN_ALBUM);
         }
     }
+
+    public void validateNotRecentlyDownloaded(Set<Long> recentDownloadIds) {
+        if (!recentDownloadIds.isEmpty()) {
+            throw new PhotoException(PhotoErrorCode.PHOTO_RECENT_DOWNLOAD_BLOCKED);
+        }
+    }
 }

@@ -49,6 +49,9 @@ public class Photo extends BaseEntity {
     @Column(name = "status", nullable = false)
     private PhotoStatus status;
 
+    @Column(name = "download_user_count", nullable = false)
+    private int downloadUserCount;
+
     @Builder
     private Photo(
             User user,
@@ -56,7 +59,8 @@ public class Photo extends BaseEntity {
             String imageUrl,
             String thumbnailUrl,
             LocalDateTime captureTime,
-            PhotoStatus status
+            PhotoStatus status,
+            int downloadUserCount
     ) {
         this.user = user;
         this.album = album;
@@ -66,6 +70,7 @@ public class Photo extends BaseEntity {
         this.likesCnt = 0;
         this.isDeleted = false;
         this.status = status;
+        this.downloadUserCount = downloadUserCount;
     }
 
     public void updateImageUrl(String imageUrl) {

@@ -21,6 +21,7 @@ public class PhotoMapper {
                 .thumbnailUrl(null)
                 .captureTime(captureTime != null ? captureTime : LocalDateTime.now())
                 .status(PhotoStatus.UPLOADING)
+                .downloadUserCount(0)
                 .build();
     }
 

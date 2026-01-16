@@ -10,7 +10,6 @@ import com.cheeeese.photo.application.logger.PhotoLogger;
 import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
-import com.cheeeese.photo.domain.PhotoHistory;
 import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoDownloadRequest;
@@ -32,11 +31,13 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -112,20 +113,26 @@ public class PhotoService {
                 LocalDateTime.now().minusHours(1)
         );
 
+        photoValidator.validateNotRecentlyDownloaded(recentDownloadIds);
+
         List<PhotoDownloadResponse.DownloadFileInfo> presignedUrls = generateDownloadPresignedUrls(
                 photos, recentDownloadIds
         );
 
-        photos.stream()
-                .filter(photo -> !recentDownloadIds.contains(photo.getId()))
-                .forEach(photo -> photoHistoryRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
-                        .ifPresentOrElse(
-                                PhotoHistory::touch,
-                                () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
-                        )
-                );
+        List<Long> firstDownloadPhotoIds = new ArrayList<>();
 
-        photoLogger.logDownload(user.getId(), request.code(), request.photoIds());
+        for (Photo photo : photos) {
+            try {
+                photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo));
+                firstDownloadPhotoIds.add(photo.getId());
+            } catch (DataIntegrityViolationException ignored) {
+            }
+        }
+
+        if (!firstDownloadPhotoIds.isEmpty()) {
+            photoRepository.incrementDownloadUserCount(firstDownloadPhotoIds);
+        }
+        photoLogger.logDownload(user.getId(), request.code(), request.photoIds(), firstDownloadPhotoIds.size());
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
