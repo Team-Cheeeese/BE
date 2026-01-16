@@ -39,16 +39,15 @@ public class AlbumLogger {
 
     /**
      * [지표 1, 2] 앨범 입장 (신규)
-     * album_joined(user_id, album_code, is_first_join, photo_exist_on_join, visitor_count, joined_at)
+     * album_joined(user_id, album_code, visitor_count, joined_at)
      */
     public void logAlbumJoined(Long userId, String albumCode, int participant, boolean photoExistOnJoin) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_joined | user_key={} album_code={} is_first_join=true photo_exist_on_join={} visitor_count={} joined_at={}",
+            log.info("{} album_joined | user_key={} album_code={} visitor_count={} joined_at={}",
                     STAT_PREFIX,
                     logMaskingUtil.userKey(userId),
                     albumCode,
-                    photoExistOnJoin,
                     participant,
                     LocalDateTime.now()
             );
@@ -68,6 +67,20 @@ public class AlbumLogger {
                     STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, role, LocalDateTime.now());
         } finally {
             MDC.remove("type");
+        }
+    }
+
+    /**
+     * [지표] 앨범 방문자 수 2명 도달
+     * album_id, album_code. participant_count, achieved_at
+     */
+    public void logParticipants2MilestoneAt(Long albumId, String albumCode, LocalDateTime achievedAt) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} album_participants_milestone_at | album_id={} album_code={} participant_count=2 achieved_at={}",
+                    STAT_PREFIX, albumId, albumCode, achievedAt);
+        } finally {
+            MDC.clear();
         }
     }
 }

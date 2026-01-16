@@ -149,6 +149,8 @@ public class AlbumService {
         }
         userRepository.incrementAlbumCnt(currentUser.getId());
 
+        handleParticipantMilestone(album.getId(), album.getCode());
+
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
         int remainingUploadSlots = album.getRemainingUploadSlots();
@@ -248,5 +250,12 @@ public class AlbumService {
     private void onAlbumUserBlacklisted(Long albumId, int photoCnt) {
         albumRepository.decrementPhotoCount(albumId, photoCnt);
         albumRepository.decrementParticipantCount(albumId);
+    }
+
+    private void handleParticipantMilestone(Long albumId, String albumCode) {
+        int updated = albumRepository.markParticipants2Milestone(albumId, LocalDateTime.now());
+        if (updated == 1) {
+            albumLogger.logParticipants2MilestoneAt(albumId, albumCode, LocalDateTime.now());
+        }
     }
 }

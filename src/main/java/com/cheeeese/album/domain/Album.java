@@ -58,6 +58,9 @@ public class Album extends BaseEntity {
     @Column(name = "status", nullable = false)
     private AlbumStatus status;
 
+    @Column(name = "participant_milestone_at")
+    private LocalDateTime participantMilestoneAt;
+
     public enum AlbumStatus {
         ACTIVE, EXPIRED, DELETED
     }

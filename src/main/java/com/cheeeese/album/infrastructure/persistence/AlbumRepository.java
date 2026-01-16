@@ -66,4 +66,25 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
         WHERE a.id = :id
     """)
     int findCurrentPhotoCountById(@Param("id") Long id);
+
+    @Modifying
+    @Query("""
+        UPDATE Album a
+        SET a.currentParticipant = a.currentParticipant + 1
+        WHERE a.id = :albumId
+    """)
+    int incrementParticipantCount(@Param("albumId") Long albumId);
+
+    @Modifying
+    @Query("""
+        UPDATE Album a
+        SET a.participantMilestoneAt = :now
+        WHERE a.id = :albumId
+        AND a.currentParticipant = 2
+        AND a.participantMilestoneAt IS NULL
+    """)
+    int markParticipants2Milestone(
+            @Param("albumId") Long albumId,
+            @Param("now") LocalDateTime now
+    );
 }
