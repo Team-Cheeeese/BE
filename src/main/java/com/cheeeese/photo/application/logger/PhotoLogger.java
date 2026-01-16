@@ -1,6 +1,5 @@
 package com.cheeeese.photo.application.logger;
 
-import com.cheeeese.album.domain.Album;
 import com.cheeeese.global.logging.LogMaskingUtil;
 import com.cheeeese.photo.domain.Photo;
 import lombok.RequiredArgsConstructor;

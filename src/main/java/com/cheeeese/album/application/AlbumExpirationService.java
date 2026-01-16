@@ -4,6 +4,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.cheese4cut.application.logger.Cheese4CutLogger;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.domain.Cheese4cutPhoto;
 import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
@@ -35,6 +36,7 @@ public class AlbumExpirationService {
     private final PhotoRepository photoRepository;
     private final Cheese4cutRepository cheese4cutRepository;
     private final ObjectStorageDeleteUtil objectStorageDeleteUtil;
+    private final Cheese4CutLogger cheese4CutLogger;
 
     @Transactional
     public void expireAlbum(Long albumId) {
@@ -90,7 +92,7 @@ public class AlbumExpirationService {
 
         cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
-        log.info("[AlbumExpiration] Cheese4cut created automatically for album id={}", albumId);
+        cheese4CutLogger.logCheese4CutAutoCreated(albumId);
         return topPhotoIds;
     }
 
