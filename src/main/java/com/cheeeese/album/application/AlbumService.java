@@ -154,7 +154,7 @@ public class AlbumService {
         int remainingUploadSlots = album.getRemainingUploadSlots();
 
         boolean photoExist = album.getCurrentPhotoCount() > 0;
-        albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), photoExist);
+        albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), album.getParticipant(), photoExist);
 
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }

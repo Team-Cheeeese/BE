@@ -153,6 +153,8 @@ public class PhotoService {
 
         userRepository.incrementLikeCnt(photo.getUser().getId());
 
+        photoLogger.logFirstLike(user.getId(), photo);
+
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 

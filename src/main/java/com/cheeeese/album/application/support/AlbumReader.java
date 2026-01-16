@@ -1,11 +1,9 @@
 package com.cheeeese.album.application.support;
 
-import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
-import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

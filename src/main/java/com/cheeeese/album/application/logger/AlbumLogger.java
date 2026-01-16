@@ -20,13 +20,18 @@ public class AlbumLogger {
 
     /**
      * [지표 1] 앨범 생성
-     * album_created(user_id, album_code, expected_participant, created_at)
+     * album_created(user_id, album_code, invitable_count, created_at)
      */
-    public void logAlbumCreated(Long userId, String albumCode, int expectedParticipant) {
+    public void logAlbumCreated(Long userId, String albumCode, int invitableCount) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_created | user_key={} album_code={} expected_participant={} created_at={}",
-                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, expectedParticipant, LocalDateTime.now());
+            log.info("{} album_created | user_key={} album_code={} invitable_count={} created_at={}",
+                    STAT_PREFIX,
+                    logMaskingUtil.userKey(userId),
+                    albumCode,
+                    invitableCount,
+                    LocalDateTime.now()
+            );
         } finally {
             MDC.remove("type");
         }
@@ -34,13 +39,19 @@ public class AlbumLogger {
 
     /**
      * [지표 1, 2] 앨범 입장 (신규)
-     * album_joined(user_id, album_code, is_first_join, photo_exist_on_join, joined_at)
+     * album_joined(user_id, album_code, is_first_join, photo_exist_on_join, visitor_count, joined_at)
      */
-    public void logAlbumJoined(Long userId, String albumCode, boolean photoExistOnJoin) {
+    public void logAlbumJoined(Long userId, String albumCode, int participant, boolean photoExistOnJoin) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_joined | user_key={} album_code={} is_first_join=true photo_exist_on_join={} joined_at={}",
-                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, photoExistOnJoin, LocalDateTime.now());
+            log.info("{} album_joined | user_key={} album_code={} is_first_join=true photo_exist_on_join={} visitor_count={} joined_at={}",
+                    STAT_PREFIX,
+                    logMaskingUtil.userKey(userId),
+                    albumCode,
+                    photoExistOnJoin,
+                    participant,
+                    LocalDateTime.now()
+            );
         } finally {
             MDC.remove("type");
         }

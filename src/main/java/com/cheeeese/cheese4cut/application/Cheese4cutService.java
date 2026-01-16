@@ -144,7 +144,7 @@ public class Cheese4cutService {
 
         cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
-        log.info("[Cheese4cut] Cheese4cut Finalized | album_id={} maker_id={} photo_ids={} finalized_at={}",
+        log.info("[Cheese4cut] Cheese4cut Finalized | album_id={} maker_id={} photo_ids={} finalized_at={} 4cut_created=true",
                 album.getId(), user.getId(), request.photoIds(), LocalDateTime.now());
     }
 

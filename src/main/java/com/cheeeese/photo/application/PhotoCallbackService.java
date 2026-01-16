@@ -22,7 +22,6 @@ public class PhotoCallbackService {
     private final PhotoQueryService photoQueryService;
     private final AlbumRepository albumRepository;
     private final UserService userService;
-
     private final PhotoLogger photoLogger;
 
     public void markUploadCompleted(PhotoCompleteRequest request) {
@@ -40,6 +39,8 @@ public class PhotoCallbackService {
         Photo photo = photoRepository.findById(request.photoId())
                 .orElseThrow(() -> new PhotoException(PhotoErrorCode.PHOTO_NOT_FOUND));
 
+        Long albumId = photo.getAlbum().getId();
+
         int albumUpdated = albumRepository.incrementPhotoCount(photo.getAlbum().getId(), 1);
         if (albumUpdated == 0) {
             photoRepository.updateStatusAndUrl(
@@ -50,12 +51,13 @@ public class PhotoCallbackService {
             );
             throw new PhotoException(PhotoErrorCode.PHOTO_COUNT_INCREMENT_FAILED);
         }
+        int updatedPhotoCount = albumRepository.findCurrentPhotoCountById(albumId);
 
         userService.incrementPhotoCount(photo.getUser().getId(), 1);
 
         String albumCode = photoRepository.findAlbumCodeByPhotoId(request.photoId());
 
-        photoLogger.logUploadCompleted(photo.getUser().getId(), albumCode, photo.getId());
+        photoLogger.logUploadCompleted(photo.getUser().getId(), albumCode, updatedPhotoCount, photo.getId());
 
         if (albumCode != null) {
             photoQueryService.invalidatePhotoCache(albumCode);

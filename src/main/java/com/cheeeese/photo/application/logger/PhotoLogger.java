@@ -1,6 +1,8 @@
 package com.cheeeese.photo.application.logger;
 
+import com.cheeeese.album.domain.Album;
 import com.cheeeese.global.logging.LogMaskingUtil;
+import com.cheeeese.photo.domain.Photo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -20,13 +22,19 @@ public class PhotoLogger {
 
     /**
      * [지표 2, 3] 사진 업로드 완료
-     * photo_upload_completed(user_id, album_code, photo_id, created_at)
+     * photo_upload_completed(user_id, album_code, photo_count, photo_id, created_at)
      */
-    public void logUploadCompleted(Long userId, String albumCode, Long photoId) {
+    public void logUploadCompleted(Long userId, String albumCode, int photoCount, Long photoId) {
         try {
             MDC.put("type", "photo");
-            log.info("{} photo_upload_completed | user_key={} album_code={} photo_id={} created_at={}",
-                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, photoId, LocalDateTime.now());
+            log.info("{} photo_upload_completed | user_key={} album_code={} photo_count={} photo_id={} created_at={}",
+                    STAT_PREFIX,
+                    logMaskingUtil.userKey(userId),
+                    albumCode,
+                    photoCount,
+                    photoId,
+                    LocalDateTime.now()
+            );
         } finally {
             MDC.remove("type");
         }
@@ -40,7 +48,30 @@ public class PhotoLogger {
         try {
             MDC.put("type", "photo");
             log.info("{} photo_download_log | user_key={} album_code={} photo_ids={} requested_at={}",
-                    STAT_PREFIX, logMaskingUtil.userKey(userId), albumCode, photoIds, LocalDateTime.now());
+                    STAT_PREFIX,
+                    logMaskingUtil.userKey(userId),
+                    albumCode,
+                    photoIds,
+                    LocalDateTime.now()
+            );
+        } finally {
+            MDC.remove("type");
+        }
+    }
+
+    /**
+     * [지표] 고유 좋아요 사용자 누른 사람 수
+     * liker_count (각 사용자의 첫 좋아요 시)
+     */
+    public void logFirstLike(Long userId, Photo photo) {
+        try {
+            MDC.put("type", "photo");
+            log.info("{} photo_first_liked | user_key={} photo_id={} liker_count={}",
+                    STAT_PREFIX,
+                    logMaskingUtil.userKey(userId),
+                    photo.getId(),
+                    photo.getLikesCnt()
+            );
         } finally {
             MDC.remove("type");
         }
