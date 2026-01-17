@@ -22,16 +22,50 @@ public class ObjectStorageDeleteUtil {
     @Value("${ncp.object-storage.thumbnail-bucket}")
     private String thumbnailBucket;
 
+    // =========================
+    // 실패해도 로그만 남기는 용
+    // =========================
+
     public void deletePhotoObjects(String imageUrl, String thumbnailUrl) {
-        deleteObjectIfPresent(originalBucket, extractObjectKey(imageUrl, "say-cheeeese/"));
+        deletePhotoObjectsInternal(imageUrl, thumbnailUrl, true, false);
+    }
+
+    public void deleteThumbnailVariants(String thumbnailUrl) {
+        deleteThumbnailVariantsInternal(thumbnailUrl, false);
+    }
+
+    // =========================
+    // Strict 메서드: 실패 시 예외 던짐
+    // =========================
+
+    public void deletePhotoObjectsStrict(String imageUrl, String thumbnailUrl, boolean deleteOriginal) {
+        deletePhotoObjectsInternal(imageUrl, thumbnailUrl, deleteOriginal, true);
+    }
+
+    public void deleteThumbnailVariantsStrict(String thumbnailUrl) {
+        deleteThumbnailVariantsInternal(thumbnailUrl, true);
+    }
+
+    private void deletePhotoObjectsInternal(String imageUrl, String thumbnailUrl,
+                                            boolean deleteOriginal, boolean throwOnFailure) {
+        if (deleteOriginal) {
+            deleteObjectIfPresent(originalBucket, extractObjectKey(imageUrl, "say-cheeeese/"), throwOnFailure);
+        }
 
         List<String> thumbnailKeys = buildThumbnailKeys(thumbnailUrl);
         for (String key : thumbnailKeys) {
-            deleteObjectIfPresent(thumbnailBucket, key);
+            deleteObjectIfPresent(thumbnailBucket, key, throwOnFailure);
         }
     }
 
-    private void deleteObjectIfPresent(String bucket, String objectKey) {
+    private void deleteThumbnailVariantsInternal(String thumbnailUrl, boolean throwOnFailure) {
+        List<String> thumbnailKeys = buildThumbnailKeys(thumbnailUrl);
+        for (String key : thumbnailKeys) {
+            deleteObjectIfPresent(thumbnailBucket, key, throwOnFailure);
+        }
+    }
+
+    private void deleteObjectIfPresent(String bucket, String objectKey, boolean throwOnFailure) {
         if (objectKey == null || objectKey.isBlank()) {
             return;
         }
@@ -42,6 +76,12 @@ public class ObjectStorageDeleteUtil {
                     .build());
         } catch (Exception exception) {
             log.warn("[ObjectStorage] Failed to delete object bucket={} key={}", bucket, objectKey, exception);
+
+            if (throwOnFailure) {
+                throw new IllegalStateException(
+                        "Failed to delete object bucket=" + bucket + " key=" + objectKey, exception
+                );
+            }
         }
     }
 
