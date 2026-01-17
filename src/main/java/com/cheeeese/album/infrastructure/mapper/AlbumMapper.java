@@ -39,6 +39,7 @@ public class AlbumMapper {
                 .isInfoAvailable(isInfoAvailable)
                 .expiredAt(expiredAt)
                 .status(Album.AlbumStatus.ACTIVE)
+                .downloadUserCount(0)
                 .build();
     }
 

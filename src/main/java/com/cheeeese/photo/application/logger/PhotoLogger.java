@@ -41,16 +41,15 @@ public class PhotoLogger {
 
     /**
      * [지표 3, 5] 사진 다운로드
-     * photo_download_log(user_id, album_code, photo_ids, downloader_count, requested_at)
+     * photo_download_log(user_id, album_code, photo_ids, requested_at)
      */
-    public void logDownload(Long userId, String albumCode, List<Long> photoIds, int downloaderCount) {
+    public void logDownload(Long userId, String albumCode, int downloaderCount) {
         try {
             MDC.put("type", "photo");
-            log.info("{} photo_download_log | user_key={} album_code={} photo_ids={} downloader_count={} requested_at={}",
+            log.info("{} photo_download_log | user_key={} album_code={} downloader_count={} requested_at={}",
                     STAT_PREFIX,
                     logMaskingUtil.userKey(userId),
                     albumCode,
-                    photoIds,
                     downloaderCount,
                     LocalDateTime.now()
             );

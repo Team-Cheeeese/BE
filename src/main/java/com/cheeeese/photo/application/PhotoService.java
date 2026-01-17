@@ -10,6 +10,7 @@ import com.cheeeese.photo.application.logger.PhotoLogger;
 import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.application.validator.PhotoValidator;
 import com.cheeeese.photo.domain.Photo;
+import com.cheeeese.photo.domain.PhotoHistory;
 import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.request.PhotoDownloadRequest;
@@ -113,26 +114,33 @@ public class PhotoService {
                 LocalDateTime.now().minusHours(1)
         );
 
-        photoValidator.validateNotRecentlyDownloaded(recentDownloadIds);
-
         List<PhotoDownloadResponse.DownloadFileInfo> presignedUrls = generateDownloadPresignedUrls(
                 photos, recentDownloadIds
         );
 
-        List<Long> firstDownloadPhotoIds = new ArrayList<>();
+        boolean isFirstAlbumDownloaded = !photoHistoryRepository.existsByUserIdAndPhotoAlbumId(user.getId(), album.getId());
 
         for (Photo photo : photos) {
-            try {
-                photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo));
-                firstDownloadPhotoIds.add(photo.getId());
-            } catch (DataIntegrityViolationException ignored) {
+            if (recentDownloadIds.contains(photo.getId())) {
+                continue;
             }
+            photoHistoryRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
+                    .ifPresentOrElse(
+                            PhotoHistory::touch,
+                            () -> {
+                                photoHistoryRepository.save(
+                                        PhotoHistoryMapper.toEntity(user, photo)
+                                );
+                            }
+                    );
         }
 
-        if (!firstDownloadPhotoIds.isEmpty()) {
-            photoRepository.incrementDownloadUserCount(firstDownloadPhotoIds);
+        if (isFirstAlbumDownloaded) {
+            albumRepository.incrementDownloadUserCount(album.getId());
         }
-        photoLogger.logDownload(user.getId(), request.code(), request.photoIds(), firstDownloadPhotoIds.size());
+        int downloaderCount = albumRepository.findDownloadUserCount(album.getId());
+
+        photoLogger.logDownload(user.getId(), request.code(), downloaderCount);
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }

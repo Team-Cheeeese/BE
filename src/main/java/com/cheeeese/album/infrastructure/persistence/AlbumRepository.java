@@ -87,4 +87,19 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
             @Param("albumId") Long albumId,
             @Param("now") LocalDateTime now
     );
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+        UPDATE Album a
+        SET a.downloadUserCount = a.downloadUserCount + 1
+        WHERE a.id = :albumId
+    """)
+    void incrementDownloadUserCount(@Param("albumId") Long albumId);
+
+    @Query("""
+        SELECT a.downloadUserCount
+        FROM Album a
+        WHERE a.id = :albumId
+    """)
+    int findDownloadUserCount(@Param("albumId") Long albumId);
 }

@@ -225,12 +225,4 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         WHERE p.id IN :photoIds
     """)
     void softDeleteAllByIds(@Param("photoIds") List<Long> photoIds);
-
-    @Modifying(clearAutomatically = true)
-    @Query("""
-        UPDATE Photo p
-        SET p.downloadUserCount = p.downloadUserCount + 1
-        WHERE p.id IN :photoIds
-    """)
-    void incrementDownloadUserCount(@Param("photoIds") List<Long> photoIds);
 }
