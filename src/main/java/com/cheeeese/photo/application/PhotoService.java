@@ -1,5 +1,6 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.application.logger.AlbumLogger;
 import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
@@ -32,13 +33,11 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -62,8 +61,7 @@ public class PhotoService {
     private final AlbumReader albumReader;
     private final PresignedUrlService presignedUrlService;
     private final PhotoQueryService photoQueryService;
-
-    private final PhotoLogger photoLogger;
+    private final AlbumLogger albumLogger;
 
     @Value("${ncp.object-storage.bucket}")
     private String bucket;
@@ -134,7 +132,7 @@ public class PhotoService {
         }
         int downloaderCount = photoHistoryRepository.countDistinctDownloadUsersByAlbumId(album.getId());
 
-        photoLogger.logDownload(user.getId(), request.code(), downloaderCount);
+        albumLogger.logDownload(user.getId(), request.code(), downloaderCount);
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
@@ -164,7 +162,7 @@ public class PhotoService {
 
         int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
 
-        photoLogger.logFirstLike(user.getId(), photo.getAlbum().getId(), likerCount);
+        albumLogger.logFirstLike(user.getId(), photo.getAlbum().getId(), likerCount);
 
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }

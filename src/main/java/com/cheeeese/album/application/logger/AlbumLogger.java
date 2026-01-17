@@ -71,6 +71,42 @@ public class AlbumLogger {
     }
 
     /**
+     * [지표 3, 5] 사진 다운로드
+     * album_download_log(user_id, album_code, downloaderCount)
+     */
+    public void logDownload(Long userId, String albumCode, int downloaderCount) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} album_download_log | user_key={} album_code={} downloader_count={}",
+                    STAT_PREFIX,
+                    logMaskingUtil.userKey(userId),
+                    albumCode,
+                    downloaderCount
+            );
+        } finally {
+            MDC.remove("type");
+        }
+    }
+
+    /**
+     * [지표] 고유 좋아요 사용자 누른 사람 수
+     * liker_count (앨범당 각 사용자의 첫 좋아요 시)
+     */
+    public void logFirstLike(Long userId, Long albumId, int likerCount) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} album_first_liked | user_key={} album_id={} liker_count={}",
+                    STAT_PREFIX,
+                    logMaskingUtil.userKey(userId),
+                    albumId,
+                    likerCount
+            );
+        } finally {
+            MDC.remove("type");
+        }
+    }
+
+    /**
      * [지표] 앨범 방문자 수 2명 도달
      * album_id, album_code. participant_count, achieved_at
      */
