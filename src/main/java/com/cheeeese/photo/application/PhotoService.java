@@ -158,7 +158,7 @@ public class PhotoService {
 
         int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
 
-        albumLogger.logFirstLike(user.getId(), photo.getAlbum().getId(), likerCount);
+        albumLogger.logFirstLike(user.getId(), photo.getAlbum().getCode(), likerCount);
 
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }

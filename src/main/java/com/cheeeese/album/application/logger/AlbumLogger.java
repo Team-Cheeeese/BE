@@ -39,16 +39,17 @@ public class AlbumLogger {
 
     /**
      * [지표 1, 2] 앨범 입장 (신규)
-     * album_joined(user_id, album_code, visitor_count, joined_at)
+     * album_joined(user_id, album_code, visitor_count, photo_exist_on_join, joined_at)
      */
     public void logAlbumJoined(Long userId, String albumCode, int participant, boolean photoExistOnJoin) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_joined | user_key={} album_code={} visitor_count={} joined_at={}",
+            log.info("{} album_joined | user_key={} album_code={} visitor_count={} photo_exist_on_join={} joined_at={}",
                     STAT_PREFIX,
                     logMaskingUtil.userKey(userId),
                     albumCode,
                     participant,
+                    photoExistOnJoin,
                     LocalDateTime.now()
             );
         } finally {
@@ -92,13 +93,13 @@ public class AlbumLogger {
      * [지표] 고유 좋아요 사용자 누른 사람 수
      * liker_count (앨범당 각 사용자의 첫 좋아요 시)
      */
-    public void logFirstLike(Long userId, Long albumId, int likerCount) {
+    public void logFirstLike(Long userId, String albumCode, int likerCount) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_first_liked | user_key={} album_id={} liker_count={}",
+            log.info("{} album_first_liked | user_key={} album_code={} liker_count={}",
                     STAT_PREFIX,
                     logMaskingUtil.userKey(userId),
-                    albumId,
+                    albumCode,
                     likerCount
             );
         } finally {
@@ -110,11 +111,11 @@ public class AlbumLogger {
      * [지표] 앨범 방문자 수 2명 도달
      * album_id, participant_count, achieved_at
      */
-    public void logParticipants2MilestoneAt(Long albumId, LocalDateTime achievedAt) {
+    public void logParticipants2MilestoneAt(String albumCode, LocalDateTime achievedAt) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_participants_milestone_at | album_id={} participant_count=2 achieved_at={}",
-                    STAT_PREFIX, albumId, achievedAt);
+            log.info("{} album_participants_milestone_at | album_code={} achieved_at={}",
+                    STAT_PREFIX, albumCode, achievedAt);
         } finally {
             MDC.clear();
         }

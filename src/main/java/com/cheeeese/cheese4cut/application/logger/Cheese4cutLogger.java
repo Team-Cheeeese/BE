@@ -18,21 +18,21 @@ public class Cheese4cutLogger {
 
     private final LogMaskingUtil logMaskingUtil;
 
-    public void logCheese4CutFinalized(Long userId, List<Long> photoIds, Long albumId) {
+    public void logCheese4CutFinalized(Long userId, List<Long> photoIds, String albumCode) {
         try {
             MDC.put("type", "cheese4cut");
-            log.info("[Cheese4cut] Cheese4cut Finalized | album_id={} maker_id={} photo_ids={} finalized_at={} 4cut_created=true",
-                    albumId, logMaskingUtil.userKey(userId), photoIds, LocalDateTime.now());
+            log.info("[Cheese4cut] Cheese4cut Finalized | album_code={} maker_id={} photo_ids={} finalized_at={} 4cut_created=true",
+                    albumCode, logMaskingUtil.userKey(userId), photoIds, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }
     }
 
-    public void logCheese4CutAutoCreated(Long albumId) {
+    public void logCheese4CutAutoCreated(String albumCode) {
         try {
             MDC.put("type", "cheese4cut");
-            log.info("[Cheese4cut] Cheese4cut created automatically | album id={} created_at={}",
-                    albumId, LocalDateTime.now());
+            log.info("[Cheese4cut] Cheese4cut created automatically | album_code={} created_at={}",
+                    albumCode, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }

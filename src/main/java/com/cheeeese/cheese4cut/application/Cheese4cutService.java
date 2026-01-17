@@ -145,7 +145,7 @@ public class Cheese4cutService {
 
         cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
-        cheese4cutLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getId());
+        cheese4cutLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
     }
 
     private List<Photo> getOrderedPhotos(List<Long> photoIds) {

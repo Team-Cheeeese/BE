@@ -254,7 +254,7 @@ public class AlbumService {
 
     private void handleParticipantMilestone(Album album) {
         if (album.getCurrentParticipant() == 2) {
-            albumLogger.logParticipants2MilestoneAt(album.getId(), LocalDateTime.now());
+            albumLogger.logParticipants2MilestoneAt(album.getCode(), LocalDateTime.now());
         }
     }
 }
