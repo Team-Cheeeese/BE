@@ -60,16 +60,16 @@ public class PhotoLogger {
 
     /**
      * [지표] 고유 좋아요 사용자 누른 사람 수
-     * liker_count (각 사용자의 첫 좋아요 시)
+     * liker_count (앨범당 각 사용자의 첫 좋아요 시)
      */
-    public void logFirstLike(Long userId, Photo photo) {
+    public void logFirstLike(Long userId, Long albumId, int likerCount) {
         try {
-            MDC.put("type", "photo");
-            log.info("{} photo_first_liked | user_key={} photo_id={} liker_count={}",
+            MDC.put("type", "album");
+            log.info("{} album_first_liked | user_key={} album_id={} liker_count={}",
                     STAT_PREFIX,
                     logMaskingUtil.userKey(userId),
-                    photo.getId(),
-                    photo.getLikesCnt()
+                    albumId,
+                    likerCount
             );
         } finally {
             MDC.remove("type");

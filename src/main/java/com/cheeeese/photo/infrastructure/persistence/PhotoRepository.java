@@ -48,7 +48,7 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
             Pageable pageable
     );
 
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query("""
         UPDATE Photo p
         SET p.likesCnt = p.likesCnt + 1
