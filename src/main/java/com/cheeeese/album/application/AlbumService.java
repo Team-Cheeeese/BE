@@ -149,7 +149,9 @@ public class AlbumService {
         }
         userRepository.incrementAlbumCnt(currentUser.getId());
 
-        handleParticipantMilestone(album);
+        int participantCount = albumRepository.findCurrentParticipant(album.getId());
+
+        handleParticipantMilestone(album.getCode(), participantCount);
 
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
@@ -252,9 +254,9 @@ public class AlbumService {
         albumRepository.decrementParticipantCount(albumId);
     }
 
-    private void handleParticipantMilestone(Album album) {
-        if (album.getCurrentParticipant() == 2) {
-            albumLogger.logParticipants2MilestoneAt(album.getCode(), LocalDateTime.now());
+    private void handleParticipantMilestone(String albumCode, int participantCount) {
+        if (participantCount == 2) {
+            albumLogger.logParticipants2MilestoneAt(albumCode, LocalDateTime.now());
         }
     }
 }

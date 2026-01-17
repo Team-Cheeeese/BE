@@ -47,8 +47,8 @@ public class LoggingAspect {
 
             throw ex;
         } finally {
-            MDC.remove("executionTime");
-            MDC.remove("status");
+            MDC.remove("executionTimeMs");
+            MDC.remove("methodStatus");
             MDC.remove("exceptionType");
         }
     }

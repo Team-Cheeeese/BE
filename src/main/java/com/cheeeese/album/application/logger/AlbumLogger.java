@@ -117,7 +117,7 @@ public class AlbumLogger {
             log.info("{} album_participants_milestone_at | album_code={} achieved_at={}",
                     STAT_PREFIX, albumCode, achievedAt);
         } finally {
-            MDC.clear();
+            MDC.remove("type");
         }
     }
 }

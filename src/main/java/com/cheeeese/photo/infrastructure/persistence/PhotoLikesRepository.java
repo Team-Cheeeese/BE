@@ -67,4 +67,6 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
         WHERE p.album.id = :albumId
     """)
     int countDistinctLikeUsersByAlbumId(@Param("albumId") Long albumId);
+
+    boolean existsByUserIdAndPhotoAlbumId(Long userId, Long albumId);
 }

@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -156,6 +157,11 @@ public class PhotoService {
 
         userRepository.incrementLikeCnt(photo.getUser().getId());
 
+        boolean isFirstAlbumLike = !photoLikesRepository.existsByUserIdAndPhotoAlbumId(user.getId(), photo.getAlbum().getId());
+
+        if (!isFirstAlbumLike) {
+            return;
+        }
         int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
 
         albumLogger.logFirstLike(user.getId(), photo.getAlbum().getCode(), likerCount);
