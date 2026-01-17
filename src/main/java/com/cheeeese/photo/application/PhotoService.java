@@ -157,15 +157,14 @@ public class PhotoService {
 
         userRepository.incrementLikeCnt(photo.getUser().getId());
 
-        boolean isFirstAlbumLike = !photoLikesRepository.existsByUserIdAndPhotoAlbumId(user.getId(), photo.getAlbum().getId());
+        boolean isFirstAlbumLike = !photoLikesRepository.existsByUserIdAndPhotoAlbumId(
+                user.getId(), photo.getAlbum().getId()
+        );
 
-        if (!isFirstAlbumLike) {
-            return;
+        if (isFirstAlbumLike) {
+            int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
+            albumLogger.logFirstLike(user.getId(), photo.getAlbum().getCode(), likerCount);
         }
-        int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
-
-        albumLogger.logFirstLike(user.getId(), photo.getAlbum().getCode(), likerCount);
-
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 
