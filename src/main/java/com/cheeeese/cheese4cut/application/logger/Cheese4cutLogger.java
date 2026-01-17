@@ -22,7 +22,7 @@ public class Cheese4cutLogger {
         try {
             MDC.put("type", "cheese4cut");
             log.info("[Cheese4cut] Cheese4cut Finalized | album_id={} maker_id={} photo_ids={} finalized_at={} 4cut_created=true",
-                    albumId, userId, photoIds, LocalDateTime.now());
+                    albumId, logMaskingUtil.userKey(userId), photoIds, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }
