@@ -123,11 +123,7 @@ public class PhotoService {
             photoHistoryRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
                     .ifPresentOrElse(
                             PhotoHistory::touch,
-                            () -> {
-                                photoHistoryRepository.save(
-                                        PhotoHistoryMapper.toEntity(user, photo)
-                                );
-                            }
+                            () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
                     );
         }
         int downloaderCount = photoHistoryRepository.countDistinctDownloadUsersByAlbumId(album.getId());
