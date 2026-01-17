@@ -58,9 +58,6 @@ public class Album extends BaseEntity {
     @Column(name = "status", nullable = false)
     private AlbumStatus status;
 
-    @Column(name = "participant_milestone_at")
-    private LocalDateTime participantMilestoneAt;
-
     public enum AlbumStatus {
         ACTIVE, EXPIRED, DELETED
     }
@@ -86,8 +83,7 @@ public class Album extends BaseEntity {
             int currentPhotoCount,
             boolean isInfoAvailable,
             LocalDateTime expiredAt,
-            AlbumStatus status,
-            LocalDateTime participantMilestoneAt
+            AlbumStatus status
     ) {
         this.makerId = makerId;
         this.title = title;
@@ -101,6 +97,5 @@ public class Album extends BaseEntity {
         this.isInfoAvailable = isInfoAvailable;
         this.expiredAt = expiredAt;
         this.status = status;
-        this.participantMilestoneAt = participantMilestoneAt;
     }
 }

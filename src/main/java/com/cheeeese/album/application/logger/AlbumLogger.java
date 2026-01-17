@@ -108,13 +108,13 @@ public class AlbumLogger {
 
     /**
      * [지표] 앨범 방문자 수 2명 도달
-     * album_id, album_code. participant_count, achieved_at
+     * album_id, participant_count, achieved_at
      */
-    public void logParticipants2MilestoneAt(Long albumId, String albumCode, LocalDateTime achievedAt) {
+    public void logParticipants2MilestoneAt(Long albumId, LocalDateTime achievedAt) {
         try {
             MDC.put("type", "album");
-            log.info("{} album_participants_milestone_at | album_id={} album_code={} participant_count=2 achieved_at={}",
-                    STAT_PREFIX, albumId, albumCode, achievedAt);
+            log.info("{} album_participants_milestone_at | album_id={} participant_count=2 achieved_at={}",
+                    STAT_PREFIX, albumId, achievedAt);
         } finally {
             MDC.clear();
         }
