@@ -62,6 +62,11 @@ services:
     restart: always
     networks:
       - cheeeeese-network
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: cheeeeese.backend.dev.green
 
   backend-blue-dev:
     image: mozzarella32/backend:dev
@@ -75,6 +80,11 @@ services:
     restart: always
     networks:
       - cheeeeese-network
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: cheeeeese.backend.dev.blue
 
 # ------------------------------------------------------------
 # ✅ 네트워크 및 볼륨 정의
