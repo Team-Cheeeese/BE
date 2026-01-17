@@ -118,8 +118,6 @@ public class PhotoService {
                 photos, recentDownloadIds
         );
 
-        boolean isFirstAlbumDownloaded = !photoHistoryRepository.existsByUserIdAndPhotoAlbumId(user.getId(), album.getId());
-
         for (Photo photo : photos) {
             if (recentDownloadIds.contains(photo.getId())) {
                 continue;
@@ -134,11 +132,7 @@ public class PhotoService {
                             }
                     );
         }
-
-        if (isFirstAlbumDownloaded) {
-            albumRepository.incrementDownloadUserCount(album.getId());
-        }
-        int downloaderCount = albumRepository.findDownloadUserCount(album.getId());
+        int downloaderCount = photoHistoryRepository.countDistinctDownloadUsersByAlbumId(album.getId());
 
         photoLogger.logDownload(user.getId(), request.code(), downloaderCount);
 
