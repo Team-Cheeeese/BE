@@ -8,6 +8,7 @@ import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
+import com.cheeeese.cheese4cut.application.logger.Cheese4cutLogger;
 import com.cheeeese.cheese4cut.application.validator.Cheese4cutValidator;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
@@ -33,7 +34,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +55,7 @@ public class Cheese4cutService {
     private final AlbumValidator albumValidator;
     private final Cheese4cutValidator cheese4cutValidator;
     private final CdnUrlResolver cdnUrlResolver;
+    private final Cheese4cutLogger cheese4cutLogger;
 
     @Transactional(readOnly = true)
     public Cheese4cutResponse getCheese4cutByAlbumCode(Authentication authentication, String code) {
@@ -144,8 +145,7 @@ public class Cheese4cutService {
 
         cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
-        log.info("[Cheese4cut] Cheese4cut Finalized | album_id={} maker_id={} photo_ids={} finalized_at={}",
-                album.getId(), user.getId(), request.photoIds(), LocalDateTime.now());
+        cheese4cutLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
     }
 
     private List<Photo> getOrderedPhotos(List<Long> photoIds) {

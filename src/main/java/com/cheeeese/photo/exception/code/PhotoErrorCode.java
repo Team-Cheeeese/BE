@@ -32,6 +32,7 @@ public enum PhotoErrorCode implements BaseCode {
     PHOTO_LIKES_NOT_FOUND(HttpStatus.NOT_FOUND, "사진에 대한 좋아요 내역이 존재하지 않습니다."),
     PHOTO_NOT_FOUND_IN_ALBUM(HttpStatus.NOT_FOUND, "해당 사진은 이 앨범에 포함되어 있지 않습니다."),
     PHOTO_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 사진입니다."),
+    PHOTO_RECENT_DOWNLOAD_BLOCKED(HttpStatus.CONFLICT, "1시간 이내에 다운로드한 사진입니다."),
     ;
 
     private final HttpStatus httpStatus;

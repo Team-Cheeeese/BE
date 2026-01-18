@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +16,10 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class MDCLoggingFilter extends OncePerRequestFilter {
+
+    private final LogMaskingUtil logMaskingUtil;
 
     @Override
     protected void doFilterInternal(
@@ -23,20 +27,20 @@ public class MDCLoggingFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain chain
     ) throws ServletException, IOException {
-        String traceId = UUID.randomUUID().toString().substring(0, 8);
-        MDC.put("traceId", traceId);
-
         try {
+            MDC.put("traceId", UUID.randomUUID().toString().substring(0, 8));
+            MDC.put("requestUri", request.getRequestURI());
+            MDC.put("httpMethod", request.getMethod());
+
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication != null
                     && authentication.isAuthenticated()
-                    && !"anonymousUser".equals(authentication.getPrincipal())
+                    && authentication.getPrincipal() instanceof CustomUserDetails userDetails
             ) {
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-                MDC.put("userId", String.valueOf(userDetails.getUser().getId()));
+                MDC.put("userKey", logMaskingUtil.userKey(userDetails.getUser().getId()));
             } else {
-                MDC.put("userId", "null");
+                MDC.put("userKey", "null");
             }
             chain.doFilter(request, response);
         } finally {

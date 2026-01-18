@@ -37,4 +37,12 @@ public interface PhotoHistoryRepository extends JpaRepository<PhotoHistory, Long
     );
 
     Optional<PhotoHistory> findByUserIdAndPhotoId(Long userId, Long photoId);
+
+    @Query("""
+        SELECT COUNT(DISTINCT ph.user.id)
+        FROM PhotoHistory ph
+        JOIN ph.photo p
+        WHERE p.album.id = :albumId
+    """)
+    int countDistinctDownloadUsersByAlbumId(@Param("albumId") Long albumId);
 }

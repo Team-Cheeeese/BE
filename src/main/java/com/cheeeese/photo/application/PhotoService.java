@@ -1,5 +1,6 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.application.logger.AlbumLogger;
 import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
@@ -39,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,8 +62,7 @@ public class PhotoService {
     private final AlbumReader albumReader;
     private final PresignedUrlService presignedUrlService;
     private final PhotoQueryService photoQueryService;
-
-    private final PhotoLogger photoLogger;
+    private final AlbumLogger albumLogger;
 
     @Value("${ncp.object-storage.bucket}")
     private String bucket;
@@ -116,16 +117,19 @@ public class PhotoService {
                 photos, recentDownloadIds
         );
 
-        photos.stream()
-                .filter(photo -> !recentDownloadIds.contains(photo.getId()))
-                .forEach(photo -> photoHistoryRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
-                        .ifPresentOrElse(
-                                PhotoHistory::touch,
-                                () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
-                        )
-                );
+        for (Photo photo : photos) {
+            if (recentDownloadIds.contains(photo.getId())) {
+                continue;
+            }
+            photoHistoryRepository.findByUserIdAndPhotoId(user.getId(), photo.getId())
+                    .ifPresentOrElse(
+                            PhotoHistory::touch,
+                            () -> photoHistoryRepository.save(PhotoHistoryMapper.toEntity(user, photo))
+                    );
+        }
+        int downloaderCount = photoHistoryRepository.countDistinctDownloadUsersByAlbumId(album.getId());
 
-        photoLogger.logDownload(user.getId(), request.code(), request.photoIds());
+        albumLogger.logDownload(user.getId(), request.code(), downloaderCount);
 
         return PhotoMapper.toPhotoDownloadResponse(presignedUrls);
     }
@@ -153,6 +157,14 @@ public class PhotoService {
 
         userRepository.incrementLikeCnt(photo.getUser().getId());
 
+        boolean isFirstAlbumLike = !photoLikesRepository.existsByUserIdAndPhotoAlbumId(
+                user.getId(), photo.getAlbum().getId()
+        );
+
+        if (isFirstAlbumLike) {
+            int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
+            albumLogger.logFirstLike(user.getId(), photo.getAlbum().getCode(), likerCount);
+        }
         photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
     }
 

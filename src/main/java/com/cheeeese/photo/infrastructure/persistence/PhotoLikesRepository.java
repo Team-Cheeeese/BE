@@ -59,4 +59,14 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
         WHERE pl.photo.id IN :photoIds
     """)
     void deleteAllByPhotoIds(@Param("photoIds") List<Long> photoIds);
+
+    @Query("""
+        SELECT COUNT(DISTINCT pl.user.id)
+        FROM PhotoLikes pl
+        JOIN pl.photo p
+        WHERE p.album.id = :albumId
+    """)
+    int countDistinctLikeUsersByAlbumId(@Param("albumId") Long albumId);
+
+    boolean existsByUserIdAndPhotoAlbumId(Long userId, Long albumId);
 }

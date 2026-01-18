@@ -149,12 +149,16 @@ public class AlbumService {
         }
         userRepository.incrementAlbumCnt(currentUser.getId());
 
+        int participantCount = albumRepository.findCurrentParticipant(album.getId());
+
+        handleParticipantMilestone(album.getCode(), participantCount);
+
         List<NewEnterResponse.RecentPhotoResponse> recentPhotos = getRecentPhotosWithUploaderInfo(album.getId());
 
         int remainingUploadSlots = album.getRemainingUploadSlots();
 
         boolean photoExist = album.getCurrentPhotoCount() > 0;
-        albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), photoExist);
+        albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), album.getParticipant(), photoExist);
 
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
@@ -248,5 +252,11 @@ public class AlbumService {
     private void onAlbumUserBlacklisted(Long albumId, int photoCnt) {
         albumRepository.decrementPhotoCount(albumId, photoCnt);
         albumRepository.decrementParticipantCount(albumId);
+    }
+
+    private void handleParticipantMilestone(String albumCode, int participantCount) {
+        if (participantCount == 2) {
+            albumLogger.logParticipants2MilestoneAt(albumCode, LocalDateTime.now());
+        }
     }
 }
