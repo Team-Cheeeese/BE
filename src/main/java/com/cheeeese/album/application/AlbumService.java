@@ -180,7 +180,7 @@ public class AlbumService {
 
         removeTargetUserLikes(album.getId(), targetUserId);
 
-        UserStatsImpact impact = removeUserFromAlbum(album.getId(), targetUserId);
+        UserStatsImpact impact = removeTargetUserOwned(album.getId(), targetUserId);
 
         userService.onAlbumUserBlacklisted(targetUserId, impact.photoCnt(), impact.likesCnt());
 
@@ -238,7 +238,7 @@ public class AlbumService {
                 .toList();
     }
 
-    private UserStatsImpact removeUserFromAlbum(Long albumId, Long userId) {
+    private UserStatsImpact removeTargetUserOwned(Long albumId, Long userId) {
         // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
         int photoCnt = photoRepository.countNotDeletedPhotosByAlbumAndUser(albumId, userId);
         int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
