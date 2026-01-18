@@ -25,6 +25,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.domain.model.LikeImpact;
 import com.cheeeese.user.domain.model.UserStatsImpact;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
@@ -177,6 +178,8 @@ public class AlbumService {
 
         targetAlbum.blacklist();
 
+        removeTargetUserLikes(album.getId(), targetUserId);
+
         UserStatsImpact impact = removeUserFromAlbum(album.getId(), targetUserId);
 
         userService.onAlbumUserBlacklisted(targetUserId, impact.photoCnt(), impact.likesCnt());
@@ -247,6 +250,16 @@ public class AlbumService {
             photoRepository.softDeleteAllByIds(photoIds);
         }
         return UserStatsImpact.of(photoCnt, likeCnt);
+    }
+
+    private void removeTargetUserLikes(Long albumId, Long targetUserId) {
+        List<LikeImpact> likeImpacts = photoLikesRepository.findLikeImpacts(targetUserId, albumId);
+
+        photoLikesRepository.deleteByUserIdAndPhotoAlbumId(targetUserId, albumId);
+
+        for (LikeImpact impact : likeImpacts) {
+            userService.decrementLikeCount(impact.ownerId(), impact.likeCnt().intValue());
+        }
     }
 
     private void onAlbumUserBlacklisted(Long albumId, int photoCnt) {

@@ -116,7 +116,8 @@ public class UserService {
         }
     }
 
-    private void decrementLikeCount(Long userId, int count) {
+    @Transactional
+    public void decrementLikeCount(Long userId, int count) {
         int updated = userRepository.decrementLikeCntBy(userId, count);
         if (updated != 1) {
             throw new UserException(UserErrorCode.USER_PHOTO_LIKE_COUNT_DECREMENT_FAILED);
