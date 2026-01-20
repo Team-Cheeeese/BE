@@ -79,7 +79,6 @@ public class PhotoMapper {
                 .likeCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
-                .isRecentlyDownloaded(false)
                 .canDelete(false)
                 .build();
     }

@@ -30,7 +30,7 @@ public record PhotoPageResponse(
                             "likeCnt": 1,
                             "isLiked": true,
                             "isDownloaded": false,
-                            "isRecentlyDownloaded": false
+                            "canDelete": false
                           }
                         ]
                         """

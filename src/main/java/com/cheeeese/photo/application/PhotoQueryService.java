@@ -133,13 +133,11 @@ public class PhotoQueryService {
         List<Long> photoIds = extractPhotoIds(response);
         Set<Long> likedIds = findUserLikedPhotoIds(user.getId(), photoIds);
         Set<Long> downloadedIds = findUserDownloadedPhotoIds(user.getId(), photoIds);
-        Set<Long> recentlyDownloadedIds = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
         Set<Long> deletableIds = findUserDeletablePhotoIds(user, photoIds);
         List<PhotoListResponse> updatedResponses = updateUserStatus(
                 response.responses(),
                 likedIds,
                 downloadedIds,
-                recentlyDownloadedIds,
                 deletableIds
         );
         return PhotoMapper.toRebuildPhotoPageResponse(response, updatedResponses);
@@ -183,14 +181,12 @@ public class PhotoQueryService {
             List<PhotoListResponse> responses,
             Set<Long> likeIds,
             Set<Long> downloadedIds,
-            Set<Long> recentlyDownloadedIds,
             Set<Long> deletableIds
     ) {
         return responses.stream()
                 .map(response -> response.withUserStatus(
                         likeIds.contains(response.photoId()),
                         downloadedIds.contains(response.photoId()),
-                        recentlyDownloadedIds.contains(response.photoId()),
                         deletableIds.contains(response.photoId())
                 )).toList();
     }
