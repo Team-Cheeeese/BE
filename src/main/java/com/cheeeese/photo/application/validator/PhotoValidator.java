@@ -25,7 +25,7 @@ public class PhotoValidator {
 
     private final PhotoRepository photoRepository;
 
-    private static final long MAX_FILE_SIZE = 6 * 1024 * 1024; // 6MB
+    private static final long MAX_FILE_SIZE = 13 * 1024 * 1024; // 13MB
     private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/jpg");
 
     /**
