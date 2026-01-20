@@ -150,6 +150,15 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
             Pageable pageable
     );
 
+    @Query("""
+        SELECT p
+        FROM Photo p
+        JOIN FETCH p.user
+        JOIN FETCH p.album
+        WHERE p.id IN :photoIds
+    """)
+    List<Photo> findAllByIdInWithUserAndAlbum(@Param("photoIds") List<Long> photoIds);
+
     List<Photo> findAllByIdIn(List<Long> photoIds);
 
     List<Photo> findAllByAlbumId(Long albumId);

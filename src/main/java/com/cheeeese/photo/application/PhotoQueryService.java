@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -133,7 +134,14 @@ public class PhotoQueryService {
         Set<Long> likedIds = findUserLikedPhotoIds(user.getId(), photoIds);
         Set<Long> downloadedIds = findUserDownloadedPhotoIds(user.getId(), photoIds);
         Set<Long> recentlyDownloadedIds = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
-        List<PhotoListResponse> updatedResponses = updateUserStatus(response.responses(), likedIds, downloadedIds, recentlyDownloadedIds);
+        Set<Long> deletableIds = findUserDeletablePhotoIds(user, photoIds);
+        List<PhotoListResponse> updatedResponses = updateUserStatus(
+                response.responses(),
+                likedIds,
+                downloadedIds,
+                recentlyDownloadedIds,
+                deletableIds
+        );
         return PhotoMapper.toRebuildPhotoPageResponse(response, updatedResponses);
     }
 
@@ -155,17 +163,35 @@ public class PhotoQueryService {
         return photoHistoryRepository.findRecentlyDownloadedPhotoIds(userId, photoIds, LocalDateTime.now().minusHours(1));
     }
 
+    private Set<Long> findUserDeletablePhotoIds(User user, List<Long> photoIds) {
+        if (photoIds.isEmpty()) {
+            return Set.of();
+        }
+        List<Photo> photos = photoRepository.findAllByIdInWithUserAndAlbum(photoIds);
+        return photos.stream()
+                .filter(photo -> canDelete(user, photo))
+                .map(Photo::getId)
+                .collect(Collectors.toSet());
+    }
+
+    private boolean canDelete(User user, Photo photo) {
+        return photo.getUser().getId().equals(user.getId())
+                || photo.getAlbum().getMakerId().equals(user.getId());
+    }
+
     private List<PhotoListResponse> updateUserStatus(
             List<PhotoListResponse> responses,
             Set<Long> likeIds,
             Set<Long> downloadedIds,
-            Set<Long> recentlyDownloadedIds
+            Set<Long> recentlyDownloadedIds,
+            Set<Long> deletableIds
     ) {
         return responses.stream()
                 .map(response -> response.withUserStatus(
                         likeIds.contains(response.photoId()),
                         downloadedIds.contains(response.photoId()),
-                        recentlyDownloadedIds.contains(response.photoId())
+                        recentlyDownloadedIds.contains(response.photoId()),
+                        deletableIds.contains(response.photoId())
                 )).toList();
     }
 
