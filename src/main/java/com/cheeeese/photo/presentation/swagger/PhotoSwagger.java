@@ -32,7 +32,7 @@ public interface PhotoSwagger {
                     ---
                     1. 앨범의 존재 및 만료 여부 확인
                     2. 앨범의 최대 사진 개수 (`maxPhotoCount`) 초과 여부 확인
-                    3. 파일별 크기(6MB), Content-Type(image/jpeg · image/png · image/jpg) 유효성 검증
+                    3. 파일별 크기(13MB), Content-Type(image/jpeg · image/png · image/jpg) 유효성 검증
                     4. 검증 통과 시, DB에 `Photo` 레코드를 `UPLOADING` 상태로 생성
                     5. 클라우드 스토리지 Presigned URL을 발급하여 반환
                     """
