@@ -1,6 +1,7 @@
 package com.cheeeese.photo.application;
 
 import com.cheeeese.album.domain.type.AlbumSorting;
+import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.RedisCacheUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
@@ -32,6 +33,7 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class PhotoQueryService {
 
+    private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
@@ -51,13 +53,13 @@ public class PhotoQueryService {
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
         if (cachedList != null) {
-            return attachUserStatus(user, cachedList);
+            return attachUserStatus(user, code, cachedList);
         }
         PhotoPageResponse responses = getPhotoPageFromDB(code, page, size, albumSorting);
 
         redisCacheUtil.setValue(photoKey, responses, 300000L);
 
-        return attachUserStatus(user, responses);
+        return attachUserStatus(user, code, responses);
     }
 
     @Transactional
@@ -121,19 +123,31 @@ public class PhotoQueryService {
                     String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);
                     String imageUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
                     String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
-                    return PhotoMapper.toPhotoListResponse(photo, profileImage, imageUrl, thumbnailUrl, false, false);
+
+                    return PhotoMapper.toPhotoListResponse(
+                            photo, profileImage, imageUrl, thumbnailUrl, false, false, false
+                    );
                 })
                 .toList();
 
         return PhotoMapper.toPhotoPageResponse(photos, responses);
     }
 
-    private PhotoPageResponse attachUserStatus(User user, PhotoPageResponse response) {
+    private PhotoPageResponse attachUserStatus(User user, String code, PhotoPageResponse response) {
         List<Long> photoIds = extractPhotoIds(response);
         Set<Long> likedIds = findUserLikedPhotoIds(user.getId(), photoIds);
         Set<Long> downloadedIds = findUserDownloadedPhotoIds(user.getId(), photoIds);
         Set<Long> recentlyDownloadedIds = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
-        List<PhotoListResponse> updatedResponses = updateUserStatus(response.responses(), likedIds, downloadedIds, recentlyDownloadedIds);
+        Long makerId = albumRepository.findAlbumMakerIdByCode(code);
+
+        List<PhotoListResponse> updatedResponses = response.responses().stream()
+                .map(res -> res.withUserStatus(
+                        likedIds.contains(res.photoId()),
+                        downloadedIds.contains(res.photoId()),
+                        recentlyDownloadedIds.contains(res.photoId()),
+                        canDelete(user.getId(), res.uploaderId(), makerId)
+                )).toList();
+
         return PhotoMapper.toRebuildPhotoPageResponse(response, updatedResponses);
     }
 
@@ -155,18 +169,8 @@ public class PhotoQueryService {
         return photoHistoryRepository.findRecentlyDownloadedPhotoIds(userId, photoIds, LocalDateTime.now().minusHours(1));
     }
 
-    private List<PhotoListResponse> updateUserStatus(
-            List<PhotoListResponse> responses,
-            Set<Long> likeIds,
-            Set<Long> downloadedIds,
-            Set<Long> recentlyDownloadedIds
-    ) {
-        return responses.stream()
-                .map(response -> response.withUserStatus(
-                        likeIds.contains(response.photoId()),
-                        downloadedIds.contains(response.photoId()),
-                        recentlyDownloadedIds.contains(response.photoId())
-                )).toList();
+    private boolean canDelete(Long userId, Long uploaderId, Long makerId) {
+        return userId.equals(uploaderId) || (userId.equals(makerId));
     }
 
     private Sort getPhotoSortingOption(AlbumSorting albumSorting) {

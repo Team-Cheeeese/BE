@@ -68,17 +68,20 @@ public class PhotoMapper {
             String imageUrl,
             String thumbnailUrl,
             boolean isLiked,
-            boolean isDownloaded
+            boolean isDownloaded,
+            boolean canDelete
     ) {
         return PhotoListResponse.builder()
                 .name(photo.getUser().getName())
                 .photoId(photo.getId())
+                .uploaderId(photo.getUser().getId())
                 .profileImage(profileImage)
                 .imageUrl(imageUrl)
                 .thumbnailUrl(thumbnailUrl)
                 .likeCnt(photo.getLikesCnt())
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
+                .canDelete(canDelete)
                 .build();
     }
 
