@@ -73,4 +73,11 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
         WHERE a.id = :albumId
     """)
     int findCurrentParticipant(@Param("albumId") Long albumId);
+
+    @Query("""
+        SELECT a.makerId
+        FROM Album a
+        WHERE a.code = :code
+    """)
+    Long findAlbumMakerIdByCode(@Param("code") String code);
 }

@@ -210,6 +210,8 @@ public class PhotoService {
 
         photo.softDelete();
 
+        albumRepository.decrementPhotoCount(album.getId(), 1);
+
         photoQueryService.invalidatePhotoCache(album.getCode());
     }
 
