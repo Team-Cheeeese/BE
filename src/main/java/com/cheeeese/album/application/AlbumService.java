@@ -25,6 +25,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.domain.model.LikeImpact;
 import com.cheeeese.user.domain.model.UserStatsImpact;
 import com.cheeeese.user.exception.UserException;
 import com.cheeeese.user.exception.code.UserErrorCode;
@@ -177,7 +178,9 @@ public class AlbumService {
 
         targetAlbum.blacklist();
 
-        UserStatsImpact impact = removeUserFromAlbum(album.getId(), targetUserId);
+        removeTargetUserLikes(album.getId(), targetUserId);
+
+        UserStatsImpact impact = removeTargetUserOwned(album.getId(), targetUserId);
 
         userService.onAlbumUserBlacklisted(targetUserId, impact.photoCnt(), impact.likesCnt());
 
@@ -235,7 +238,7 @@ public class AlbumService {
                 .toList();
     }
 
-    private UserStatsImpact removeUserFromAlbum(Long albumId, Long userId) {
+    private UserStatsImpact removeTargetUserOwned(Long albumId, Long userId) {
         // 사진 삭제 전, 사진 수와 띱 수 먼저 계산
         int photoCnt = photoRepository.countNotDeletedPhotosByAlbumAndUser(albumId, userId);
         int likeCnt = photoLikesRepository.countLikesByAlbumAndPhotoOwner(albumId, userId);
@@ -247,6 +250,16 @@ public class AlbumService {
             photoRepository.softDeleteAllByIds(photoIds);
         }
         return UserStatsImpact.of(photoCnt, likeCnt);
+    }
+
+    private void removeTargetUserLikes(Long albumId, Long targetUserId) {
+        List<LikeImpact> likeImpacts = photoLikesRepository.findLikeImpacts(targetUserId, albumId);
+
+        photoLikesRepository.deleteByUserIdAndPhotoAlbumId(targetUserId, albumId);
+
+        for (LikeImpact impact : likeImpacts) {
+            userService.decrementLikeCount(impact.ownerId(), impact.likeCnt().intValue());
+        }
     }
 
     private void onAlbumUserBlacklisted(Long albumId, int photoCnt) {

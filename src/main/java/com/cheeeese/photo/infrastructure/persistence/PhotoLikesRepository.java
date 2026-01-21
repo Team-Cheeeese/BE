@@ -2,6 +2,7 @@ package com.cheeeese.photo.infrastructure.persistence;
 
 import com.cheeeese.photo.domain.PhotoLikes;
 import com.cheeeese.user.domain.User;
+import com.cheeeese.user.domain.model.LikeImpact;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -69,4 +70,23 @@ public interface PhotoLikesRepository extends JpaRepository<PhotoLikes, Long> {
     int countDistinctLikeUsersByAlbumId(@Param("albumId") Long albumId);
 
     boolean existsByUserIdAndPhotoAlbumId(Long userId, Long albumId);
+
+    @Query("""
+        SELECT new com.cheeeese.user.domain.model.LikeImpact(
+            p.user.id,
+            COUNT(pl)
+        )
+        FROM PhotoLikes pl
+        JOIN pl.photo p
+        WHERE pl.user.id = :targetUserId
+        AND p.album.id = :albumId
+        AND p.user.id <> :targetUserId
+        GROUP BY p.user.id
+    """)
+    List<LikeImpact> findLikeImpacts(
+            @Param("targetUserId") Long targetUserId,
+            @Param("albumId") Long albumId
+    );
+
+    void deleteByUserIdAndPhotoAlbumId(Long userId, Long albumId);
 }
