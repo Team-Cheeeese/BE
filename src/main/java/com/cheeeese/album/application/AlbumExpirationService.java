@@ -94,7 +94,7 @@ public class AlbumExpirationService {
     }
 
     /**
-     * 트랜잭션 안에서는 "DB 삭제"만 처리
+     * 트랜잭션 안에서는 "DB 업데이트"만 처리
      * 스토리지 삭제는 AFTER_COMMIT 이벤트로 넘김
      */
     private void cleanupPhotosExceptCheese4cut(Album album, List<Long> cheese4cutPhotoIds) {
@@ -105,23 +105,22 @@ public class AlbumExpirationService {
                         cheese4cutPhotoIds
                 );
 
-        // 이벤트 payload 구성 (스토리지 삭제 대상 URL만 수집)
-        List<AlbumStorageDeleteEvent.PhotoObjectDeleteTarget> photoObjectTargets = new ArrayList<>();
-        for (Photo photo : photosToDelete) {
-            photoObjectTargets.add(new AlbumStorageDeleteEvent.PhotoObjectDeleteTarget(
-                    photo.getImageUrl(),
-                    photo.getThumbnailUrl(),
-                    true
-            ));
+        if (photosToDelete.isEmpty()) {
+            return;
         }
 
-        // DB 삭제(트랜잭션 내)
-        if (!photosToDelete.isEmpty()) {
-            // photoRepository.deleteAll(photosToDelete);
-            photoRepository.deleteAllInBatch(photosToDelete);
+        List<AlbumStorageDeleteEvent.PhotoObjectDeleteTarget> photoObjectTargets = photosToDelete.stream()
+                .map(photo -> new AlbumStorageDeleteEvent.PhotoObjectDeleteTarget(
+                        photo.getImageUrl(),
+                        photo.getThumbnailUrl(),
+                        true
+                ))
+                .toList();
 
-            log.info("[AlbumExpiration] Album id={} deleted photos count={}", album.getId(), photosToDelete.size());
-        }
+        List<Long> targetIds = photosToDelete.stream().map(Photo::getId).toList();
+        photoRepository.softDeleteAllByIds(targetIds);
+
+        log.info("[AlbumExpiration] Album id={} soft-deleted photos count={}", album.getId(), targetIds.size());
 
         // 트랜잭션 커밋 이후 실행될 이벤트 발행
         if (!photoObjectTargets.isEmpty()) {
