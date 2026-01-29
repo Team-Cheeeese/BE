@@ -70,6 +70,9 @@ dependencies {
 	// prometheus
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// 리사이징
+	implementation 'net.coobird:thumbnailator:0.4.20'
 }
 
 tasks.named('test') {
