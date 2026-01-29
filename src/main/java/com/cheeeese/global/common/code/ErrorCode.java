@@ -13,6 +13,9 @@ public enum ErrorCode implements BaseCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
+    CLOVA_API_ERROR(HttpStatus.BAD_GATEWAY, "CLOVA API 호출 중 오류가 발생했습니다."),
+    CLOVA_RESPONSE_EMPTY(HttpStatus.BAD_GATEWAY, "CLOVA API로부터 빈 응답을 받았습니다.");
     ;
 
     private final HttpStatus httpStatus;
