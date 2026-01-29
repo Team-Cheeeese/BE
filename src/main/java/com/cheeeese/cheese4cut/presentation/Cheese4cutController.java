@@ -44,4 +44,14 @@ public class Cheese4cutController implements Cheese4cutSwagger {
         cheese4cutService.finalizeCheese4cut(user, code, request);
         return CommonResponse.success(CHEESE4CUT_FINALIZE_SUCCESS);
     }
+
+    @PostMapping("/fixed/ai")
+    public CommonResponse<Void> finalizeCheese4cutWithAi(
+            @CurrentUser User user,
+            @PathVariable @NotBlank String code,
+            @RequestBody @Valid Cheese4cutFixedRequest request
+    ) {
+        cheese4cutService.finalizeCheese4cutWithAi(user, code, request);
+        return CommonResponse.success(CHEESE4CUT_FINALIZE_SUCCESS); // AI 완료를 기다리지 않고 즉시 응답
+    }
 }

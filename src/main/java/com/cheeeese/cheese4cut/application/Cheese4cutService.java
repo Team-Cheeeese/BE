@@ -56,6 +56,7 @@ public class Cheese4cutService {
     private final Cheese4cutValidator cheese4cutValidator;
     private final CdnUrlResolver cdnUrlResolver;
     private final Cheese4cutLogger cheese4cutLogger;
+    private final Cheese4cutAiService cheese4cutAiService;
 
     @Transactional(readOnly = true)
     public Cheese4cutResponse getCheese4cutByAlbumCode(Authentication authentication, String code) {
@@ -179,5 +180,41 @@ public class Cheese4cutService {
             return customUserDetails.getUser();
         }
         return null;
+    }
+
+    public void finalizeCheese4cutWithAi(User user, String code, Cheese4cutFixedRequest request) {
+        // 1. 기존 검증 로직 (기존 코드와 동일하게 유지)
+        Album album = albumValidator.validateAlbumCode(code);
+
+        if (album.isExpired()) {
+            throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
+        }
+
+        cheese4cutValidator.validateUserIsMaker(album, user);
+
+        // 이미 확정된 치즈네컷이 있는지 확인
+        if (cheese4cutRepository.findByAlbumId(album.getId()).isPresent()) {
+            throw new Cheese4cutException(Cheese4cutErrorCode.CHEESE4CUT_ALREADY_FINALIZED);
+        }
+
+        // 사진 개수 및 앨범 소속 여부 검증
+        cheese4cutValidator.validateFinalizePhotos(album, request.photoIds());
+
+        // 2. 사진 데이터 조회 및 정렬
+        List<Photo> orderedPhotos =
+                photoRepository.findAllByIdInOrderByLikesDescCreatedDesc(request.photoIds());
+
+        if (orderedPhotos.size() != request.photoIds().size()) {
+            throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
+        }
+
+        // 3. 치즈네컷 엔티티 저장 (AI 요약 엔티티의 외래키가 됨)
+        Cheese4cut cheese4cut = cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
+
+        // 4. [추가] 비동기 AI 파이프라인 시작
+        cheese4cutAiService.generateAiSummary(cheese4cut, album, orderedPhotos);
+
+        // 5. 로깅
+        cheese4cutLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
     }
 }
