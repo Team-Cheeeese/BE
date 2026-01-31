@@ -30,7 +30,6 @@ public class PhotoInfoService {
 
     public PhotoLikedUserResponse getPhotoLikedUsers(User user, String code, Long photoId) {
         Album album = albumValidator.validateAlbumCode(code);
-
         albumValidator.validateAlbumParticipant(album, user);
 
         Photo photo = photoReader.getPhotoInAlbum(photoId, code);
