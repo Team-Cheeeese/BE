@@ -1,6 +1,7 @@
 package com.cheeeese.cheese4cut.presentation.swagger;
 
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutAiResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.global.util.CurrentUser;
@@ -163,4 +164,20 @@ public interface Cheese4cutSwagger {
             @PathVariable @NotBlank String code,
             @RequestBody @Valid Cheese4cutFixedRequest request
     );
+
+    @Operation(
+            summary = "치즈네컷 AI 요약 결과 조회 (폴링용)",
+            description = "AI가 사진을 분석하여 생성한 제목과 내용을 조회합니다. 생성 중일 때는 PROCESSING 상태를 반환합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공 (PROCESSING 또는 COMPLETED)"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "앨범 또는 치즈네컷을 찾을 수 없음"
+            )
+    })
+    CommonResponse<Cheese4cutAiResponse> getAiSummary(@PathVariable String code);
 }

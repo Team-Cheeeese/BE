@@ -1,11 +1,18 @@
 package com.cheeeese.cheese4cut.application;
 
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.exception.AlbumException;
+import com.cheeeese.album.exception.code.AlbumErrorCode;
+import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.domain.Cheese4cutAiSummary;
 import com.cheeeese.cheese4cut.dto.response.AiResult;
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutAiResponse;
+import com.cheeeese.cheese4cut.exception.Cheese4cutException;
+import com.cheeeese.cheese4cut.exception.code.Cheese4cutErrorCode;
 import com.cheeeese.cheese4cut.infrastructure.ClovaClient;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutAiSummaryRepository;
+import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
 import com.cheeeese.global.util.ImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.domain.Photo;
@@ -26,6 +33,8 @@ public class Cheese4cutAiService {
     private final ClovaClient clovaClient;
     private final ImageUtil imageUtil;
     private final Cheese4cutAiSummaryRepository aiSummaryRepository;
+    private final Cheese4cutRepository cheese4cutRepository;
+    private final AlbumRepository albumRepository;
     private final CdnUrlResolver cdnUrlResolver;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -64,5 +73,21 @@ public class Cheese4cutAiService {
         } catch (Exception e) {
             log.error("AI Summary 생성 중 치명적 오류 발생: ", e);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Cheese4cutAiResponse getAiSummary(String code) {
+        // 1. 앨범 코드로 앨범 존재 확인
+        Album album = albumRepository.findByCode(code)
+                .orElseThrow(() -> new AlbumException(AlbumErrorCode.ALBUM_NOT_FOUND));
+
+        // 2. 해당 앨범의 치즈네컷 확인
+        Cheese4cut cheese4cut = cheese4cutRepository.findByAlbumId(album.getId())
+                .orElseThrow(() -> new Cheese4cutException(Cheese4cutErrorCode.CHEESE4CUT_NOT_FOUND));
+
+        // 3. AI 요약 결과 조회
+        return aiSummaryRepository.findByCheese4cutId(cheese4cut.getId())
+                .map(summary -> Cheese4cutAiResponse.completed(summary.getAiTitle(), summary.getAiContent()))
+                .orElseGet(Cheese4cutAiResponse::processing);
     }
 }
