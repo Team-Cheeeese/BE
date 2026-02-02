@@ -5,6 +5,7 @@ import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.cheese4cut.application.Cheese4cutAiService;
+import com.cheeeese.cheese4cut.application.Cheese4cutFinalizedEvent;
 import com.cheeeese.cheese4cut.application.logger.Cheese4cutLogger;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.domain.Cheese4cutPhoto;
@@ -91,7 +92,10 @@ public class AlbumExpirationService {
 
         Cheese4cut cheese4cut = cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
         cheese4CutLogger.logCheese4CutAutoCreated(album.getCode());
-        cheese4cutAiService.generateAiSummary(cheese4cut, album, orderedPhotos);
+        eventPublisher.publishEvent(
+                new Cheese4cutFinalizedEvent(cheese4cut, album, orderedPhotos)
+        );
+
         return topPhotoIds;
     }
 

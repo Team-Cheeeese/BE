@@ -28,6 +28,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -44,7 +45,6 @@ import java.util.stream.IntStream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class Cheese4cutService {
 
     private final Cheese4cutRepository cheese4cutRepository;
@@ -56,7 +56,7 @@ public class Cheese4cutService {
     private final Cheese4cutValidator cheese4cutValidator;
     private final CdnUrlResolver cdnUrlResolver;
     private final Cheese4cutLogger cheese4cutLogger;
-    private final Cheese4cutAiService cheese4cutAiService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public Cheese4cutResponse getCheese4cutByAlbumCode(Authentication authentication, String code) {
@@ -123,6 +123,7 @@ public class Cheese4cutService {
         return Cheese4cutMapper.toPreviewResponse(resolvedPhotoInfos, uniqueLikesCount, participant, myRole);
     }
 
+    @Transactional
     public void finalizeCheese4cut(User user, String code, Cheese4cutFixedRequest request) {
         Album album = albumValidator.validateAlbumCode(code);
 
@@ -182,6 +183,7 @@ public class Cheese4cutService {
         return null;
     }
 
+    @Transactional
     public void finalizeCheese4cutWithAi(User user, String code, Cheese4cutFixedRequest request) {
         // 1. 기존 검증 로직 (기존 코드와 동일하게 유지)
         Album album = albumValidator.validateAlbumCode(code);
@@ -212,7 +214,9 @@ public class Cheese4cutService {
         Cheese4cut cheese4cut = cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
         // 4. [추가] 비동기 AI 파이프라인 시작
-        cheese4cutAiService.generateAiSummary(cheese4cut, album, orderedPhotos);
+        eventPublisher.publishEvent(
+                new Cheese4cutFinalizedEvent(cheese4cut, album, orderedPhotos)
+        );
 
         // 5. 로깅
         cheese4cutLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
