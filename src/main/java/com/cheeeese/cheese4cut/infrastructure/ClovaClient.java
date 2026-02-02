@@ -3,6 +3,8 @@ package com.cheeeese.cheese4cut.infrastructure;
 import com.cheeeese.cheese4cut.dto.response.AiResult;
 import com.cheeeese.global.common.code.ErrorCode;
 import com.cheeeese.global.exception.BusinessException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ public class ClovaClient {
     @Value("${clova.api.dash-url}") private String dashUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // 프롬프트 1: 이미지 분석용 (HCX-005) - 파이썬 코드의 request_data 반영
     private static final String SYSTEM_PROMPT_005 =
@@ -67,9 +70,18 @@ public class ClovaClient {
                     "- 사용자에게 말하듯 자연스럽게, 하지만 과장 없이 쓴다.\n" +
                     "- 사진에서 나온 구체 요소(사람, 행동, 사물, 배경)를 최소 두 개 이상 포함한다.\n" +
                     "- 사진에는 순서가 없으므로 시간 흐름을 임의로 만들지 않는다.\n\n" +
-                    "출력 형식:\n\n" +
-                    "제목: <특수문자를 제외한 공백포함 10자 이내 형용사를 포함한 앨범 제목>\n" +
-                    "내용: <150자 이내로 구성된 구체적인 설명. 예: “3월 14일은 졸업식이었어요. …가 눈에 띄어요. ...한 기억이에요.” 같은 톤>";
+
+                    "제목은 특수문자를 제외하고 공백 포함 10자 이내로 작성한다.\n" +
+                    "내용은 공백 포함 200자 이내로 작성한다.\n\n" +
+
+                    "⚠️ 매우 중요: 출력은 반드시 아래 JSON 형식으로만 작성한다.\n" +
+                    "다른 설명, 줄글, 마크다운(**), 제목 표시, 부가 텍스트를 절대 추가하지 마라.\n\n" +
+
+                    "{\n" +
+                    "  \"title\": \"특수문자 없이 공백 포함 10자 이내 제목\",\n" +
+                    "  \"content\": \"공백 포함 200자 이내로 구성된 구체적인 하루 기록. 예: 3월 14일은 졸업식이었어요. 교정에 앉아 사진을 찍던 장면이 기억에 남는 하루였어요. 같은 자연스럽고 회상하는 말투\"\n" +
+                    "}";
+
 
     public String callHcx005(String base64Image) {
         Map<String, Object> dataUri = new HashMap<>();
@@ -95,15 +107,22 @@ public class ClovaClient {
                 title, date, combinedAnalysis);
 
         List<Map<String, Object>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "system", "content", List.of(Map.of("type", "text", "text", SYSTEM_PROMPT_DASH))));
-        messages.add(Map.of("role", "user", "content", List.of(Map.of("type", "text", "text", userText))));
+        messages.add(Map.of("role", "system",
+                "content", List.of(Map.of("type", "text", "text", SYSTEM_PROMPT_DASH))));
+        messages.add(Map.of("role", "user",
+                "content", List.of(Map.of("type", "text", "text", userText))));
 
         String response = sendRequest(dashUrl, messages, 0.5);
 
         try {
-            String aiTitle = response.split("내용:")[0].replace("제목:", "").trim();
-            String aiContent = response.split("내용:")[1].trim();
+            String jsonOnly = extractJson(response);
+            JsonNode node = objectMapper.readTree(jsonOnly);
+
+            String aiTitle = node.get("title").asText();
+            String aiContent = node.get("content").asText();
+
             return new AiResult(aiTitle, aiContent);
+
         } catch (Exception e) {
             // 예외 시 기본값 처리
             return new AiResult(title, response);
@@ -150,4 +169,19 @@ public class ClovaClient {
             throw new BusinessException(ErrorCode.CLOVA_API_ERROR);
         }
     }
+
+    private String extractJson(String response) {
+        response = response.trim();
+
+        // ```json ... ``` 제거
+        if (response.startsWith("```")) {
+            int firstBrace = response.indexOf("{");
+            int lastBrace = response.lastIndexOf("}");
+            if (firstBrace != -1 && lastBrace != -1) {
+                return response.substring(firstBrace, lastBrace + 1);
+            }
+        }
+        return response; // 이미 JSON이면 그대로
+    }
+
 }
