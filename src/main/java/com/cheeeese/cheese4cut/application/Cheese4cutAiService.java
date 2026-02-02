@@ -43,12 +43,11 @@ public class Cheese4cutAiService {
             // 1. 이미지 분석 (HCX-005) - 사진 4장을 각각 분석하여 텍스트 추출
             String combinedAnalysis = photos.stream()
                     .map(photo -> {
-                        // 사용자님의 ImageUtil 활용
-                        // TODO: test만 원본 이미지로 실 서비스는 썸네일
-                        String absoluteUrl = cdnUrlResolver.resolveOriginal(photo.getImageUrl());
+                        String absoluteUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
 
                         // 2. 변환된 절대 URL을 ImageUtil에 전달
-                        String base64 = imageUtil.resizeAndEncodeToBase64FromUrl(absoluteUrl);                        return String.format("[사진 분석]\n%s\n", clovaClient.callHcx005(base64));
+                        String base64 = imageUtil.resizeAndEncodeToBase64FromUrl(absoluteUrl);
+                        return String.format("[사진 분석]\n%s\n", clovaClient.callHcx005(base64));
                     })
                     .collect(Collectors.joining("\n"));
 
