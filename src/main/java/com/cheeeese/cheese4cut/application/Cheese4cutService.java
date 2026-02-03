@@ -127,9 +127,7 @@ public class Cheese4cutService {
     public void finalizeCheese4cut(User user, String code, Cheese4cutFixedRequest request) {
         Album album = albumValidator.validateAlbumCode(code);
 
-        if (album.isExpired()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
-        }
+        albumValidator.validateAlbumEntry(album, user);
 
         cheese4cutValidator.validateUserIsMaker(album, user);
 
@@ -188,9 +186,8 @@ public class Cheese4cutService {
         // 1. 기존 검증 로직 (기존 코드와 동일하게 유지)
         Album album = albumValidator.validateAlbumCode(code);
 
-        if (album.isExpired()) {
-            throw new AlbumException(AlbumErrorCode.ALBUM_EXPIRED);
-        }
+        // 앨범 만료 확인 & 사용자 블랙리스트 확인
+        albumValidator.validateAlbumEntry(album, user);
 
         cheese4cutValidator.validateUserIsMaker(album, user);
 
