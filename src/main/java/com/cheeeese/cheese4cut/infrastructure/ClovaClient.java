@@ -118,14 +118,18 @@ public class ClovaClient {
             String jsonOnly = extractJson(response);
             JsonNode node = objectMapper.readTree(jsonOnly);
 
+            if (!node.has("title") || !node.has("content")) {
+                throw new BusinessException(ErrorCode.AI_PARSING_FAILED);
+            }
+
             String aiTitle = node.get("title").asText();
             String aiContent = node.get("content").asText();
 
             return new AiResult(aiTitle, aiContent);
 
         } catch (Exception e) {
-            // 예외 시 기본값 처리
-            return new AiResult(title, response);
+            log.error("AI 응답 JSON 파싱 실패. 원본 응답: {}", response);
+            throw new BusinessException(ErrorCode.AI_PARSING_FAILED);
         }
     }
 
@@ -164,7 +168,11 @@ public class ClovaClient {
             Map<String, Object> message = (Map<String, Object>) result.get("message");
 
             return (String) message.get("content");
+        } catch (BusinessException e) {
+            // 1. 이미 구체적으로 정의된 비즈니스 예외는 그대로
+            throw e;
         } catch (Exception e) {
+            // 2. 그 외의 알 수 없는 런타임 예외들만 일반적인 API 에러로 반환.
             log.error("Clova API 호출 중 예상치 못한 오류 발생: {}", e.getMessage());
             throw new BusinessException(ErrorCode.CLOVA_API_ERROR);
         }
