@@ -2,8 +2,11 @@ package com.cheeeese.cheese4cut.infrastructure.mapper;
 
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.Role;
+import com.cheeeese.cheese4cut.domain.AiSummaryStatus;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
+import com.cheeeese.cheese4cut.domain.Cheese4cutAiSummary;
 import com.cheeeese.cheese4cut.domain.Cheese4cutPhoto;
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutAiResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
 import com.cheeeese.photo.domain.Photo;
@@ -81,6 +84,23 @@ public class Cheese4cutMapper {
                 .imageUrl(imageUrl)
                 .photoRank(rank)
                 .build();
+    }
+
+    // AI 생성 시작 시 (PROCESSING 상태)
+    public static Cheese4cutAiSummary toAiSummaryProcessing(Cheese4cut cheese4cut) {
+        return Cheese4cutAiSummary.builder()
+                .cheese4cut(cheese4cut)
+                .status(AiSummaryStatus.PROCESSING)
+                .build();
+    }
+
+    // AI 요약 결과 DTO 변환
+    public static Cheese4cutAiResponse toAiResponse(Cheese4cutAiSummary summary) {
+        return switch (summary.getStatus()) {
+            case COMPLETED -> Cheese4cutAiResponse.completed(summary.getAiTitle(), summary.getAiContent());
+            case FAILED -> Cheese4cutAiResponse.failed();
+            default -> Cheese4cutAiResponse.processing();
+        };
     }
 
 }
