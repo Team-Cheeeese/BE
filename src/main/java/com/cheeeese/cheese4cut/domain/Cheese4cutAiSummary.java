@@ -27,10 +27,21 @@ public class Cheese4cutAiSummary extends BaseEntity {
     @Column(name = "ai_content", length = 1000) // 180~220자 내외
     private String aiContent;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private AiSummaryStatus status;
+
     @Builder
-    public Cheese4cutAiSummary(Cheese4cut cheese4cut, String aiTitle, String aiContent) {
+    public Cheese4cutAiSummary(Cheese4cut cheese4cut, String aiTitle, String aiContent, AiSummaryStatus status) {
         this.cheese4cut = cheese4cut;
         this.aiTitle = aiTitle;
         this.aiContent = aiContent;
+        this.status = status;
+    }
+
+    public void updateStatus(AiSummaryStatus status, String title, String content) {
+        this.status = status;
+        this.aiTitle = title;
+        this.aiContent = content;
     }
 }

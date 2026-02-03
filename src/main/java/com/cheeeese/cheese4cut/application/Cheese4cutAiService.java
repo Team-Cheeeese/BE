@@ -4,6 +4,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
+import com.cheeeese.cheese4cut.domain.AiSummaryStatus;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.domain.Cheese4cutAiSummary;
 import com.cheeeese.cheese4cut.dto.response.AiResult;
@@ -11,6 +12,7 @@ import com.cheeeese.cheese4cut.dto.response.Cheese4cutAiResponse;
 import com.cheeeese.cheese4cut.exception.Cheese4cutException;
 import com.cheeeese.cheese4cut.exception.code.Cheese4cutErrorCode;
 import com.cheeeese.cheese4cut.infrastructure.ClovaClient;
+import com.cheeeese.cheese4cut.infrastructure.mapper.Cheese4cutMapper;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutAiSummaryRepository;
 import com.cheeeese.cheese4cut.infrastructure.persistence.Cheese4cutRepository;
 import com.cheeeese.global.util.ImageUtil;
@@ -39,6 +41,11 @@ public class Cheese4cutAiService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void generateAiSummary(Cheese4cut cheese4cut, Album album, List<Photo> photos) {
+        Cheese4cutAiSummary summary = aiSummaryRepository.findByCheese4cutId(cheese4cut.getId())
+                .orElseGet(() -> aiSummaryRepository.saveAndFlush(
+                        Cheese4cutMapper.toAiSummaryProcessing(cheese4cut)
+                ));
+
         try {
             // 1. 이미지 분석 (HCX-005) - 사진 4장을 각각 분석하여 텍스트 추출
             String combinedAnalysis = photos.stream()
@@ -59,19 +66,17 @@ public class Cheese4cutAiService {
             );
 
             // 3. 결과 저장
-            Cheese4cutAiSummary summary = Cheese4cutAiSummary.builder()
-                    .cheese4cut(cheese4cut)
-                    .aiTitle(result.title())     // 10자 이내 검증된 결과
-                    .aiContent(result.content()) // 180~220자 사이의 기록
-                    .build();
-
-            aiSummaryRepository.saveAndFlush(summary);
+            summary.updateStatus(AiSummaryStatus.COMPLETED, result.title(), result.content());
 
             log.info("AI Summary 성공적으로 생성됨. Album ID: {}", album.getId());
 
         } catch (Exception e) {
             log.error("AI Summary 생성 중 치명적 오류 발생: ", e);
+            // 실패 상태 저장하여 프론트엔드가 인지할 수 있도록 함
+            summary.updateStatus(AiSummaryStatus.FAILED, "요약 실패", "AI 분석 중 오류가 발생했습니다.");
         }
+
+        aiSummaryRepository.saveAndFlush(summary);
     }
 
     @Transactional(readOnly = true)
@@ -86,7 +91,7 @@ public class Cheese4cutAiService {
 
         // 3. AI 요약 결과 조회
         return aiSummaryRepository.findByCheese4cutId(cheese4cut.getId())
-                .map(summary -> Cheese4cutAiResponse.completed(summary.getAiTitle(), summary.getAiContent()))
+                .map(Cheese4cutMapper::toAiResponse)
                 .orElseGet(Cheese4cutAiResponse::processing);
     }
 }
