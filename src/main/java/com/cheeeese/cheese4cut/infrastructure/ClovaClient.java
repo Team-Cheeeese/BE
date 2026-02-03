@@ -27,8 +27,8 @@ public class ClovaClient {
     @Value("${clova.api.hcx-url}") private String hcxUrl;
     @Value("${clova.api.dash-url}") private String dashUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     // 프롬프트 1: 이미지 분석용 (HCX-005) - 파이썬 코드의 request_data 반영
     private static final String SYSTEM_PROMPT_005 =

@@ -73,6 +73,9 @@ dependencies {
 
 	// 리사이징
 	implementation 'net.coobird:thumbnailator:0.4.21'
+
+	// Apache HttpClient 5, RestTemplate 타임아웃 설정
+	implementation 'org.apache.httpcomponents.client5:httpclient5'
 }
 
 tasks.named('test') {
