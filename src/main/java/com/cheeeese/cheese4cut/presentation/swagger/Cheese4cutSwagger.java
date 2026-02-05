@@ -1,6 +1,7 @@
 package com.cheeeese.cheese4cut.presentation.swagger;
 
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
+import com.cheeeese.cheese4cut.dto.response.Cheese4cutAiResponse;
 import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutResponse;
 import com.cheeeese.global.util.CurrentUser;
@@ -120,4 +121,63 @@ public interface Cheese4cutSwagger {
             @PathVariable @NotBlank String code,
             @RequestBody @Valid Cheese4cutFixedRequest request
     );
+
+    @Operation(
+            summary = "치즈네컷 수동 확정 API with AI",
+            description = """
+                    ### PathVariable
+                    ---
+                    `code`: 앨범 코드
+                    
+                    ### RequestBody
+                    ---
+                    `photoIds`: 사용자가 최종 선택한 4장의 사진 ID \n
+                    
+                    ### 로직 상세
+                    ---
+                    1. 사용자 권한 확인 (MAKER만 가능).
+                    2. 앨범 만료 및 이미 확정 여부 확인.
+                    3. 요청된 4장의 사진 ID가 모두 **COMPLETED 상태**이고 해당 앨범에 속하는지 검증.
+                    4. `Cheese4cut` 레코드를 생성하고 저장.
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "치즈네컷 수동 확정이 성공적으로 완료되었습니다."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "유효성 검증 실패 (사진 개수/상태 오류)"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "권한 없음 (MAKER가 아님) 또는 만료된 앨범"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "이미 치즈네컷이 확정되었습니다."
+            )
+    })
+    CommonResponse<Void> finalizeCheese4cutWithAi(
+            @CurrentUser User user,
+            @PathVariable @NotBlank String code,
+            @RequestBody @Valid Cheese4cutFixedRequest request
+    );
+
+    @Operation(
+            summary = "치즈네컷 AI 요약 결과 조회 (폴링용)",
+            description = "AI가 사진을 분석하여 생성한 제목과 내용을 조회합니다. 생성 중일 때는 PROCESSING 상태를 반환합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공 (PROCESSING 또는 COMPLETED)"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "앨범 또는 치즈네컷을 찾을 수 없음"
+            )
+    })
+    CommonResponse<Cheese4cutAiResponse> getAiSummary(@PathVariable String code);
 }

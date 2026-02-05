@@ -1,5 +1,7 @@
 package com.cheeeese.photo.application;
 
+import com.cheeeese.album.application.validator.AlbumValidator;
+import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.ProfileImageUtil;
@@ -9,8 +11,6 @@ import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
 import com.cheeeese.photo.dto.response.*;
-import com.cheeeese.photo.exception.PhotoException;
-import com.cheeeese.photo.exception.code.PhotoErrorCode;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
@@ -37,6 +37,7 @@ public class PhotoQueryService {
     private final PhotoRepository photoRepository;
     private final PhotoLikesRepository photoLikesRepository;
     private final PhotoHistoryRepository photoHistoryRepository;
+    private final AlbumValidator albumValidator;
     private final PhotoReader photoReader;
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
@@ -45,6 +46,9 @@ public class PhotoQueryService {
     private static final String VERSION_KEY = "cache:album:%s:version";
 
     public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateAlbumParticipant(album, user);
+
         String versionKey = String.format(VERSION_KEY, code);
         Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
@@ -72,8 +76,10 @@ public class PhotoQueryService {
         redisCacheUtil.deletePattern("album:" + code + ":photos:*");
     }
 
-    // TODO: 데이터 조회 로직을 Reader 클래스로 분리하는 것 고려
     public PhotoLikedPageResponse getPhotoLiked(User user, String code, int page, int size) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateAlbumParticipant(album, user);
+
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<Photo> photos = photoRepository.findLikedPhotosByAlbumAndUser(code, user.getId(), PhotoStatus.COMPLETED, pageRequest);
 
@@ -95,6 +101,9 @@ public class PhotoQueryService {
     }
 
     public PhotoDetailResponse getPhotoDetail(User user, String code, Long photoId) {
+        Album album = albumValidator.validateAlbumCode(code);
+        albumValidator.validateAlbumParticipant(album, user);
+
         Photo photo = photoReader.getPhotoInAlbum(photoId, code);
 
         String profileImage = ProfileImageUtil.resolveProfileImage(photo.getUser(), cdnUrlResolver);

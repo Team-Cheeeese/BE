@@ -33,6 +33,8 @@ public enum PhotoErrorCode implements BaseCode {
     PHOTO_NOT_FOUND_IN_ALBUM(HttpStatus.NOT_FOUND, "해당 사진은 이 앨범에 포함되어 있지 않습니다."),
     PHOTO_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 사진입니다."),
     PHOTO_RECENT_DOWNLOAD_BLOCKED(HttpStatus.CONFLICT, "1시간 이내에 다운로드한 사진입니다."),
+
+    IMAGE_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 리사이징 및 인코딩에 실패했습니다."),
     ;
 
     private final HttpStatus httpStatus;

@@ -53,6 +53,7 @@ public enum SuccessCode implements BaseCode {
     // cheese4cut
     CHEESE4CUT_GET_SUCCESS(HttpStatus.OK, "치즈네컷 조회가 성공적으로 완료되었습니다."),
     CHEESE4CUT_FINALIZE_SUCCESS(HttpStatus.OK, "치즈네컷 수동 확정이 성공적으로 완료되었습니다."),
+    CHEESE4CUT_AI_GET_SUCCESS(HttpStatus.OK, "치즈네컷 AI 조회가 성공적으로 완료되었습니다."),
     ;
 
     private final HttpStatus httpStatus;
