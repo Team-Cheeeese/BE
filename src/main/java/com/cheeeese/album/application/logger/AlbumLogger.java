@@ -8,6 +8,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -116,6 +117,26 @@ public class AlbumLogger {
             MDC.put("type", "album");
             log.info("{} album_participants_milestone_at | album_code={} achieved_at={}",
                     STAT_PREFIX, albumCode, achievedAt);
+        } finally {
+            MDC.remove("type");
+        }
+    }
+
+    public void logCheese4CutFinalized(Long userId, List<Long> photoIds, String albumCode) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} Cheese4cut Finalized | album_code={} maker_id={} photo_ids={} created_at={} 4cut_created=true",
+                    STAT_PREFIX, albumCode, logMaskingUtil.userKey(userId), photoIds, LocalDateTime.now());
+        } finally {
+            MDC.remove("type");
+        }
+    }
+
+    public void logCheese4CutAutoCreated(String albumCode) {
+        try {
+            MDC.put("type", "album");
+            log.info("{} Cheese4cut created automatically | album_code={} created_at={}",
+                    STAT_PREFIX, albumCode, LocalDateTime.now());
         } finally {
             MDC.remove("type");
         }
