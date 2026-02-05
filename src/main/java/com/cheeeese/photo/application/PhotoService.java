@@ -150,16 +150,15 @@ public class PhotoService {
     public void createPhotoLikes(User user, Long photoId) {
         Photo photo = photoReader.getPhoto(photoId);
 
+        boolean isFirstAlbumLike = !photoLikesRepository.existsByUserIdAndPhotoAlbumId(
+                user.getId(), photo.getAlbum().getId()
+        );
         PhotoLikes photoLikes = PhotoLikesMapper.toEntity(user, photo);
 
         photoRepository.incrementLikeCnt(photo.getId());
         photoLikesRepository.save(photoLikes);
 
         userRepository.incrementLikeCnt(photo.getUser().getId());
-
-        boolean isFirstAlbumLike = !photoLikesRepository.existsByUserIdAndPhotoAlbumId(
-                user.getId(), photo.getAlbum().getId()
-        );
 
         if (isFirstAlbumLike) {
             int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
