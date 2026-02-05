@@ -94,10 +94,6 @@ public class AlbumExpirationService {
         eventPublisher.publishEvent(
                 new Cheese4cutFinalizedEvent(cheese4cut, album, orderedPhotos)
         );
-
-        cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
-
-        albumLogger.logCheese4CutAutoCreated(album.getCode());
         return topPhotoIds;
     }
 
