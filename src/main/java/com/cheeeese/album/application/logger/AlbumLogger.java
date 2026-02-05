@@ -122,6 +122,10 @@ public class AlbumLogger {
         }
     }
 
+    /**
+     * [지표 6] 치즈네컷 최종 확정 (수동 생성)
+     * cheese4cut_finalized(album_code, maker_id, photo_ids, created_at, 4cut_created)
+     */
     public void logCheese4CutFinalized(Long userId, List<Long> photoIds, String albumCode) {
         try {
             MDC.put("type", "album");
@@ -132,6 +136,10 @@ public class AlbumLogger {
         }
     }
 
+    /**
+     * [지표 7] 치즈네컷 자동 생성
+     * cheese4cut_auto_created(album_code, created_at)
+     */
     public void logCheese4CutAutoCreated(String albumCode) {
         try {
             MDC.put("type", "album");
