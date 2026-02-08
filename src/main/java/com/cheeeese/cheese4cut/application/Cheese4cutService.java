@@ -1,5 +1,6 @@
 package com.cheeeese.cheese4cut.application;
 
+import com.cheeeese.album.application.logger.AlbumLogger;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.UserAlbum;
@@ -8,7 +9,6 @@ import com.cheeeese.album.exception.AlbumException;
 import com.cheeeese.album.exception.code.AlbumErrorCode;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
-import com.cheeeese.cheese4cut.application.logger.Cheese4cutLogger;
 import com.cheeeese.cheese4cut.application.validator.Cheese4cutValidator;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
@@ -55,8 +55,8 @@ public class Cheese4cutService {
     private final AlbumValidator albumValidator;
     private final Cheese4cutValidator cheese4cutValidator;
     private final CdnUrlResolver cdnUrlResolver;
-    private final Cheese4cutLogger cheese4cutLogger;
     private final ApplicationEventPublisher eventPublisher;
+    private final AlbumLogger albumLogger;
 
     @Transactional(readOnly = true)
     public Cheese4cutResponse getCheese4cutByAlbumCode(Authentication authentication, String code) {
@@ -145,7 +145,7 @@ public class Cheese4cutService {
 
         cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
-        cheese4cutLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
+        albumLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
     }
 
     private List<Photo> getOrderedPhotos(List<Long> photoIds) {
@@ -216,6 +216,6 @@ public class Cheese4cutService {
         );
 
         // 5. 로깅
-        cheese4cutLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
+        albumLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
     }
 }

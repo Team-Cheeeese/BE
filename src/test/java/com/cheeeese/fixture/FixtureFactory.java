@@ -42,6 +42,23 @@ public class FixtureFactory {
         return new KakaoUserInfo(attributes);
     }
 
+    // 인덱스를 받아 고유한 유저 엔티티를 생성하는 메서드
+    public static User createUniqueKakaoUser(int index) {
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("nickname", "유저" + index);
+        profile.put("profile_image_url", "https://example.com/profile" + index + ".png");
+
+        Map<String, Object> kakaoAccount = new HashMap<>();
+        kakaoAccount.put("email", "user" + index + "@test.com");
+        kakaoAccount.put("profile", profile);
+
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("id", 2000000000L + index);
+        attributes.put("kakao_account", kakaoAccount);
+
+        return UserMapper.toEntity(new KakaoUserInfo(attributes));
+    }
+
     public static KakaoUserInfo createKakaoTargetInfo() {
         Map<String, Object> profile = new HashMap<>();
         profile.put("nickname", "카카오타겟");
@@ -69,10 +86,11 @@ public class FixtureFactory {
     }
 
     public static Album createAlbum(Long userId) {
+        String uniqueCode = "ALBUM-" + java.util.UUID.randomUUID().toString().substring(0, 8);
         return AlbumMapper.toEntity(
                 userId,
                 "테스트 앨범",
-                "테스트 코드",
+                uniqueCode,
                 "테스트 이미지",
                 4,
                 LocalDate.of(2025, 1, 1),
