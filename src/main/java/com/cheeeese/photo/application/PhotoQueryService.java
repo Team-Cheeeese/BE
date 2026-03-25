@@ -138,7 +138,7 @@ public class PhotoQueryService {
                     String thumbnailUrl = cdnUrlResolver.resolveThumbnail(photo.getThumbnailUrl());
 
                     return PhotoMapper.toPhotoListResponse(
-                            photo, profileImage, imageUrl, thumbnailUrl, false, false, false
+                            photo, profileImage, imageUrl, thumbnailUrl, false, false, false, false
                     );
                 })
                 .toList();
@@ -158,7 +158,8 @@ public class PhotoQueryService {
                         likedIds.contains(res.photoId()),
                         downloadedIds.contains(res.photoId()),
                         recentlyDownloadedIds.contains(res.photoId()),
-                        canDelete(user.getId(), res.uploaderId(), makerId)
+                        canDelete(user.getId(), res.uploaderId(), makerId),
+                        isMine(user.getId(), res.uploaderId())
                 )).toList();
 
         return PhotoMapper.toRebuildPhotoPageResponse(response, updatedResponses);
@@ -184,6 +185,10 @@ public class PhotoQueryService {
 
     private boolean canDelete(Long userId, Long uploaderId, Long makerId) {
         return userId.equals(uploaderId) || (userId.equals(makerId));
+    }
+
+    private boolean isMine(Long userId, Long uploaderId) {
+        return userId.equals(uploaderId);
     }
 
     private Sort getPhotoSortingOption(AlbumSorting albumSorting) {
