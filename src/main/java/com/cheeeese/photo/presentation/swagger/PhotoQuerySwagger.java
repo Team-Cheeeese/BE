@@ -25,8 +25,7 @@ public interface PhotoQuerySwagger {
                     ---
                     `page`: 조회할 페이지 번호 (기본값: 0) \n
                     `size`: 페이지당 사진 개수 (기본값: 20) \n
-                    `sorting`: 정렬 기준 (`CREATED_AT`: 업로드 시간순, `POPULAR`: 띱 많은순, `CAPTURED_AT`: 최근 촬영한 시간순) \n
-                    `includeMine`: 내 사진 포함 여부
+                    `sorting`: 정렬 기준 (`CREATED_AT`: 업로드 시간순, `POPULAR`: 띱 많은순, `CAPTURED_AT`: 최근 촬영한 시간순)
                     """
     )
     @ApiResponses(value = {
@@ -40,8 +39,7 @@ public interface PhotoQuerySwagger {
             @PathVariable String code,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "CREATED_AT") AlbumSorting sorting,
-            @RequestParam(defaultValue = "true") boolean includeMine
+            @RequestParam(defaultValue = "CREATED_AT") AlbumSorting sorting
     );
 
     @Operation(

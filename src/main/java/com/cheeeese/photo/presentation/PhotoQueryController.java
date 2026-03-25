@@ -28,12 +28,11 @@ public class PhotoQueryController implements PhotoQuerySwagger {
             @PathVariable String code,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "CREATED_AT") AlbumSorting sorting,
-            @RequestParam(defaultValue = "true") boolean includeMine
+            @RequestParam(defaultValue = "CREATED_AT") AlbumSorting sorting
     ) {
         return CommonResponse.success(
                 PHOTO_LIST_GET_SUCCESS,
-                photoQueryService.getPhotoPage(user, code, page, size, sorting, includeMine)
+                photoQueryService.getPhotoPage(user, code, page, size, sorting)
         );
     }
 

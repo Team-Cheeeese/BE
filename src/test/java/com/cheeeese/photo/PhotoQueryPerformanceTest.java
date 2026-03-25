@@ -66,12 +66,12 @@ public class PhotoQueryPerformanceTest {
 
         // DB 조회 (Cache Miss & Save)
         stopWatch.start("DB Query (Cold Start)");
-        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT, false);
+        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
         stopWatch.stop();
 
         // Redis 조회 (Cache Hit)
         stopWatch.start("Redis Cache (Warm Start)");
-        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT, false);
+        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
         stopWatch.stop();
 
         // 결과 출력
@@ -121,12 +121,12 @@ public class PhotoQueryPerformanceTest {
 
         // DB 조회
         stopWatch.start("DB Query (Cold Start)");
-        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT, false);
+        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
         stopWatch.stop();
 
         // Redis 조회
         stopWatch.start("Redis Cache Hit (Warm Start)");
-        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT, false);
+        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
         stopWatch.stop();
 
         System.out.println(stopWatch.prettyPrint());

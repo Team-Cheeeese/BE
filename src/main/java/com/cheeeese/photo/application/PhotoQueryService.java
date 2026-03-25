@@ -42,25 +42,25 @@ public class PhotoQueryService {
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
 
-    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:include:%b:version:%d";
+    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:version:%d";
     private static final String VERSION_KEY = "cache:album:%s:version";
     private static final long PHOTO_CACHE_TTL = 5 * 60L;
 
-    public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting, boolean includeMine) {
+    public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting) {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateAlbumParticipant(album, user);
 
         String versionKey = String.format(VERSION_KEY, code);
         Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
-        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, size, includeMine, curVersion);
+        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, size, curVersion);
         PhotoPageResponse cachedList = redisCacheUtil.getObject(photoKey, PhotoPageResponse.class);
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
         if (cachedList != null) {
             return attachUserStatus(user, code, cachedList);
         }
-        PhotoPageResponse responses = getPhotoPageFromDB(code, page, size, albumSorting, includeMine, user.getId());
+        PhotoPageResponse responses = getPhotoPageFromDB(code, page, size, albumSorting);
 
         redisCacheUtil.setValue(photoKey, responses, PHOTO_CACHE_TTL);
 
@@ -119,20 +119,17 @@ public class PhotoQueryService {
         boolean canDelete = photo.getUser().getId().equals(user.getId())
                 || photo.getAlbum().getMakerId().equals(user.getId());
 
+        boolean isMine = photo.getUser().getId().equals(user.getId());
+
         return PhotoMapper.toPhotoDetailResponse(
-                photo, profileImage, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded, canDelete
+                photo, profileImage, resolveOriginalUrl, resolveThumbnailUrl,
+                isLiked, isDownloaded, isRecentlyDownloaded, canDelete, isMine
         );
     }
 
-    private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting, boolean includeMine, Long userId) {
+    private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting) {
         PageRequest pageRequest = PageRequest.of(page, size, getPhotoSortingOption(albumSorting));
-
-        Slice<Photo> photos;
-        if (includeMine) {
-            photos = photoRepository.findAllByAlbumCodeAndStatus(code, PhotoStatus.COMPLETED, pageRequest);
-        } else {
-            photos = photoRepository.findAllByAlbumCodeAndStatusAndUserIdNot(code, PhotoStatus.COMPLETED, userId, pageRequest);
-        }
+        Slice<Photo> photos = photoRepository.findAllByAlbumCodeAndStatus(code, PhotoStatus.COMPLETED, pageRequest);
 
         List<PhotoListResponse> responses = photos.getContent().stream()
                 .map(photo -> {

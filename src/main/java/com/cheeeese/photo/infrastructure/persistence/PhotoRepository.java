@@ -35,22 +35,6 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
         SELECT p
         FROM Photo p
         JOIN p.album a
-        WHERE a.code = :code
-        AND p.isDeleted = FALSE
-        AND p.status = :status
-        AND p.user.id != :userId
-    """)
-    Slice<Photo> findAllByAlbumCodeAndStatusAndUserIdNot(
-            @Param("code") String code,
-            @Param("status") PhotoStatus status,
-            @Param("userId") Long userId,
-            Pageable pageable
-    );
-
-    @Query("""
-        SELECT p
-        FROM Photo p
-        JOIN p.album a
         JOIN PhotoLikes pl ON pl.photo = p
         WHERE a.code = :albumCode
         AND p.isDeleted = FALSE
