@@ -42,7 +42,7 @@ public class PhotoQueryService {
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
 
-    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:inclue:%b:version:%d";
+    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:include:%b:version:%d";
     private static final String VERSION_KEY = "cache:album:%s:version";
     private static final long PHOTO_CACHE_TTL = 5 * 60L;
 

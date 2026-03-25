@@ -41,7 +41,7 @@ public interface PhotoQuerySwagger {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "CREATED_AT") AlbumSorting sorting,
-            @RequestParam(defaultValue = "false") boolean includeMine
+            @RequestParam(defaultValue = "true") boolean includeMine
     );
 
     @Operation(
