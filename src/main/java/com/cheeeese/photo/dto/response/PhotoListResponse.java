@@ -14,7 +14,8 @@ import lombok.Builder;
                 "isLiked",
                 "isDownloaded",
                 "isRecentlyDownloaded",
-                "canDelete"
+                "canDelete",
+                "isMine"
         }
 )
 public record PhotoListResponse(
@@ -49,19 +50,24 @@ public record PhotoListResponse(
         boolean isRecentlyDownloaded,
 
         @Schema(description = "삭제 가능 여부", example = "true")
-        boolean canDelete
+        boolean canDelete,
+
+        @Schema(description = "내 사진 여부", example = "false")
+        boolean isMine
 ) {
     public PhotoListResponse withUserStatus(
             boolean isLiked,
             boolean isDownloaded,
             boolean isRecentlyDownloaded,
-            boolean canDelete
+            boolean canDelete,
+            boolean isMine
     ) {
         return this.toBuilder()
                 .isLiked(isLiked)
                 .isDownloaded(isDownloaded)
                 .isRecentlyDownloaded(isRecentlyDownloaded)
                 .canDelete(canDelete)
+                .isMine(isMine)
                 .build();
     }
 }
