@@ -83,7 +83,7 @@ public class PhotoQueryServiceIntegrationTest {
     void getPhotoList() {
         // when
         PhotoPageResponse page = photoQueryService.getPhotoPage(
-                testUser, testAlbum.getCode(), 0, 20, AlbumSorting.CREATED_AT, false
+                testUser, testAlbum.getCode(), 0, 20, AlbumSorting.CREATED_AT
         );
 
         // then
