@@ -119,8 +119,11 @@ public class PhotoQueryService {
         boolean canDelete = photo.getUser().getId().equals(user.getId())
                 || photo.getAlbum().getMakerId().equals(user.getId());
 
+        boolean isMine = photo.getUser().getId().equals(user.getId());
+
         return PhotoMapper.toPhotoDetailResponse(
-                photo, profileImage, resolveOriginalUrl, resolveThumbnailUrl, isLiked, isDownloaded, isRecentlyDownloaded, canDelete
+                photo, profileImage, resolveOriginalUrl, resolveThumbnailUrl,
+                isLiked, isDownloaded, isRecentlyDownloaded, canDelete, isMine
         );
     }
 
