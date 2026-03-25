@@ -42,25 +42,25 @@ public class PhotoQueryService {
     private final RedisCacheUtil redisCacheUtil;
     private final CdnUrlResolver cdnUrlResolver;
 
-    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:exclude:%b:version:%d";
+    private static final String PHOTO_KEY = "cache:album:%s:photos:sort:%s:page:%d:size:%d:inclue:%b:version:%d";
     private static final String VERSION_KEY = "cache:album:%s:version";
     private static final long PHOTO_CACHE_TTL = 5 * 60L;
 
-    public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting, boolean excludeMine) {
+    public PhotoPageResponse getPhotoPage(User user, String code, int page, int size, AlbumSorting albumSorting, boolean includeMine) {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateAlbumParticipant(album, user);
 
         String versionKey = String.format(VERSION_KEY, code);
         Long curVersion = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
 
-        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, size, excludeMine, curVersion);
+        String photoKey = String.format(PHOTO_KEY, code, albumSorting.getParam(), page, size, includeMine, curVersion);
         PhotoPageResponse cachedList = redisCacheUtil.getObject(photoKey, PhotoPageResponse.class);
 
         // redis에 존재할 경우, db 접근 X + 바로 반환
         if (cachedList != null) {
             return attachUserStatus(user, code, cachedList);
         }
-        PhotoPageResponse responses = getPhotoPageFromDB(code, page, size, albumSorting, excludeMine, user.getId());
+        PhotoPageResponse responses = getPhotoPageFromDB(code, page, size, albumSorting, includeMine, user.getId());
 
         redisCacheUtil.setValue(photoKey, responses, PHOTO_CACHE_TTL);
 
@@ -124,14 +124,14 @@ public class PhotoQueryService {
         );
     }
 
-    private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting, boolean excludeMine, Long userId) {
+    private PhotoPageResponse getPhotoPageFromDB(String code, int page, int size, AlbumSorting albumSorting, boolean includeMine, Long userId) {
         PageRequest pageRequest = PageRequest.of(page, size, getPhotoSortingOption(albumSorting));
 
         Slice<Photo> photos;
-        if (excludeMine) {
-            photos = photoRepository.findAllByAlbumCodeAndStatusAndUserIdNot(code, PhotoStatus.COMPLETED, userId, pageRequest);
-        } else {
+        if (includeMine) {
             photos = photoRepository.findAllByAlbumCodeAndStatus(code, PhotoStatus.COMPLETED, pageRequest);
+        } else {
+            photos = photoRepository.findAllByAlbumCodeAndStatusAndUserIdNot(code, PhotoStatus.COMPLETED, userId, pageRequest);
         }
 
         List<PhotoListResponse> responses = photos.getContent().stream()
