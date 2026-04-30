@@ -18,6 +18,7 @@ public class UserMapper {
                 .name(oAuth2UserInfo.getName())
                 .profileImage(DEFAULT_PROFILE_IMAGE)
                 .providerId(oAuth2UserInfo.getProviderId())
+                .phoneNumber(oAuth2UserInfo.getPhoneNumber())
                 .build();
     }
 

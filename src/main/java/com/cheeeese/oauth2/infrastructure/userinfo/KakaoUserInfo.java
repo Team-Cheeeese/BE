@@ -26,6 +26,11 @@ public class KakaoUserInfo implements OAuth2UserInfo {
         return (String) getKakaoProfile().get("nickname");
     }
 
+    @Override
+    public String getPhoneNumber() {
+        return (String) getKakaoAccount().get("phone_number");
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getKakaoAccount() {
         Object account = attributes.get("kakao_account");
