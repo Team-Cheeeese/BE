@@ -36,7 +36,7 @@ public class UserService {
     @Transactional
     public void updateUserProfile(User user, UserProfileRequest request) {
         ProfileImageType type = ProfileImageType.fromName(request.imageCode());
-        user.updateUserName(request.name(), type.name());
+        user.updateUserProfile(request.name(), type.name());
     }
 
     public UserProfileImageResponse getUserProfileImageOpt() {
