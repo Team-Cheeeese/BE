@@ -19,7 +19,6 @@ public enum SuccessCode implements BaseCode {
     // user
     USER_INFO_FETCH_SUCCESS(HttpStatus.OK, "사용자 정보 조회가 성공적으로 완료되었습니다."),
     USER_PROFILE_UPDATE_SUCCESS(HttpStatus.OK, "사용자 프로필 업데이트가 성공적으로 완료되었습니다."),
-    USER_NAME_UPDATE_SUCCESS(HttpStatus.OK, "사용자 이름 업데이트가 성공적으로 완료되었습니다."),
     USER_PROFILE_IMAGE_OPT_GET_SUCCESS(HttpStatus.OK, "사용자 프로필 이미지 선택 옵션 목록 조회가 성공적으로 완료되었습니다."),
     USER_PROFILE_IMAGE_UPDATE_SUCCESS(HttpStatus.OK, "사용자 프로필 이미지 업데이트가 성공적으로 완료되었습니다."),
     USER_ONBOARDING_SUCCESS(HttpStatus.OK, "사용자 온보딩이 성공적으로 완료되었습니다."),

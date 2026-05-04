@@ -8,7 +8,6 @@ import com.cheeeese.user.application.validator.UserValidator;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.domain.type.ProfileImageType;
 import com.cheeeese.user.dto.request.UserOnboardingRequest;
-import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
 import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.dto.response.UserProfileImageResponse;
@@ -35,8 +34,9 @@ public class UserService {
     private final CdnUrlResolver cdnUrlResolver;
 
     @Transactional
-    public void updateUserName(User user, UserProfileRequest request) {
-        user.updateUserName(request.name());
+    public void updateUserProfile(User user, UserProfileRequest request) {
+        ProfileImageType type = ProfileImageType.fromName(request.imageCode());
+        user.updateUserName(request.name(), type.name());
     }
 
     public UserProfileImageResponse getUserProfileImageOpt() {
@@ -49,12 +49,6 @@ public class UserService {
                         .toList();
 
         return UserMapper.toProfileImageResponse(opts);
-    }
-
-    @Transactional
-    public void updateUserProfileImage(User user, UserProfileImageRequest request) {
-        ProfileImageType type = ProfileImageType.fromName(request.imageCode());
-        user.updateUserProfileImage(type.name());
     }
 
     @Transactional

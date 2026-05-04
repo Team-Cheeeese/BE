@@ -4,7 +4,6 @@ import com.cheeeese.global.common.CommonResponse;
 import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserOnboardingRequest;
-import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
 import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.dto.response.UserProfileImageResponse;
@@ -31,20 +30,21 @@ public interface UserSwagger {
 
   
     @Operation(
-            summary = "사용자 이름 수정 API",
+            summary = "사용자 프로필 수정 API",
             description = """
                           ### RequestBody
                           ---
-                          `name`: 사용자 이름 (String)
+                          `name`: 사용자 이름 (String) \n
+                          `imageCode`: 프로필 이미지 코드 (String)
                           """
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "사용자 이름이 성공적으로 수정되었습니다."
+                    description = "사용자 프로필이 성공적으로 수정되었습니다."
             )
     })
-    CommonResponse<Void> updateUserName(
+    CommonResponse<Void> updateUserProfile(
             @CurrentUser User user,
             @RequestBody @Valid UserProfileRequest request
     );
@@ -60,25 +60,6 @@ public interface UserSwagger {
             )
     })
     CommonResponse<UserProfileImageResponse> getUserProfileImage();
-
-    @Operation(
-            summary = "사용자 프로필 이미지 수정 API",
-            description = """
-                    ### RequestBody
-                    ---
-                    `imageCode`: 프로필 이미지 코드 (String)
-                    """
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "사용자 프로필 이미지 수정이 성공적으로 수행되었습니다."
-            )
-    })
-    CommonResponse<Void> updateUserProfileImage(
-            @CurrentUser User user,
-            @RequestBody @Valid UserProfileImageRequest request
-    );
 
     @Operation(
             summary = "사용자 온보딩 API",
