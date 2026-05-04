@@ -9,6 +9,7 @@ import lombok.Builder;
         requiredProperties = {
                 "userId",
                 "profileImage",
+                "phoneNumber",
                 "email",
                 "name",
                 "albumCount",
@@ -21,6 +22,9 @@ import lombok.Builder;
 
         @Schema(description = "사용자 프로필 이미지 URL", example = "https://cdn.cheeeese.me/profile.png")
         String profileImage,
+
+        @Schema(description = "사용자 전화번호", example = "010-0000-0000")
+        String phoneNumber,
 
         @Schema(description = "사용자 이메일", example = "say.cheese@gmail.com")
         String email,

@@ -27,6 +27,7 @@ public class UserMapper {
                 .userId(user.getId())
                 .profileImage(profileImage)
                 .name(user.getName())
+                .phoneNumber(user.getPhoneNumber())
                 .email(user.getEmail())
                 .albumCount(user.getAlbumCnt())
                 .photoCount(user.getPhotoCnt())

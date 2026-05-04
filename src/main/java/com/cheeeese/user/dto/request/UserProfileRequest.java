@@ -7,7 +7,9 @@ import lombok.Builder;
 @Schema(description = "사용자 프로필 수정 API")
 public record UserProfileRequest(
         @Schema(description = "사용자 이름", example = "주")
-        String name
-        // TODO: 이미지 수정 추후 추가
+        String name,
+
+        @Schema(description = "프로필 이미지 코드", example = "P1")
+        String imageCode
 ) {
 }

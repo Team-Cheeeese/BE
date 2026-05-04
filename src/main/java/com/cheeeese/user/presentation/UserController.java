@@ -5,7 +5,6 @@ import com.cheeeese.global.util.CurrentUser;
 import com.cheeeese.user.application.UserService;
 import com.cheeeese.user.domain.User;
 import com.cheeeese.user.dto.request.UserOnboardingRequest;
-import com.cheeeese.user.dto.request.UserProfileImageRequest;
 import com.cheeeese.user.dto.request.UserProfileRequest;
 import com.cheeeese.user.dto.response.UserInfoResponse;
 import com.cheeeese.user.dto.response.UserProfileImageResponse;
@@ -30,29 +29,19 @@ public class UserController implements UserSwagger {
     }
   
     @Override
-    @PatchMapping("/me/name")
-    public CommonResponse<Void> updateUserName(
+    @PatchMapping("/me")
+    public CommonResponse<Void> updateUserProfile(
             @CurrentUser User user,
             @RequestBody @Valid UserProfileRequest request
     ) {
-        userService.updateUserName(user, request);
-        return CommonResponse.success(USER_NAME_UPDATE_SUCCESS);
+        userService.updateUserProfile(user, request);
+        return CommonResponse.success(USER_PROFILE_UPDATE_SUCCESS);
     }
 
     @Override
     @GetMapping("/profile-images")
     public CommonResponse<UserProfileImageResponse> getUserProfileImage() {
         return CommonResponse.success(USER_PROFILE_IMAGE_OPT_GET_SUCCESS, userService.getUserProfileImageOpt());
-    }
-
-    @Override
-    @PatchMapping("/me/profile-image")
-    public CommonResponse<Void> updateUserProfileImage(
-            @CurrentUser User user,
-            @RequestBody @Valid UserProfileImageRequest request
-    ) {
-        userService.updateUserProfileImage(user, request);
-        return CommonResponse.success(USER_PROFILE_IMAGE_UPDATE_SUCCESS);
     }
 
     @Override

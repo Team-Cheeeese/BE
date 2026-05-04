@@ -87,11 +87,8 @@ public class User extends BaseEntity {
         this.likesCnt = likesCnt;
     }
 
-    public void updateUserName(String name) {
+    public void updateUserProfile(String name, String profileImage) {
         this.name = name;
-    }
-
-    public void updateUserProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
 
