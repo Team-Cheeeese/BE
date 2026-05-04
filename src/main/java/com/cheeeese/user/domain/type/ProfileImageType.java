@@ -1,7 +1,5 @@
 package com.cheeeese.user.domain.type;
 
-import com.cheeeese.global.exception.BusinessException;
-import com.cheeeese.user.exception.code.UserErrorCode;
 import lombok.Getter;
 
 @Getter
