@@ -17,6 +17,7 @@ public enum UserErrorCode implements BaseCode {
     USER_PHOTO_COUNT_DECREMENT_FAILED(HttpStatus.CONFLICT, "유저의 앨범 사진 개수 감소에 실패했습니다."),
     USER_ALBUM_COUNT_DECREMENT_FAILED(HttpStatus.CONFLICT, "사용자의 앨범 개수 감소에 실패했습니다."),
     USER_PHOTO_LIKE_COUNT_DECREMENT_FAILED(HttpStatus.CONFLICT, "사용자의 띱 수 개수 감소에 실패했습니다."),
+    USER_PROFILE_IMAGE_CODE_INVALID(HttpStatus.BAD_REQUEST, "유효하지 않은 프로필 이미지 코드입니다."),
     ;
 
     private final HttpStatus httpStatus;

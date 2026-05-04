@@ -1,5 +1,7 @@
 package com.cheeeese.user.domain.type;
 
+import com.cheeeese.global.exception.BusinessException;
+import com.cheeeese.user.exception.code.UserErrorCode;
 import lombok.Getter;
 
 @Getter
@@ -22,12 +24,14 @@ public enum ProfileImageType {
     }
 
     public static ProfileImageType fromName(String name) {
-        if (name == null || name.isBlank()) return null;
+        if (name == null || name.isBlank()) {
+            throw new BusinessException(UserErrorCode.USER_PROFILE_IMAGE_CODE_INVALID);
+        }
 
         try {
             return ProfileImageType.valueOf(name);
         } catch (IllegalArgumentException e) {
-            return null;
+            throw new BusinessException(UserErrorCode.USER_PROFILE_IMAGE_CODE_INVALID);
         }
     }
 }
