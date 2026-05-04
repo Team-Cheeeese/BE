@@ -24,14 +24,12 @@ public enum ProfileImageType {
     }
 
     public static ProfileImageType fromName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new BusinessException(UserErrorCode.USER_PROFILE_IMAGE_CODE_INVALID);
-        }
+        if (name == null || name.isBlank()) return null;
 
         try {
             return ProfileImageType.valueOf(name);
         } catch (IllegalArgumentException e) {
-            throw new BusinessException(UserErrorCode.USER_PROFILE_IMAGE_CODE_INVALID);
+            return null;
         }
     }
 }
