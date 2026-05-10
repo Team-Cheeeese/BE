@@ -4,6 +4,7 @@ import com.cheeeese.album.application.logger.AlbumLogger;
 import com.cheeeese.album.application.support.AlbumReader;
 import com.cheeeese.album.application.validator.AlbumValidator;
 import com.cheeeese.album.domain.Album;
+import com.cheeeese.album.domain.event.AlbumJoinedEvent;
 import com.cheeeese.album.domain.type.AlbumJoinStatus;
 import com.cheeeese.album.domain.type.Role;
 import com.cheeeese.album.dto.request.AlbumCreationRequest;
@@ -33,6 +34,7 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,7 @@ public class AlbumService {
     private final CdnUrlResolver cdnUrlResolver;
     private final AlbumReader albumReader;
     private final AlbumLogger albumLogger;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public AlbumCreationResponse createAlbum(User user, AlbumCreationRequest request) {
@@ -160,6 +163,8 @@ public class AlbumService {
 
         boolean photoExist = album.getCurrentPhotoCount() > 0;
         albumLogger.logAlbumJoined(currentUser.getId(), album.getCode(), album.getParticipant(), photoExist);
+
+        eventPublisher.publishEvent(AlbumJoinedEvent.of(currentUser.getId(), album.getId()));
 
         return AlbumMapper.toNewResponse(album, makerInfo, remainingUploadSlots, recentPhotos);
     }
