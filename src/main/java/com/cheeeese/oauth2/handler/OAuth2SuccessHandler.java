@@ -42,7 +42,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             Authentication authentication
     ) throws IOException {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+
         User user = customUserDetails.getUser();
+        boolean isSignup = customUserDetails.isSignup();
 
         String accessToken = jwtProvider.createAccessToken(user.getId());
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
@@ -58,8 +60,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 )),
                 1000 * 60L
         );
-
         String redirect = null;
+
         if (request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
                 if ("REDIRECT_URI".equals(c.getName())) {
@@ -74,7 +76,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(redirectUri)
-                .queryParam("code", tempCode);
+                .queryParam("code", tempCode)
+                .queryParam("isSignup", isSignup);
 
         if (redirect != null && !redirect.isBlank()) {
             builder.queryParam("redirect", redirect);
