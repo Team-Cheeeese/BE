@@ -15,23 +15,22 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     private final User user;
     private final Map<String, Object> attributes;
+    private final boolean isSignup;
 
     public CustomUserDetails(User user) {
         this.user = user;
         this.attributes = Collections.emptyMap();
+        this.isSignup = false;
     }
 
-    public CustomUserDetails(User user, Map<String, Object> attributes) {
+    public CustomUserDetails(User user, Map<String, Object> attributes, boolean isSignup) {
         this.user = user;
         this.attributes = attributes;
+        this.isSignup = isSignup;
     }
 
     public Long getId() {
         return user.getId();
-    }
-
-    public String getEmail() {
-        return user.getEmail();
     }
 
     @Override

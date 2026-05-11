@@ -26,16 +26,24 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
-
         KakaoUserInfo userInfo = extractKakaoUserInfo(attributes);
 
-        User user = userRepository.findByProviderId(userInfo.getProviderId())
-                .orElseGet(() -> {
-                    User newUser = UserMapper.toEntity(userInfo);
-                    return userRepository.save(newUser);
-                });
+        User user;
+        boolean isSignup;
 
-        return new CustomUserDetails(user, attributes);
+        User existingUser = userRepository
+                .findByProviderId(userInfo.getProviderId())
+                .orElse(null);
+
+        if (existingUser != null) {
+            user = existingUser;
+            isSignup = false;
+        } else {
+            User newUser = UserMapper.toEntity(userInfo);
+            user = userRepository.save(newUser);
+            isSignup = true;
+        }
+        return new CustomUserDetails(user, attributes, isSignup);
     }
 
     private KakaoUserInfo extractKakaoUserInfo(Map<String, Object> attributes) {
