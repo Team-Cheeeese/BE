@@ -5,12 +5,12 @@ import lombok.Builder;
 @Builder
 public record Cheese4cutCreatedEvent(
         Long albumId,
-        Long cheese4CutId
+        Long cheese4cutId
 ) {
-    public static Cheese4cutCreatedEvent of(Long albumId, Long cheese4CutId) {
+    public static Cheese4cutCreatedEvent of(Long albumId, Long cheese4cutId) {
         return Cheese4cutCreatedEvent.builder()
                 .albumId(albumId)
-                .cheese4CutId(cheese4CutId)
+                .cheese4cutId(cheese4cutId)
                 .build();
     }
 }

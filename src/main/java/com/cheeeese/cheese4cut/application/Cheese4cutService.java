@@ -11,6 +11,7 @@ import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
 import com.cheeeese.cheese4cut.application.validator.Cheese4cutValidator;
 import com.cheeeese.cheese4cut.domain.Cheese4cut;
+import com.cheeeese.cheese4cut.domain.event.Cheese4cutCreatedEvent;
 import com.cheeeese.cheese4cut.dto.request.Cheese4cutFixedRequest;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutFinalResponse;
 import com.cheeeese.cheese4cut.dto.response.Cheese4cutPreviewResponse;
@@ -143,9 +144,11 @@ public class Cheese4cutService {
         if (orderedPhotos.size() != request.photoIds().size())
             throw new Cheese4cutException(Cheese4cutErrorCode.INSUFFICIENT_COUNT_FOR_CHEESE4CUT);
 
-        cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
+        Cheese4cut cheese4cut = cheese4cutRepository.save(Cheese4cutMapper.toEntity(album, orderedPhotos));
 
         albumLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
+
+        eventPublisher.publishEvent(Cheese4cutCreatedEvent.of(album.getId(), cheese4cut.getId()));
     }
 
     private List<Photo> getOrderedPhotos(List<Long> photoIds) {
@@ -217,5 +220,8 @@ public class Cheese4cutService {
 
         // 5. 로깅
         albumLogger.logCheese4CutFinalized(user.getId(), request.photoIds(), album.getCode());
+
+        // 6. 치즈네컷 알림톡 발송 파이프라인 시작
+        eventPublisher.publishEvent(Cheese4cutCreatedEvent.of(album.getId(), cheese4cut.getId()));
     }
 }

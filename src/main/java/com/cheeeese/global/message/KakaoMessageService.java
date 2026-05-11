@@ -51,6 +51,29 @@ public class KakaoMessageService {
 
         kakaoOption.setTemplateId(kakaoTemplateProperties.albumJoined());
 
+        sendKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+    }
+
+    public void sendCheese4cutCreatedMessage(
+            String to,
+            String albumTitle,
+            String albumCode
+    ) throws SolapiEmptyResponseException, SolapiUnknownException, SolapiMessageNotReceivedException {
+        KakaoOption kakaoOption = new KakaoOption();
+
+        kakaoOption.setPfId(pfId);
+
+        kakaoOption.setTemplateId(kakaoTemplateProperties.cheese4cutCreated());
+
+        sendKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+    }
+
+    private void sendKakaoMessage(
+            String to,
+            String albumTitle,
+            String albumCode,
+            KakaoOption kakaoOption
+    ) throws SolapiMessageNotReceivedException, SolapiEmptyResponseException, SolapiUnknownException {
         Map<String, String> variables = new HashMap<>();
 
         variables.put("#{album_title}", albumTitle);

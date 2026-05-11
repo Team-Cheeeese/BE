@@ -93,4 +93,16 @@ public interface UserAlbumRepository extends JpaRepository<UserAlbum, Long> {
     """)
     Optional<UserAlbum> findMakerByAlbumId(@Param("albumId") Long albumId, @Param("role") Role role);
 
+    @Query("""
+        SELECT ua
+        FROM UserAlbum ua
+        JOIN FETCH ua.user
+        WHERE ua.album.id = :albumId
+        AND ua.isVisible = TRUE
+        AND ua.role <> :blackRole
+    """)
+    List<UserAlbum> findNotificationParticipants(
+            @Param("albumId") Long albumId,
+            @Param("blackRole") Role blackRole
+    );
 }
