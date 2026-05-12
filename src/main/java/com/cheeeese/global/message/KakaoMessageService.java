@@ -68,6 +68,20 @@ public class KakaoMessageService {
         sendKakaoMessage(to, albumTitle, albumCode, kakaoOption);
     }
 
+    public void sendAlbumExpireD1Message(
+            String to,
+            String albumTitle,
+            String albumCode
+    ) throws SolapiMessageNotReceivedException, SolapiEmptyResponseException, SolapiUnknownException {
+        KakaoOption kakaoOption = new KakaoOption();
+
+        kakaoOption.setPfId(pfId);
+
+        kakaoOption.setTemplateId(kakaoTemplateProperties.albumExpireD1());
+
+        sendKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+    }
+
     private void sendKakaoMessage(
             String to,
             String albumTitle,

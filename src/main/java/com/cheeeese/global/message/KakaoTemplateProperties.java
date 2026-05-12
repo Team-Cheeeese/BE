@@ -6,6 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record KakaoTemplateProperties(
         String albumJoined,
         String cheese4cutCreated,
-        String albumExpiredD1
+        String albumExpireD1
 ) {
 }

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
@@ -80,4 +81,17 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
         WHERE a.code = :code
     """)
     Long findAlbumMakerIdByCode(@Param("code") String code);
+
+    @Query("""
+        SELECT a
+        FROM Album a
+        WHERE a.status = :status
+            AND a.expiredAt >= :start
+            AND a.expiredAt < :end
+    """)
+    List<Album> findAlbumsExpiringBetween(
+            @Param("status") Album.AlbumStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }
