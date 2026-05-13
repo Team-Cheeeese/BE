@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.solapi.sdk.message.model.kakao.KakaoOption;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -40,54 +41,70 @@ public class KakaoMessageService {
         this.messageService = SolapiClient.INSTANCE.createInstance(apiKey, apiSecret);
     }
 
-    public void sendAlbumJoinedMessage(
+    public  Message createAlbumJoinedMessage(
             String to,
             String albumTitle,
             String albumCode
-    ) throws SolapiEmptyResponseException, SolapiUnknownException, SolapiMessageNotReceivedException {
+    ) {
         KakaoOption kakaoOption = new KakaoOption();
 
         kakaoOption.setPfId(pfId);
 
         kakaoOption.setTemplateId(kakaoTemplateProperties.albumJoined());
 
-        sendKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+        return createKakaoMessage(to, albumTitle, albumCode, kakaoOption);
     }
 
-    public void sendCheese4cutCreatedMessage(
+    public Message createCheese4cutCreatedMessage(
             String to,
             String albumTitle,
             String albumCode
-    ) throws SolapiEmptyResponseException, SolapiUnknownException, SolapiMessageNotReceivedException {
+    ) {
         KakaoOption kakaoOption = new KakaoOption();
 
         kakaoOption.setPfId(pfId);
 
         kakaoOption.setTemplateId(kakaoTemplateProperties.cheese4cutCreated());
 
-        sendKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+        return createKakaoMessage(to, albumTitle, albumCode, kakaoOption);
     }
 
-    public void sendAlbumExpireD1Message(
+    public Message createAlbumExpireD1Message(
             String to,
             String albumTitle,
             String albumCode
-    ) throws SolapiMessageNotReceivedException, SolapiEmptyResponseException, SolapiUnknownException {
+    ) {
         KakaoOption kakaoOption = new KakaoOption();
 
         kakaoOption.setPfId(pfId);
 
         kakaoOption.setTemplateId(kakaoTemplateProperties.albumExpireD1());
 
-        sendKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+        return createKakaoMessage(to, albumTitle, albumCode, kakaoOption);
     }
 
-    private void sendKakaoMessage(
+    public void sendMessage(Message message) throws
+            SolapiMessageNotReceivedException,
+            SolapiEmptyResponseException,
+            SolapiUnknownException
+    {
+        messageService.send(message);
+    }
+
+    public void sendMessages(List<Message> messages) throws
+            SolapiMessageNotReceivedException,
+            SolapiEmptyResponseException,
+            SolapiUnknownException
+    {
+        messageService.send(messages);
+    }
+
+    private Message createKakaoMessage(
             String to,
             String albumTitle,
             String albumCode,
             KakaoOption kakaoOption
-    ) throws SolapiMessageNotReceivedException, SolapiEmptyResponseException, SolapiUnknownException {
+    ) {
         Map<String, String> variables = new HashMap<>();
 
         variables.put("#{album_title}", albumTitle);
@@ -103,6 +120,6 @@ public class KakaoMessageService {
 
         message.setKakaoOptions(kakaoOption);
 
-        messageService.send(message);
+        return message;
     }
 }

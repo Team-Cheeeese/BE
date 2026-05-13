@@ -8,6 +8,7 @@ import com.cheeeese.album.domain.event.AlbumJoinedEvent;
 import com.cheeeese.cheese4cut.domain.event.Cheese4cutCreatedEvent;
 import com.cheeeese.user.application.support.UserReader;
 import com.cheeeese.user.domain.User;
+import com.solapi.sdk.message.model.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -34,9 +35,10 @@ public class KakaoEventListener {
             User user = userReader.getUser(event.userId());
             Album album = albumReader.getAlbum(event.albumId());
 
-            kakaoMessageService.sendAlbumJoinedMessage(
+            Message message = kakaoMessageService.createAlbumJoinedMessage(
                     user.getPhoneNumber(), album.getTitle(), album.getCode()
             );
+            kakaoMessageService.sendMessage(message);
         } catch (Exception e) {
             log.error("앨범 입장 알림톡 발송 실패", e);
         }
@@ -49,22 +51,19 @@ public class KakaoEventListener {
             Album album = albumReader.getAlbum(event.albumId());
             List<UserAlbum> participants = albumReader.getAlbumParticipants(event.albumId());
 
-            for (UserAlbum participant : participants) {
-                try {
-                    User user = participant.getUser();
+            List<Message> messages = participants.stream()
+                    .map(participant -> {
+                        User user = participant.getUser();
 
-                    kakaoMessageService.sendCheese4cutCreatedMessage(
-                            user.getPhoneNumber(), album.getTitle(), album.getCode()
-                    );
-                } catch (Exception e) {
-                    log.error(
-                            "치즈네컷 생성 알림톡 발송 실패. userId={}",
-                            participant.getUser().getId(), e
-                    );
-                }
-            }
+                        return kakaoMessageService.createCheese4cutCreatedMessage(
+                                user.getPhoneNumber(), album.getTitle(), album.getCode()
+                        );
+                    })
+                    .toList();
+
+            kakaoMessageService.sendMessages(messages);
         } catch (Exception e) {
-            log.error("치즈네컷 생성 이벤트 처리 실패", e);
+            log.error("치즈네컷 알림톡 발송 실패", e);
         }
     }
 
@@ -75,28 +74,19 @@ public class KakaoEventListener {
             Album album = albumReader.getAlbum(event.albumId());
             List<UserAlbum> participants = albumReader.getAlbumParticipants(event.albumId());
 
-            log.info(
-                    "앨범 만료 D-1 알림톡 발송 시작. albumId={}, participantCount={}",
-                    album.getId(),
-                    participants.size()
-            );
+            List<Message> messages = participants.stream()
+                    .map(participant -> {
+                        User user = participant.getUser();
 
-            for (UserAlbum participant : participants) {
-                try {
-                    User user = participant.getUser();
+                        return kakaoMessageService.createAlbumExpireD1Message(
+                                user.getPhoneNumber(), album.getTitle(), album.getCode()
+                        );
+                    })
+                    .toList();
 
-                    kakaoMessageService.sendAlbumExpireD1Message(
-                            user.getPhoneNumber(), album.getTitle(), album.getCode()
-                    );
-                } catch (Exception e) {
-                    log.error(
-                            "앨범 만료 D-1 알림톡 발송 실패. userId={}",
-                            participant.getUser().getId(), e
-                    );
-                }
-            }
+            kakaoMessageService.sendMessages(messages);
         } catch (Exception e) {
-            log.error("앨범 만료 D-1 이벤트 처리 실패", e);
+            log.error("앨범 만료 D-1 알림톡 발송 실패", e);
         }
     }
 }
