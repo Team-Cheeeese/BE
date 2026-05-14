@@ -1,5 +1,6 @@
-package com.cheeeese.album.application;
+package com.cheeeese.album.application.scheduler;
 
+import com.cheeeese.album.application.AlbumExpirationService;
 import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

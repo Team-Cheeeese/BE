@@ -72,6 +72,9 @@ dependencies {
 
 	// Apache HttpClient 5, RestTemplate 타임아웃 설정
 	implementation 'org.apache.httpcomponents.client5:httpclient5'
+
+	// solapi - 카카오 알림톡
+	implementation 'com.solapi:sdk:1.0.0'
 }
 
 tasks.named('test') {
