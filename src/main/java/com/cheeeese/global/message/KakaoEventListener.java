@@ -28,7 +28,7 @@ public class KakaoEventListener {
     private final AlbumReader albumReader;
     private final KakaoMessageService kakaoMessageService;
 
-    @Async
+    @Async("kakaoAsyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAlbumJoined(AlbumJoinedEvent event) {
         try {
@@ -44,7 +44,7 @@ public class KakaoEventListener {
         }
     }
 
-    @Async
+    @Async("kakaoAsyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCheese4cutCreated(Cheese4cutCreatedEvent event) {
         try {
@@ -67,7 +67,7 @@ public class KakaoEventListener {
         }
     }
 
-    @Async
+    @Async("kakaoAsyncExecutor")
     @EventListener
     public void handleAlbumExpireD1(AlbumExpireD1Event event) {
         try {
