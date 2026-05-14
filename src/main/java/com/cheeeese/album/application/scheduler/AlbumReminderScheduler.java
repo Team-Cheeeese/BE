@@ -41,7 +41,7 @@ public class AlbumReminderScheduler {
                         AlbumExpireD1Event.of(album.getId())
                 );
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("[AlbumReminder] D-1 이벤트 발행 실패. album_id={}", album.getId(), e);
             }
         }
     }

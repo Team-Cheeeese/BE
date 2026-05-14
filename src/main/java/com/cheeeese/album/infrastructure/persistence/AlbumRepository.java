@@ -82,6 +82,7 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     """)
     Long findAlbumMakerIdByCode(@Param("code") String code);
 
+    // TODO: 대량 데이터 처리 시 Slice 기반 배치 처리로 전환 고려
     @Query("""
         SELECT a
         FROM Album a
