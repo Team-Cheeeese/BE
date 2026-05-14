@@ -8,6 +8,7 @@ import com.cheeeese.album.domain.event.AlbumJoinedEvent;
 import com.cheeeese.cheese4cut.domain.event.Cheese4cutCreatedEvent;
 import com.cheeeese.user.application.support.UserReader;
 import com.cheeeese.user.domain.User;
+import com.solapi.sdk.message.exception.SolapiMessageNotReceivedException;
 import com.solapi.sdk.message.model.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +40,12 @@ public class KakaoEventListener {
                     user.getPhoneNumber(), album.getTitle(), album.getCode()
             );
             kakaoMessageService.sendMessage(message);
+
+            log.info("앨범 입장 알림톡 발송 완료. albumId={}, userId={}",
+                    album.getId(), user.getId());
         } catch (Exception e) {
-            log.error("앨범 입장 알림톡 발송 실패", e);
+            log.error("앨범 입장 알림톡 발송 실패. albumId={}, userId={}",
+                    event.albumId(), event.userId(), e);
         }
     }
 
@@ -62,8 +67,14 @@ public class KakaoEventListener {
                     .toList();
 
             kakaoMessageService.sendMessages(messages);
+
+            log.info("치즈네컷 알림톡 발송 완료. albumId={}, participantCount={}",
+                    album.getId(), participants.size());
+        } catch (SolapiMessageNotReceivedException e) {
+            log.error("치즈네컷 알림톡 일부 발송 실패. albumId={}, failedMessages={}",
+                    event.albumId(), e.getFailedMessageList(), e);
         } catch (Exception e) {
-            log.error("치즈네컷 알림톡 발송 실패", e);
+            log.error("치즈네컷 알림톡 발송 실패. albumId={}", event.albumId(), e);
         }
     }
 
@@ -85,8 +96,13 @@ public class KakaoEventListener {
                     .toList();
 
             kakaoMessageService.sendMessages(messages);
+
+            log.info("앨범 만료 D-1 알림톡 발송 완료. albumId={}", album.getId());
+        } catch (SolapiMessageNotReceivedException e) {
+            log.error("앨범 만료 D-1 알림톡 일부 발송 실패. albumId={}, failedMessages={}",
+                    event.albumId(), e.getFailedMessageList(), e);
         } catch (Exception e) {
-            log.error("앨범 만료 D-1 알림톡 발송 실패", e);
+            log.error("앨범 만료 D-1 알림톡 발송 실패. albumId={}", event.albumId(), e);
         }
     }
 }
