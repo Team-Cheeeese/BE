@@ -90,7 +90,7 @@ public class KakaoEventListener {
                         User user = participant.getUser();
 
                         return kakaoMessageService.createAlbumExpireD1Message(
-                                user.getPhoneNumber(), album.getTitle(), album.getCode()
+                                user.getPhoneNumber(), album.getTitle() + " 앨범", album.getCode()
                         );
                     })
                     .toList();
