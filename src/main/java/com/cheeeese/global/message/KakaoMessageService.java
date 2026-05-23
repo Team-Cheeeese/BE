@@ -52,7 +52,9 @@ public class KakaoMessageService {
 
         kakaoOption.setTemplateId(kakaoTemplateProperties.albumJoined());
 
-        return createKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+        return createKakaoMessage(
+                to, albumTitle, albumCode, "kakao_alarm_enter", kakaoOption
+        );
     }
 
     public Message createCheese4cutCreatedMessage(
@@ -66,7 +68,9 @@ public class KakaoMessageService {
 
         kakaoOption.setTemplateId(kakaoTemplateProperties.cheese4cutCreated());
 
-        return createKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+        return createKakaoMessage(
+                to, albumTitle, albumCode, "kakao_alarm_4cut", kakaoOption
+        );
     }
 
     public Message createAlbumExpireD1Message(
@@ -80,7 +84,9 @@ public class KakaoMessageService {
 
         kakaoOption.setTemplateId(kakaoTemplateProperties.albumExpireD1());
 
-        return createKakaoMessage(to, albumTitle, albumCode, kakaoOption);
+        return createKakaoMessage(
+                to, albumTitle, albumCode, "kakao_alarm_close", kakaoOption
+        );
     }
 
     public void sendMessage(Message message) throws
@@ -103,12 +109,16 @@ public class KakaoMessageService {
             String to,
             String albumTitle,
             String albumCode,
+            String utmSource,
             KakaoOption kakaoOption
     ) {
         Map<String, String> variables = new HashMap<>();
 
         variables.put("#{album_title}", albumTitle);
-        variables.put("#{album_code}", albumCode);
+        variables.put(
+                "#{album_code}",
+                albumCode + "?utm_source=" + utmSource
+        );
 
         kakaoOption.setVariables(variables);
 
