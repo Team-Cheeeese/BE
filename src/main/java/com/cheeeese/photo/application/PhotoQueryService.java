@@ -10,6 +10,7 @@ import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.dto.PhotoDownloadStatus;
 import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
@@ -27,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -149,8 +151,25 @@ public class PhotoQueryService {
     private PhotoPageResponse attachUserStatus(User user, String code, PhotoPageResponse response) {
         List<Long> photoIds = extractPhotoIds(response);
         Set<Long> likedIds = findUserLikedPhotoIds(user.getId(), photoIds);
-        Set<Long> downloadedIds = findUserDownloadedPhotoIds(user.getId(), photoIds);
-        Set<Long> recentlyDownloadedIds = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
+        List<PhotoDownloadStatus> downloadStatuses =
+                photoHistoryRepository.findPhotoDownloadStatuses(
+                        user.getId(),
+                        photoIds
+                );
+
+        Set<Long> downloadedIds = downloadStatuses.stream()
+                .map(PhotoDownloadStatus::photoId)
+                .collect(Collectors.toSet());
+
+        LocalDateTime recentCriteria = LocalDateTime.now().minusHours(1);
+
+        Set<Long> recentlyDownloadedIds = downloadStatuses.stream()
+                .filter(status ->
+                        status.updatedAt().isAfter(recentCriteria)
+                )
+                .map(PhotoDownloadStatus::photoId)
+                .collect(Collectors.toSet());
+
         Long makerId = albumRepository.findAlbumMakerIdByCode(code);
 
         List<PhotoListResponse> updatedResponses = response.responses().stream()
