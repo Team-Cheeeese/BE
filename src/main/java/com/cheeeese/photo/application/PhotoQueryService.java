@@ -18,6 +18,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -30,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -76,7 +78,7 @@ public class PhotoQueryService {
 
         redisCacheUtil.setValue(versionKey, version + 1, null);
 
-        redisCacheUtil.deletePattern("album:" + code + ":photos:*");
+        redisCacheUtil.deletePattern("cache:album:" + code + ":photos:*");
     }
 
     public PhotoLikedPageResponse getPhotoLiked(User user, String code, int page, int size) {
