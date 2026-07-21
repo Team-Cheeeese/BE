@@ -10,6 +10,7 @@ import com.cheeeese.user.application.support.UserReader;
 import com.cheeeese.user.domain.User;
 import com.solapi.sdk.message.exception.SolapiMessageNotReceivedException;
 import com.solapi.sdk.message.model.Message;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -28,10 +29,13 @@ public class KakaoEventListener {
     private final UserReader userReader;
     private final AlbumReader albumReader;
     private final KakaoMessageService kakaoMessageService;
+    private final KakaoMessageSender kakaoMessageSender;
 
     @Async("kakaoAsyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAlbumJoined(AlbumJoinedEvent event) {
+        int messageCount = 0;
+
         try {
             User user = userReader.getUser(event.userId());
             Album album = albumReader.getAlbum(event.albumId());
@@ -39,19 +43,26 @@ public class KakaoEventListener {
             Message message = kakaoMessageService.createAlbumJoinedMessage(
                     user.getPhoneNumber(), album.getTitle(), album.getCode()
             );
-            kakaoMessageService.sendMessage(message);
 
-            log.info("앨범 입장 알림톡 발송 완료. albumId={}, userId={}",
-                    album.getId(), user.getId());
+            messageCount = 1;
+            kakaoMessageSender.send(message);
+
+            log.info("앨범 입장 알림톡 발송 완료. albumId={}, userId={}, messageCount={}",
+                    album.getId(), user.getId(), messageCount);
+        } catch (RequestNotPermitted e) {
+            log.warn("카카오 알림톡 rate limit 초과. albumId={}, userId={}, messageCount={}",
+                    event.albumId(), event.userId(), messageCount, e);
         } catch (Exception e) {
-            log.error("앨범 입장 알림톡 발송 실패. albumId={}, userId={}",
-                    event.albumId(), event.userId(), e);
+            log.error("앨범 입장 알림톡 발송 실패. albumId={}, userId={}, messageCount={}",
+                    event.albumId(), event.userId(), messageCount, e);
         }
     }
 
     @Async("kakaoAsyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCheese4cutCreated(Cheese4cutCreatedEvent event) {
+        int messageCount = 0;
+
         try {
             Album album = albumReader.getAlbum(event.albumId());
             List<UserAlbum> participants = albumReader.getAlbumParticipants(event.albumId());
@@ -66,21 +77,28 @@ public class KakaoEventListener {
                     })
                     .toList();
 
-            kakaoMessageService.sendMessages(messages);
+            messageCount = messages.size();
+            kakaoMessageSender.sendAll(messages);
 
-            log.info("치즈네컷 알림톡 발송 완료. albumId={}, participantCount={}",
-                    album.getId(), participants.size());
+            log.info("치즈네컷 알림톡 발송 완료. albumId={}, messageCount={}",
+                    album.getId(), messageCount);
+        } catch (RequestNotPermitted e) {
+            log.warn("카카오 알림톡 rate limit 초과. albumId={}, messageCount={}",
+                    event.albumId(), messageCount, e);
         } catch (SolapiMessageNotReceivedException e) {
-            log.error("치즈네컷 알림톡 일부 발송 실패. albumId={}, failedMessages={}",
-                    event.albumId(), e.getFailedMessageList(), e);
+            log.error("치즈네컷 알림톡 일부 발송 실패. albumId={}, messageCount={}, failedMessages={}",
+                    event.albumId(), messageCount, e.getFailedMessageList(), e);
         } catch (Exception e) {
-            log.error("치즈네컷 알림톡 발송 실패. albumId={}", event.albumId(), e);
+            log.error("치즈네컷 알림톡 발송 실패. albumId={}, messageCount={}",
+                    event.albumId(), messageCount, e);
         }
     }
 
     @Async("kakaoAsyncExecutor")
     @EventListener
     public void handleAlbumExpireD1(AlbumExpireD1Event event) {
+        int messageCount = 0;
+
         try {
             Album album = albumReader.getAlbum(event.albumId());
             List<UserAlbum> participants = albumReader.getAlbumParticipants(event.albumId());
@@ -95,14 +113,20 @@ public class KakaoEventListener {
                     })
                     .toList();
 
-            kakaoMessageService.sendMessages(messages);
+            messageCount = messages.size();
+            kakaoMessageSender.sendAll(messages);
 
-            log.info("앨범 만료 D-1 알림톡 발송 완료. albumId={}", album.getId());
+            log.info("앨범 만료 D-1 알림톡 발송 완료. albumId={}, messageCount={}",
+                    album.getId(), messageCount);
+        } catch (RequestNotPermitted e) {
+            log.warn("카카오 알림톡 rate limit 초과. albumId={}, messageCount={}",
+                    event.albumId(), messageCount, e);
         } catch (SolapiMessageNotReceivedException e) {
-            log.error("앨범 만료 D-1 알림톡 일부 발송 실패. albumId={}, failedMessages={}",
-                    event.albumId(), e.getFailedMessageList(), e);
+            log.error("앨범 만료 D-1 알림톡 일부 발송 실패. albumId={}, messageCount={}, failedMessages={}",
+                    event.albumId(), messageCount, e.getFailedMessageList(), e);
         } catch (Exception e) {
-            log.error("앨범 만료 D-1 알림톡 발송 실패. albumId={}", event.albumId(), e);
+            log.error("앨범 만료 D-1 알림톡 발송 실패. albumId={}, messageCount={}",
+                    event.albumId(), messageCount, e);
         }
     }
 }

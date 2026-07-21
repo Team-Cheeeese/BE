@@ -75,6 +75,10 @@ dependencies {
 
 	// solapi - 카카오 알림톡
 	implementation 'com.solapi:sdk:1.0.0'
+
+	// rate limit
+	implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+	implementation 'io.github.resilience4j:resilience4j-ratelimiter:2.2.0'
 }
 
 tasks.named('test') {
