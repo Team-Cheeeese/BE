@@ -1,10 +1,9 @@
 package com.cheeeese.global.util;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -19,74 +18,62 @@ public class RedisCacheUtil {
     @Qualifier("cacheRedisTemplate")
     private final RedisTemplate<String, Object> cacheRedisTemplate;
 
-    /**
-     * 캐시 저장
-     */
+    @CircuitBreaker(name = "redisCache", fallbackMethod = "setValueFallback")
     public void setValue(String key, Object value, Long expiredTime) {
-        try {
-            if (expiredTime != null) {
-                cacheRedisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.SECONDS);
-            } else {
-                cacheRedisTemplate.opsForValue().set(key, value);
-            }
-
-        } catch (DataAccessException e) {
-            log.warn("[Redis] Cache unavailable. Skip cache write. key={}", key);
+        if (expiredTime != null) {
+            cacheRedisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.SECONDS);
+        } else {
+            cacheRedisTemplate.opsForValue().set(key, value);
         }
     }
 
-    /**
-     * Long 조회
-     */
+    private void setValueFallback(String key, Object value, Long expiredTime, Throwable t) {
+        log.warn("[Redis][CircuitBreaker] Cache unavailable. Skip cache write. key={}, cause={}", key, t.toString());
+    }
+
+    @CircuitBreaker(name = "redisCache", fallbackMethod = "getValueFallback")
     public Long getValue(String key) {
-        try {
-            Object value = cacheRedisTemplate.opsForValue().get(key);
-
-            if (value instanceof Long) return (Long) value;
-            if (value instanceof Integer) return ((Integer) value).longValue();
-
-            return null;
-        } catch (DataAccessException e) {
-            log.warn("[Redis] Cache unavailable. Fallback to DB. key={}", key);
-            return null;
-        }
+        Object value = cacheRedisTemplate.opsForValue().get(key);
+        if (value instanceof Long) return (Long) value;
+        if (value instanceof Integer) return ((Integer) value).longValue();
+        return null;
     }
 
-    /**
-     * 객체 조회
-     */
+    private Long getValueFallback(String key, Throwable t) {
+        log.warn("[Redis][CircuitBreaker] Cache unavailable. Fallback to DB. key={}, cause={}", key, t.toString());
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
+    @CircuitBreaker(name = "redisCache", fallbackMethod = "getObjectFallback")
     public <T> T getObject(String key, Class<T> clazz) {
-        try {
-            return (T) cacheRedisTemplate.opsForValue().get(key);
-        } catch (DataAccessException e) {
-            log.warn("[Redis] Cache unavailable. Fallback to DB. key={}", key);
-            return null;
-        }
+        return (T) cacheRedisTemplate.opsForValue().get(key);
     }
 
-    /**
-     * 패턴 삭제
-     */
+    private <T> T getObjectFallback(String key, Class<T> clazz, Throwable t) {
+        log.warn("[Redis][CircuitBreaker] Cache unavailable. Fallback to DB. key={}, cause={}", key, t.toString());
+        return null;
+    }
+
+    @CircuitBreaker(name = "redisCache", fallbackMethod = "deletePatternFallback")
     public void deletePattern(String pattern) {
-        try {
-            Set<String> keys = cacheRedisTemplate.keys(pattern);
-
-            if (keys != null && !keys.isEmpty()) {
-                cacheRedisTemplate.delete(keys);
-            }
-
-        } catch (DataAccessException e) {
-            log.warn("[Redis] Cache delete skipped. pattern={}", pattern);
+        Set<String> keys = cacheRedisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            cacheRedisTemplate.delete(keys);
         }
     }
 
+    private void deletePatternFallback(String pattern, Throwable t) {
+        log.warn("[Redis][CircuitBreaker] Cache delete skipped. pattern={}, cause={}", pattern, t.toString());
+    }
+
+    @CircuitBreaker(name = "redisCache", fallbackMethod = "existsFallback")
     public boolean exists(String key) {
-        try {
-            return Boolean.TRUE.equals(cacheRedisTemplate.hasKey(key));
-        } catch ( DataAccessException e) {
-            log.warn("[Redis] Cache exists check failed. key={}", key);
-            return false;
-        }
+        return Boolean.TRUE.equals(cacheRedisTemplate.hasKey(key));
+    }
+
+    private boolean existsFallback(String key, Throwable t) {
+        log.warn("[Redis][CircuitBreaker] Cache exists check failed. key={}, cause={}", key, t.toString());
+        return false;
     }
 }
