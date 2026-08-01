@@ -28,6 +28,7 @@ public class SolapiKakaoMessageSender implements KakaoMessageSender {
     @Retryable(
             retryFor = { SolapiMessageNotReceivedException.class, SolapiEmptyResponseException.class, SolapiUnknownException.class },
             noRetryFor = { RequestNotPermitted.class },
+            notRecoverable = { RequestNotPermitted.class },
             maxAttempts = 3,
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
@@ -44,6 +45,7 @@ public class SolapiKakaoMessageSender implements KakaoMessageSender {
     @Retryable(
             retryFor = { SolapiMessageNotReceivedException.class, SolapiEmptyResponseException.class, SolapiUnknownException.class },
             noRetryFor = { RequestNotPermitted.class },
+            notRecoverable = { RequestNotPermitted.class },
             maxAttempts = 3,
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )

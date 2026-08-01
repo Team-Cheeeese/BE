@@ -71,16 +71,6 @@ public class PhotoQueryService {
         return attachUserStatus(user, code, responses);
     }
 
-    @Transactional
-    public void invalidatePhotoCache(String code) { // TODO: 사진 삭제, 업로드 등 변화가 일어난 부분에 해당 메서드 추가
-        String versionKey = String.format(VERSION_KEY, code);
-        Long version = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
-
-        redisCacheUtil.setValue(versionKey, version + 1, null);
-
-        redisCacheUtil.deletePattern("cache:album:" + code + ":photos:*");
-    }
-
     public PhotoLikedPageResponse getPhotoLiked(User user, String code, int page, int size) {
         Album album = albumValidator.validateAlbumCode(code);
         albumValidator.validateAlbumParticipant(album, user);
@@ -167,7 +157,7 @@ public class PhotoQueryService {
 
         Set<Long> recentlyDownloadedIds = downloadStatuses.stream()
                 .filter(status ->
-                        status.updatedAt().isAfter(recentCriteria)
+                        !status.updatedAt().isBefore(recentCriteria)
                 )
                 .map(PhotoDownloadStatus::photoId)
                 .collect(Collectors.toSet());

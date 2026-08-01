@@ -67,6 +67,19 @@ public class RedisCacheUtil {
         log.warn("[Redis][CircuitBreaker] Cache delete skipped. pattern={}, cause={}", pattern, t.toString());
     }
 
+    @CircuitBreaker(name = "redisCache")
+    public void incrementStrict(String key) {
+        cacheRedisTemplate.opsForValue().increment(key);
+    }
+
+    @CircuitBreaker(name = "redisCache")
+    public void deletePatternStrict(String pattern) {
+        Set<String> keys = cacheRedisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            cacheRedisTemplate.delete(keys);
+        }
+    }
+
     @CircuitBreaker(name = "redisCache", fallbackMethod = "existsFallback")
     public boolean exists(String key) {
         return Boolean.TRUE.equals(cacheRedisTemplate.hasKey(key));

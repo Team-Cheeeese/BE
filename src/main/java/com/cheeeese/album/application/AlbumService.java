@@ -17,7 +17,7 @@ import com.cheeeese.album.infrastructure.persistence.AlbumExpirationRedisReposit
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.global.util.ProfileImageUtil;
 import com.cheeeese.global.util.resolver.CdnUrlResolver;
-import com.cheeeese.photo.application.PhotoQueryService;
+import com.cheeeese.photo.application.PhotoCacheInvalidationEvent;
 import com.cheeeese.photo.application.PhotoService;
 import com.cheeeese.album.domain.UserAlbum;
 import com.cheeeese.album.infrastructure.persistence.UserAlbumRepository;
@@ -56,7 +56,6 @@ public class AlbumService {
     private final PhotoLikesRepository photoLikesRepository;
     private final UserService userService;
     private final PhotoService photoService;
-    private final PhotoQueryService photoQueryService;
     private final AlbumExpirationRedisRepository albumExpirationRedisRepository;
     private final CdnUrlResolver cdnUrlResolver;
     private final AlbumReader albumReader;
@@ -191,7 +190,7 @@ public class AlbumService {
 
         onAlbumUserBlacklisted(album.getId(), impact.photoCnt());
 
-        photoQueryService.invalidatePhotoCache(album.getCode());
+        eventPublisher.publishEvent(new PhotoCacheInvalidationEvent(album.getCode()));
     }
 
     @Transactional
