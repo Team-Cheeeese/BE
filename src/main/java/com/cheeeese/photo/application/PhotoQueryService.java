@@ -10,6 +10,7 @@ import com.cheeeese.global.util.resolver.CdnUrlResolver;
 import com.cheeeese.photo.application.support.PhotoReader;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.domain.PhotoStatus;
+import com.cheeeese.photo.dto.PhotoDownloadStatus;
 import com.cheeeese.photo.dto.response.*;
 import com.cheeeese.photo.infrastructure.mapper.PhotoMapper;
 import com.cheeeese.photo.infrastructure.persistence.PhotoHistoryRepository;
@@ -17,6 +18,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoLikesRepository;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -27,7 +29,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -65,16 +69,6 @@ public class PhotoQueryService {
         redisCacheUtil.setValue(photoKey, responses, PHOTO_CACHE_TTL);
 
         return attachUserStatus(user, code, responses);
-    }
-
-    @Transactional
-    public void invalidatePhotoCache(String code) { // TODO: 사진 삭제, 업로드 등 변화가 일어난 부분에 해당 메서드 추가
-        String versionKey = String.format(VERSION_KEY, code);
-        Long version = Optional.ofNullable(redisCacheUtil.getValue(versionKey)).orElse(0L);
-
-        redisCacheUtil.setValue(versionKey, version + 1, null);
-
-        redisCacheUtil.deletePattern("album:" + code + ":photos:*");
     }
 
     public PhotoLikedPageResponse getPhotoLiked(User user, String code, int page, int size) {
@@ -149,8 +143,25 @@ public class PhotoQueryService {
     private PhotoPageResponse attachUserStatus(User user, String code, PhotoPageResponse response) {
         List<Long> photoIds = extractPhotoIds(response);
         Set<Long> likedIds = findUserLikedPhotoIds(user.getId(), photoIds);
-        Set<Long> downloadedIds = findUserDownloadedPhotoIds(user.getId(), photoIds);
-        Set<Long> recentlyDownloadedIds = findUserRecentlyDownloadedPhotoIds(user.getId(), photoIds);
+        List<PhotoDownloadStatus> downloadStatuses =
+                photoHistoryRepository.findPhotoDownloadStatuses(
+                        user.getId(),
+                        photoIds
+                );
+
+        Set<Long> downloadedIds = downloadStatuses.stream()
+                .map(PhotoDownloadStatus::photoId)
+                .collect(Collectors.toSet());
+
+        LocalDateTime recentCriteria = LocalDateTime.now().minusHours(1);
+
+        Set<Long> recentlyDownloadedIds = downloadStatuses.stream()
+                .filter(status ->
+                        !status.updatedAt().isBefore(recentCriteria)
+                )
+                .map(PhotoDownloadStatus::photoId)
+                .collect(Collectors.toSet());
+
         Long makerId = albumRepository.findAlbumMakerIdByCode(code);
 
         List<PhotoListResponse> updatedResponses = response.responses().stream()

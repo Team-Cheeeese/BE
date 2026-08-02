@@ -33,6 +33,7 @@ import com.cheeeese.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +62,7 @@ public class PhotoService {
     private final AlbumValidator albumValidator;
     private final AlbumReader albumReader;
     private final PresignedUrlService presignedUrlService;
-    private final PhotoQueryService photoQueryService;
+    private final ApplicationEventPublisher eventPublisher;
     private final AlbumLogger albumLogger;
 
     @Value("${ncp.object-storage.bucket}")
@@ -164,7 +165,7 @@ public class PhotoService {
             int likerCount = photoLikesRepository.countDistinctLikeUsersByAlbumId(photo.getAlbum().getId());
             albumLogger.logFirstLike(user.getId(), photo.getAlbum().getCode(), likerCount);
         }
-        photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
+        eventPublisher.publishEvent(new PhotoCacheInvalidationEvent(photo.getAlbum().getCode()));
     }
 
     @Transactional
@@ -179,7 +180,7 @@ public class PhotoService {
 
         userRepository.decrementLikeCnt(photo.getUser().getId());
 
-        photoQueryService.invalidatePhotoCache(photo.getAlbum().getCode());
+        eventPublisher.publishEvent(new PhotoCacheInvalidationEvent(photo.getAlbum().getCode()));
     }
 
     @Transactional
@@ -211,7 +212,7 @@ public class PhotoService {
 
         albumRepository.decrementPhotoCount(album.getId(), 1);
 
-        photoQueryService.invalidatePhotoCache(album.getCode());
+        eventPublisher.publishEvent(new PhotoCacheInvalidationEvent(album.getCode()));
     }
 
     private Album validateAlbumAndPermission(User user, String albumCode) {

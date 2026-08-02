@@ -11,6 +11,7 @@ import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
 import com.cheeeese.user.application.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class PhotoCallbackService {
 
     private final PhotoRepository photoRepository;
-    private final PhotoQueryService photoQueryService;
+    private final ApplicationEventPublisher eventPublisher;
     private final AlbumRepository albumRepository;
     private final UserService userService;
     private final PhotoLogger photoLogger;
@@ -60,7 +61,7 @@ public class PhotoCallbackService {
         photoLogger.logUploadCompleted(photo.getUser().getId(), albumCode, updatedPhotoCount, photo.getId());
 
         if (albumCode != null) {
-            photoQueryService.invalidatePhotoCache(albumCode);
+            eventPublisher.publishEvent(new PhotoCacheInvalidationEvent(albumCode));
         }
     }
 }

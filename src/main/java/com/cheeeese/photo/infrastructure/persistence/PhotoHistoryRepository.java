@@ -1,6 +1,7 @@
 package com.cheeeese.photo.infrastructure.persistence;
 
 import com.cheeeese.photo.domain.PhotoHistory;
+import com.cheeeese.photo.dto.PhotoDownloadStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -45,4 +46,18 @@ public interface PhotoHistoryRepository extends JpaRepository<PhotoHistory, Long
         WHERE p.album.id = :albumId
     """)
     int countDistinctDownloadUsersByAlbumId(@Param("albumId") Long albumId);
+
+    @Query("""
+        SELECT new com.cheeeese.photo.dto.PhotoDownloadStatus(
+            ph.photo.id,
+            ph.updatedAt
+        )
+        FROM PhotoHistory ph
+        WHERE ph.user.id = :userId
+        AND ph.photo.id IN :photoIds
+    """)
+    List<PhotoDownloadStatus> findPhotoDownloadStatuses(
+            Long userId,
+            List<Long> photoIds
+    );
 }
