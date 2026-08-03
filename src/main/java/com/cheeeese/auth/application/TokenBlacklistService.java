@@ -28,8 +28,8 @@ public class TokenBlacklistService {
     }
 
     private void addBlackListFallback(String token, Object o, Duration expiration, Throwable t) {
-        log.error("[Redis][CircuitBreaker] 블랙리스트 등록 실패 - 로그아웃된 토큰이 만료 전까지 유효할 수 있음. token={}, cause={}",
-                token, t.toString());
+        log.error("[Redis][CircuitBreaker] 블랙리스트 등록 실패. cause={}", t.toString());
+        throw new IllegalStateException("Token blacklist registration failed", t);
     }
 
     @CircuitBreaker(name = "tokenBlacklist", fallbackMethod = "isBlackListedFallback")
@@ -39,8 +39,7 @@ public class TokenBlacklistService {
     }
 
     private boolean isBlackListedFallback(String token, Throwable t) {
-        log.error("[Redis][CircuitBreaker] 블랙리스트 조회 실패 - Redis 장애로 검증 불가, 기본적으로 통과 처리. token={}, cause={}",
-                token, t.toString());
-        return false;
+        log.error("[Redis][CircuitBreaker] 블랙리스트 조회 실패 - 인증을 차단합니다. cause={}", t.toString());
+        return true;
     }
 }

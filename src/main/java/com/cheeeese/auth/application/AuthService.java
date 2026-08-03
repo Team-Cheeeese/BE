@@ -84,8 +84,8 @@ public class AuthService {
             expiration = 1000;
         }
 
-        log.info("[AUTH] Logout Success | user_id={}", user.getId());
         tokenBlacklistService.addBlackList(accessToken, "logout", Duration.ofMillis(expiration));
+        log.info("[AUTH] Logout Success | user_id={}", user.getId());
     }
 
     private Map<String, String> getTokenFromTempCode(String code) {

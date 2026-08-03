@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SpringJUnitConfig(classes = {
         RetryConfig.class,
@@ -31,7 +32,7 @@ class PhotoCacheInvalidationEventHandlerTest {
         doThrow(new IllegalStateException("Redis unavailable"))
                 .when(photoCacheInvalidator).invalidate(albumCode);
 
-        handler.handle(new PhotoCacheInvalidationEvent(albumCode));
+        assertDoesNotThrow(() -> handler.handle(new PhotoCacheInvalidationEvent(albumCode)));
 
         verify(photoCacheInvalidator, times(3)).invalidate(albumCode);
     }
