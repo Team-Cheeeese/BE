@@ -4,6 +4,7 @@ import com.cheeeese.album.domain.Album;
 import com.cheeeese.album.domain.type.AlbumSorting;
 import com.cheeeese.album.infrastructure.persistence.AlbumRepository;
 import com.cheeeese.fixture.FixtureFactory;
+import com.cheeeese.photo.application.PhotoCacheInvalidator;
 import com.cheeeese.photo.application.PhotoQueryService;
 import com.cheeeese.photo.domain.Photo;
 import com.cheeeese.photo.infrastructure.persistence.PhotoRepository;
@@ -31,6 +32,9 @@ public class PhotoQueryPerformanceTest {
     private PhotoQueryService photoQueryService;
 
     @Autowired
+    private PhotoCacheInvalidator photoCacheInvalidator;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -56,7 +60,7 @@ public class PhotoQueryPerformanceTest {
         photoRepository.saveAll(photos);
 
         // 3. 기존 캐시가 있다면 무효화
-        photoQueryService.invalidatePhotoCache(testAlbum.getCode());
+        photoCacheInvalidator.invalidate(testAlbum.getCode());
     }
 
     @Test
@@ -112,7 +116,7 @@ public class PhotoQueryPerformanceTest {
         photoRepository.flush();
 
         // 캐시 초기화
-        photoQueryService.invalidatePhotoCache(album.getCode());
+        photoCacheInvalidator.invalidate(album.getCode());
 
         // 테스트 유저
         User requester = participants.get(10);
@@ -121,12 +125,12 @@ public class PhotoQueryPerformanceTest {
 
         // DB 조회
         stopWatch.start("DB Query (Cold Start)");
-        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
+        photoQueryService.getPhotoPage(requester, album.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
         stopWatch.stop();
 
         // Redis 조회
         stopWatch.start("Redis Cache Hit (Warm Start)");
-        photoQueryService.getPhotoPage(testUser, testAlbum.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
+        photoQueryService.getPhotoPage(requester, album.getCode(), 0, 2000, AlbumSorting.CREATED_AT);
         stopWatch.stop();
 
         System.out.println(stopWatch.prettyPrint());
